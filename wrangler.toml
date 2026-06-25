@@ -33,3 +33,7 @@ database_id = "358323e4-53c6-4fa2-b0ac-b871133b2cd0"
 # 静的変数（公開してOK）はここに記載してビルド時に Astro 側で読める
 [vars]
 MICROCMS_SERVICE_DOMAIN = "funsportnexus"
+FROM_EMAIL = "info@funsportnexus.org"
+FROM_NAME = "fun sport nexus 運営事務局"
+ADMIN_EMAIL_FALLBACK = "funsportnexus@spoan.or.jp"
+SITE_URL = "https://funsportnexus.org"

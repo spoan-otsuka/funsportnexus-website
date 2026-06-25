@@ -1,0 +1,348 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export const prerender = false;
+
+const success = Astro.url.searchParams.get('success') === '1';
+const errorParam = Astro.url.searchParams.get('error');
+---
+<BaseLayout
+  title="お問い合わせ"
+  description="fun sport nexus へのお問い合わせ・取材・協賛・連携のご相談はこちらから。"
+>
+
+  <section class="ct-hero">
+    <div class="ct-hero__inner">
+      <p class="ct-hero__label">CONTACT</p>
+      <h1 class="ct-hero__title">お問い合わせ</h1>
+      <p class="ct-hero__lead">
+        取材・協賛・連携のご相談、参加のお申込、その他ご質問は、<br>
+        こちらのフォームから、お気軽にお寄せください。
+      </p>
+    </div>
+  </section>
+
+  <section class="ct-section">
+    <div class="ct-section__inner">
+      {success ? (
+        <div class="ct-thanks">
+          <i class="fa-solid fa-circle-check"></i>
+          <h2>送信が完了いたしました</h2>
+          <p>
+            お問い合わせ、ありがとうございます。<br>
+            内容を確認のうえ、3営業日以内に、ご返信いたします。<br>
+            <br>
+            自動返信メールが、ご登録のアドレスに、届いているかも、ご確認ください。
+          </p>
+          <a href="/" class="ct-thanks__back">
+            <i class="fa-solid fa-arrow-left"></i>
+            トップに戻る
+          </a>
+        </div>
+      ) : (
+        <form class="ct-form" action="/api/contact" method="POST">
+          {errorParam && (
+            <div class="ct-error-banner">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              送信に失敗しました。お手数ですが、もう一度お試しください。
+              {errorParam !== '1' && <span style="display:block;font-size:0.78rem;margin-top:4px;opacity:0.8;">（{errorParam}）</span>}
+            </div>
+          )}
+
+          <div class="ct-form__row">
+            <label for="category" class="ct-form__label">
+              お問い合わせ種別 <span class="ct-form__required">必須</span>
+            </label>
+            <select id="category" name="category" required class="ct-form__select">
+              <option value="">選択してください</option>
+              <option value="メディア・取材">メディア・取材のご依頼</option>
+              <option value="協賛・連携">協賛・連携のご相談</option>
+              <option value="参加・申込">参加・申込について</option>
+              <option value="ご感想">ご感想・ご意見</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+
+          <div class="ct-form__row">
+            <label for="name" class="ct-form__label">
+              お名前 <span class="ct-form__required">必須</span>
+            </label>
+            <input type="text" id="name" name="name" required autocomplete="name"
+              placeholder="例：山田 太郎" class="ct-form__input" />
+          </div>
+
+          <div class="ct-form__row">
+            <label for="company" class="ct-form__label">ご所属（会社・団体名）</label>
+            <input type="text" id="company" name="company" autocomplete="organization"
+              placeholder="例：株式会社○○" class="ct-form__input" />
+          </div>
+
+          <div class="ct-form__row">
+            <label for="email" class="ct-form__label">
+              メールアドレス <span class="ct-form__required">必須</span>
+            </label>
+            <input type="email" id="email" name="email" required autocomplete="email"
+              placeholder="例：example@example.com" class="ct-form__input" />
+          </div>
+
+          <div class="ct-form__row">
+            <label for="phone" class="ct-form__label">お電話番号（任意）</label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel"
+              placeholder="例：03-1234-5678" class="ct-form__input" />
+          </div>
+
+          <div class="ct-form__row">
+            <label for="subject" class="ct-form__label">
+              件名 <span class="ct-form__required">必須</span>
+            </label>
+            <input type="text" id="subject" name="subject" required
+              placeholder="お問い合わせ内容の概要をご記入ください" class="ct-form__input" />
+          </div>
+
+          <div class="ct-form__row">
+            <label for="message" class="ct-form__label">
+              お問い合わせ内容 <span class="ct-form__required">必須</span>
+            </label>
+            <textarea id="message" name="message" required rows="8"
+              placeholder="お問い合わせの内容を、詳しく、ご記入ください。" class="ct-form__textarea"></textarea>
+          </div>
+
+          <div class="ct-form__consent">
+            <label>
+              <input type="checkbox" name="consent" required />
+              <span>
+                <a href="https://www.sportsanzen.org/privacy/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>に同意のうえ、送信します。
+              </span>
+            </label>
+          </div>
+
+          <input type="text" name="website" class="ct-form__honeypot" tabindex="-1" autocomplete="off" />
+
+          <div class="ct-form__submit">
+            <button type="submit" class="ct-form__btn">
+              <i class="fa-solid fa-paper-plane"></i>
+              送信する
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  .ct-hero {
+    background: linear-gradient(135deg, var(--fsn-navy-deep), var(--fsn-navy));
+    color: var(--fsn-white);
+    padding: 80px 24px 60px;
+    text-align: center;
+  }
+  .ct-hero__inner { max-width: 800px; margin: 0 auto; }
+  .ct-hero__label {
+    display: inline-block;
+    padding: 6px 18px;
+    background: rgba(249, 115, 22, 0.18);
+    color: var(--fsn-orange);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    margin: 0 0 16px;
+  }
+  .ct-hero__title {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 800;
+    color: var(--fsn-white);
+    margin: 0 0 16px;
+  }
+  .ct-hero__lead {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0;
+  }
+
+  .ct-section {
+    padding: 64px 24px 96px;
+    background: var(--fsn-gray-50);
+    min-height: 50vh;
+  }
+  .ct-section__inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .ct-form {
+    background: var(--fsn-white);
+    padding: 40px;
+    border-radius: var(--fsn-radius-md);
+    box-shadow: var(--fsn-shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  @media (max-width: 600px) {
+    .ct-form { padding: 28px 22px; }
+  }
+
+  .ct-form__row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ct-form__label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--fsn-navy-deep);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ct-form__required {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-sm);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .ct-form__input,
+  .ct-form__select,
+  .ct-form__textarea {
+    padding: 12px 16px;
+    border: 1.5px solid var(--fsn-gray-200);
+    border-radius: var(--fsn-radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: var(--fsn-white);
+    color: var(--fsn-gray-900);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .ct-form__input:focus,
+  .ct-form__select:focus,
+  .ct-form__textarea:focus {
+    outline: 0;
+    border-color: var(--fsn-orange);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
+  }
+  .ct-form__textarea {
+    resize: vertical;
+    min-height: 160px;
+    line-height: 1.7;
+  }
+
+  .ct-form__consent {
+    padding: 16px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-sm);
+  }
+  .ct-form__consent label {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    align-items: flex-start;
+  }
+  .ct-form__consent input[type="checkbox"] {
+    margin-top: 4px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--fsn-orange);
+    flex-shrink: 0;
+  }
+  .ct-form__consent a {
+    color: var(--fsn-orange);
+    text-decoration: underline;
+  }
+
+  .ct-form__honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .ct-form__submit {
+    text-align: center;
+    margin-top: 8px;
+  }
+  .ct-form__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 56px;
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border: 0;
+    border-radius: var(--fsn-radius-pill);
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
+    transition: background 0.2s, transform 0.2s;
+  }
+  .ct-form__btn:hover {
+    background: var(--fsn-orange-dark);
+    transform: translateY(-2px);
+  }
+
+  .ct-error-banner {
+    padding: 14px 18px;
+    background: #FEE2E2;
+    color: #991B1B;
+    border-radius: var(--fsn-radius-sm);
+    font-size: 0.88rem;
+    font-weight: 600;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+  }
+  .ct-error-banner i { font-size: 1.1em; margin-top: 2px; }
+
+  .ct-thanks {
+    background: var(--fsn-white);
+    padding: 56px 32px;
+    border-radius: var(--fsn-radius-md);
+    box-shadow: var(--fsn-shadow-sm);
+    text-align: center;
+  }
+  .ct-thanks i.fa-circle-check {
+    font-size: 4rem;
+    color: var(--fsn-orange);
+    margin-bottom: 20px;
+  }
+  .ct-thanks h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 16px;
+  }
+  .ct-thanks p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--fsn-gray-700);
+    margin: 0 0 32px;
+  }
+  .ct-thanks__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    text-decoration: none;
+    font-weight: 700;
+    transition: background 0.2s;
+  }
+  .ct-thanks__back:hover {
+    background: #050d2e;
+    color: var(--fsn-white);
+  }
+</style>
