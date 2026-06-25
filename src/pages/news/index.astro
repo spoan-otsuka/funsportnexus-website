@@ -53,18 +53,34 @@ const formatDate = (iso) => {
         </div>
       ) : (
         <ul class="news-list">
-          {newsList.map(item => (
-            <li class="news-item">
-              <a href={`/news/${item.id}/`} class="news-item__link">
-                <time class="news-item__date" datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
-                {item.category && (
-                  <span class="news-item__category">{typeof item.category === 'string' ? item.category : item.category?.name ?? ''}</span>
-                )}
-                <h2 class="news-item__title">{item.title}</h2>
-                <i class="fa-solid fa-chevron-right news-item__arrow"></i>
-              </a>
-            </li>
-          ))}
+          {newsList.map(item => {
+            const thumb = item.eyecatch?.url ?? item.thumbnail?.url ?? null;
+            return (
+              <li class="news-item">
+                <a href={`/news/${item.id}/`} class="news-item__link">
+                  {thumb ? (
+                    <span class="news-item__thumb">
+                      <img src={`${thumb}?w=200&h=140&fit=crop`} alt="" loading="lazy" />
+                    </span>
+                  ) : (
+                    <span class="news-item__thumb news-item__thumb--placeholder">
+                      <i class="fa-regular fa-newspaper"></i>
+                    </span>
+                  )}
+                  <span class="news-item__body">
+                    <span class="news-item__meta">
+                      <time class="news-item__date" datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
+                      {item.category && (
+                        <span class="news-item__category">{typeof item.category === 'string' ? item.category : item.category?.name ?? ''}</span>
+                      )}
+                    </span>
+                    <h2 class="news-item__title">{item.title}</h2>
+                  </span>
+                  <i class="fa-solid fa-chevron-right news-item__arrow"></i>
+                </a>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
@@ -129,8 +145,8 @@ const formatDate = (iso) => {
   .news-item:last-child { border-bottom: 0; }
   .news-item__link {
     display: grid;
-    grid-template-columns: 120px auto 1fr auto;
-    gap: 20px;
+    grid-template-columns: 140px 1fr auto;
+    gap: 24px;
     align-items: center;
     padding: 20px 28px;
     color: inherit;
@@ -140,6 +156,37 @@ const formatDate = (iso) => {
   .news-item__link:hover {
     background: var(--fsn-gray-50);
     color: inherit;
+  }
+  .news-item__thumb {
+    display: block;
+    width: 140px;
+    height: 98px;
+    border-radius: var(--fsn-radius-sm);
+    overflow: hidden;
+    background: var(--fsn-gray-100);
+  }
+  .news-item__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .news-item__thumb--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fsn-gray-300);
+    font-size: 2rem;
+  }
+  .news-item__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .news-item__meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
   .news-item__date {
     font-family: var(--fsn-font-num);
@@ -180,10 +227,11 @@ const formatDate = (iso) => {
 
   @media (max-width: 700px) {
     .news-item__link {
-      grid-template-columns: 1fr;
-      gap: 6px;
-      padding: 18px 20px;
+      grid-template-columns: 100px 1fr;
+      gap: 16px;
+      padding: 16px 20px;
     }
+    .news-item__thumb { width: 100px; height: 70px; }
     .news-item__arrow { display: none; }
   }
 </style>

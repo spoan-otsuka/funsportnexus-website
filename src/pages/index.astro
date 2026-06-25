@@ -1,5 +1,22 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { fetchNewsList } from '../lib/microcms';
+
+export const prerender = false;
+
+let latestNews = [];
+try {
+  const data = await fetchNewsList(Astro.locals, { limit: 3 });
+  latestNews = data?.contents ?? [];
+} catch (err) {
+  console.error('Failed to fetch latest news:', err);
+}
+
+const formatDate = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+};
 ---
 <BaseLayout
   title="fun sport nexus"
@@ -74,6 +91,54 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
     </div>
   </section>
+
+  <!-- 最新お知らせ -->
+  {latestNews.length > 0 && (
+    <section class="latest-news">
+      <div class="latest-news__inner">
+        <div class="latest-news__head">
+          <div>
+            <p class="section-label">NEWS</p>
+            <h2 class="section-title">最新のお知らせ</h2>
+          </div>
+          <a href="/news/" class="latest-news__more">
+            一覧を見る
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="latest-news__grid">
+          {latestNews.map(item => {
+            const thumb = item.eyecatch?.url ?? item.thumbnail?.url ?? null;
+            return (
+              <a href={`/news/${item.id}/`} class="latest-news-card">
+                <span class="latest-news-card__thumb">
+                  {thumb ? (
+                    <img src={`${thumb}?w=600&h=400&fit=crop`} alt="" loading="lazy" />
+                  ) : (
+                    <span class="latest-news-card__placeholder">
+                      <i class="fa-regular fa-newspaper"></i>
+                    </span>
+                  )}
+                </span>
+                <span class="latest-news-card__body">
+                  <span class="latest-news-card__meta">
+                    <time class="latest-news-card__date" datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
+                    {item.category && (
+                      <span class="latest-news-card__category">
+                        {typeof item.category === 'string' ? item.category : item.category?.name ?? ''}
+                      </span>
+                    )}
+                  </span>
+                  <h3 class="latest-news-card__title">{item.title}</h3>
+                </span>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  )}
 
   <!-- 12月開催告知 -->
   <section class="event-banner">
@@ -363,6 +428,128 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     line-height: 1.95;
     color: var(--fsn-gray-700);
     margin: 0;
+  }
+
+  /* ============ Latest News ============ */
+  .latest-news {
+    padding: 96px 24px;
+    background: var(--fsn-gray-50);
+  }
+  .latest-news__inner { max-width: 1160px; margin: 0 auto; }
+  .latest-news__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 36px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .latest-news__head .section-title { text-align: left; margin: 0; }
+  .latest-news__head .section-title::after { margin: 16px 0 0; }
+  .latest-news__head .section-label { margin: 0 0 12px; }
+  .latest-news__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .latest-news__more:hover {
+    background: #050d2e;
+    color: var(--fsn-white);
+    transform: translateY(-2px);
+  }
+  .latest-news__more i { color: var(--fsn-orange); }
+
+  .latest-news__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 900px) { .latest-news__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .latest-news__grid { grid-template-columns: 1fr; } }
+
+  .latest-news-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--fsn-white);
+    border-radius: var(--fsn-radius-md);
+    overflow: hidden;
+    box-shadow: var(--fsn-shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .latest-news-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--fsn-shadow-md);
+    color: inherit;
+  }
+  .latest-news-card__thumb {
+    aspect-ratio: 3 / 2;
+    background: linear-gradient(135deg, var(--fsn-gray-100), var(--fsn-gray-200));
+    overflow: hidden;
+    display: block;
+  }
+  .latest-news-card__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .latest-news-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fsn-gray-300);
+    font-size: 3rem;
+  }
+  .latest-news-card__body {
+    padding: 20px 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+  }
+  .latest-news-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .latest-news-card__date {
+    font-family: var(--fsn-font-num);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--fsn-gray-500);
+  }
+  .latest-news-card__category {
+    display: inline-block;
+    padding: 3px 10px;
+    background: var(--fsn-cyan);
+    color: var(--fsn-navy);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.7rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .latest-news-card__title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--fsn-navy-deep);
+    margin: 0;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   /* ============ Event Banner ============ */

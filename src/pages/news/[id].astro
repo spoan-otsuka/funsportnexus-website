@@ -33,10 +33,26 @@ const categoryLabel =
   article?.category
     ? (typeof article.category === 'string' ? article.category : article.category?.name ?? '')
     : '';
+
+const eyecatchUrl = article?.eyecatch?.url ?? article?.thumbnail?.url ?? null;
+const ogImageUrl = eyecatchUrl ? `${eyecatchUrl}?w=1200&h=630&fit=crop` : '/og-default.png';
+
+const stripHtml = (html) => {
+  if (!html) return '';
+  return html
+    .replace(/<[^>]+>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120);
+};
+const articleDescription = article
+  ? (stripHtml(article.content || article.body) || `fun sport nexus お知らせ：${article.title}`)
+  : 'お知らせ詳細';
 ---
 <BaseLayout
   title={article?.title ?? 'お知らせ'}
-  description={article?.title ? `fun sport nexus お知らせ：${article.title}` : 'お知らせ詳細'}
+  description={articleDescription}
+  ogImage={ogImageUrl}
 >
 
   <article class="news-article">
@@ -68,6 +84,12 @@ const categoryLabel =
         </>
       )}
     </header>
+
+    {!fetchError && article && eyecatchUrl && (
+      <figure class="news-article__eyecatch">
+        <img src={`${eyecatchUrl}?w=1200`} alt={article.title} loading="lazy" />
+      </figure>
+    )}
 
     {!fetchError && article && (
       <div class="news-article__body" set:html={article.content || article.body || ''}></div>
@@ -136,6 +158,17 @@ const categoryLabel =
     line-height: 1.5;
     padding-bottom: 24px;
     border-bottom: 1px solid var(--fsn-gray-200);
+  }
+  .news-article__eyecatch {
+    margin: 0 0 32px;
+    border-radius: var(--fsn-radius-md);
+    overflow: hidden;
+    box-shadow: var(--fsn-shadow-sm);
+  }
+  .news-article__eyecatch img {
+    width: 100%;
+    height: auto;
+    display: block;
   }
   .news-article__body {
     font-size: 1rem;
