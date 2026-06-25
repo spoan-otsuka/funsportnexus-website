@@ -106,151 +106,145 @@ const programs = [
         ※現時点の仮入れ。最終確定は、各団体との調整後に、ご案内いたします。
       </p>
 
-      <!-- DAY 1 -->
-      <div class="venuelist">
-        <div class="venuelist__head venuelist__head--navy">
-          <span class="venuelist__num">DAY 1</span>
-          <span class="venuelist__date">12月19日（土）</span>
-          <span class="venuelist__theme">スポーツの源流</span>
+      <!-- Day1 タイムテーブル -->
+      <div class="dec-tt-block">
+        <div class="dec-tt-block__head dec-tt-block__head--navy">
+          <span class="dec-tt-block__num">DAY 1</span>
+          <span class="dec-tt-block__date">12月19日（土）</span>
+          <span style="margin-left: auto; font-size: 0.95rem; font-weight: 600; opacity: 0.92;">スポーツの源流</span>
         </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 中央広場</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--orange"><b>10:00</b> ぱん食い競走</span>
-            <span class="venuelist__chip venuelist__chip--orange"><b>15:00</b> ぱん食い競走</span>
-          </div>
+        <div class="dec-tt-wrap">
+          <table class="dec-tt dec-tt--v2">
+            <thead>
+              <tr>
+                <th class="dec-tt__venue">会場</th>
+                <th>10:00</th><th>11:00</th><th>12:00</th><th>13:00</th><th>14:00</th><th>15:00</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 中央広場</th>
+                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い競走<small>10:00</small></td>
+                <td colspan="4" class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い競走<small>15:00</small></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 第1体育室</th>
+                <td colspan="6" class="dec-tt__bar dec-tt__bar--blue">Baseball5<small>10:00 - 15:00 通し</small></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 第2体育室</th>
+                <td colspan="6" class="dec-tt__bar dec-tt__bar--orange">レク協会(ピックルボール等)<small>10:00 - 15:00 通し</small></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 第3体育室</th>
+                <td colspan="6" class="dec-tt__bar dec-tt__bar--yellow">バスケ(サンロッカーズ渋谷)<small>10:00 - 15:00 通し</small></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 第4体育室</th>
+                <td class="dec-tt__bar dec-tt__bar--pink">Legit ①<small>10:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--pink">Legit ②<small>12:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--pink">Legit ③<small>14:00</small></td>
+                <td class="dec-tt__empty"></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 第5体育室</th>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--green">柔道 ①<small>11:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--green">柔道 ②<small>13:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--green">柔道 ③<small>15:00</small></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> YCAPエリア</th>
+                <td class="dec-tt__bar dec-tt__bar--purple">YCAP ①<small>10:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">YCAP ②<small>12:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">YCAP ③<small>14:00</small></td>
+                <td class="dec-tt__empty"></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 体育室エントランス</th>
+                <td colspan="6" class="dec-tt__bar dec-tt__bar--blue">ボッチャ・将棋<small>10:00 - 15:00 通し</small></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 第1体育室</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--blue venuelist__chip--allday"><b>終日</b> Baseball5（10:00 - 15:00）</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 第2体育室</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--orange-soft venuelist__chip--allday"><b>終日</b> レク協会（ピックルボール等／10:00 - 15:00）</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 第3体育室</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--yellow venuelist__chip--allday"><b>終日</b> バスケ・サンロッカーズ渋谷（10:00 - 15:00）</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 第4体育室</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--pink"><b>10:00</b> Legit ①</span>
-            <span class="venuelist__chip venuelist__chip--pink"><b>12:00</b> Legit ②</span>
-            <span class="venuelist__chip venuelist__chip--pink"><b>14:00</b> Legit ③</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 第5体育室</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--green"><b>11:00</b> 柔道 ①</span>
-            <span class="venuelist__chip venuelist__chip--green"><b>13:00</b> 柔道 ②</span>
-            <span class="venuelist__chip venuelist__chip--green"><b>15:00</b> 柔道 ③</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> YCAPエリア</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--purple"><b>10:00</b> YCAP ①</span>
-            <span class="venuelist__chip venuelist__chip--purple"><b>12:00</b> YCAP ②</span>
-            <span class="venuelist__chip venuelist__chip--purple"><b>14:00</b> YCAP ③</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 体育室エントランス</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--blue venuelist__chip--allday"><b>終日</b> ボッチャ・将棋（10:00 - 15:00）</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row venuelist__row--special">
-          <div class="venuelist__venue venuelist__venue--special"><i class="fa-solid fa-microphone-lines"></i> センター棟（特別セミナー）</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--special"><b>16:30 - 18:00</b> 基調講演 ＋ ワークショップ ＋ 交流会（90分）</span>
-          </div>
+        <div class="dec-tt__special">
+          <i class="fa-solid fa-microphone-lines"></i>
+          <span><strong>16:30 - 18:00</strong> 特別セミナー（90分）<small>センター棟 ／ 基調講演 ＋ ワークショップ ＋ 交流会</small></span>
         </div>
       </div>
 
-      <!-- DAY 2 -->
-      <div class="venuelist">
-        <div class="venuelist__head venuelist__head--orange">
-          <span class="venuelist__num">DAY 2</span>
-          <span class="venuelist__date">12月20日（日）</span>
-          <span class="venuelist__theme">体験会 ＋ 大会要素</span>
+      <!-- Day2 タイムテーブル -->
+      <div class="dec-tt-block">
+        <div class="dec-tt-block__head dec-tt-block__head--orange">
+          <span class="dec-tt-block__num">DAY 2</span>
+          <span class="dec-tt-block__date">12月20日（日）</span>
+          <span style="margin-left: auto; font-size: 0.95rem; font-weight: 600; opacity: 0.92;">体験会 ＋ 大会要素</span>
         </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 中央広場</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--orange"><b>10:00</b> ぱん食い競走</span>
-            <span class="venuelist__chip venuelist__chip--orange"><b>13:00</b> ぱん食い競走</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 第1体育室</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--green"><b>11:00</b> かけっこ教室 ①</span>
-            <span class="venuelist__chip venuelist__chip--green"><b>14:00</b> かけっこ教室 ②</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 第2体育室</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--yellow venuelist__chip--allday"><b>12:00 - 15:00</b> 鬼ごっこ（仮）</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 第4体育室</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--orange"><b>10:00</b> フェンシング ①</span>
-            <span class="venuelist__chip venuelist__chip--orange"><b>12:00</b> フェンシング ②</span>
-            <span class="venuelist__chip venuelist__chip--orange"><b>14:00</b> フェンシング ③</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 第5体育室</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--yellow"><b>11:00</b> DIP ①</span>
-            <span class="venuelist__chip venuelist__chip--yellow"><b>13:00</b> DIP ②</span>
-            <span class="venuelist__chip venuelist__chip--yellow"><b>15:00</b> DIP ③</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> YCAPエリア</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--purple"><b>10:00</b> YCAP ①</span>
-            <span class="venuelist__chip venuelist__chip--purple"><b>12:00</b> YCAP ②</span>
-            <span class="venuelist__chip venuelist__chip--purple"><b>14:00</b> YCAP ③</span>
-          </div>
-        </div>
-
-        <div class="venuelist__row">
-          <div class="venuelist__venue"><i class="fa-solid fa-location-dot"></i> 小ホール</div>
-          <div class="venuelist__times">
-            <span class="venuelist__chip venuelist__chip--navy"><b>13:00 - 14:00</b> 太鼓体験会</span>
-            <span class="venuelist__chip venuelist__chip--navy"><b>15:00 - 16:00</b> 太鼓発表会</span>
-          </div>
+        <div class="dec-tt-wrap">
+          <table class="dec-tt dec-tt--v2">
+            <thead>
+              <tr>
+                <th class="dec-tt__venue">会場</th>
+                <th>10:00</th><th>11:00</th><th>12:00</th><th>13:00</th><th>14:00</th><th>15:00</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 中央広場</th>
+                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い競走<small>10:00</small></td>
+                <td colspan="2" class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い競走<small>13:00</small></td>
+                <td colspan="2" class="dec-tt__empty"></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 第1体育室</th>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--green">かけっこ ①<small>11:00</small></td>
+                <td colspan="2" class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--green">かけっこ ②<small>14:00</small></td>
+                <td class="dec-tt__empty"></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 第2体育室</th>
+                <td colspan="2" class="dec-tt__empty"></td>
+                <td colspan="4" class="dec-tt__bar dec-tt__bar--yellow">鬼ごっこ(仮)<small>12:00 - 15:00</small></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 第3体育室</th>
+                <td colspan="6" class="dec-tt__prep">調整中</td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 第4体育室</th>
+                <td class="dec-tt__bar dec-tt__bar--orange">フェンシング ①<small>10:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--orange">フェンシング ②<small>12:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--orange">フェンシング ③<small>14:00</small></td>
+                <td class="dec-tt__empty"></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 第5体育室</th>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--yellow">DIP ①<small>11:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--yellow">DIP ②<small>13:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--yellow">DIP ③<small>15:00</small></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> YCAPエリア</th>
+                <td class="dec-tt__bar dec-tt__bar--purple">YCAP ①<small>10:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">YCAP ②<small>12:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">YCAP ③<small>14:00</small></td>
+                <td class="dec-tt__empty"></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 小ホール</th>
+                <td colspan="3" class="dec-tt__empty"></td>
+                <td colspan="2" class="dec-tt__bar dec-tt__bar--navy">太鼓体験会<small>13:00 - 14:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--navy">太鼓発表会<small>15:00</small></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
+
+      <p style="text-align: center; font-size: 0.82rem; color: var(--fsn-gray-500); margin: 16px 0 0;">
+        ※スマートフォンの方は、表を横にスクロールして、ご覧ください。
+      </p>
     </div>
   </section>
 

@@ -1169,3 +1169,122 @@
     padding: 6px 12px;
   }
 }
+
+
+
+/* ============================================
+   TIMETABLE v2 改善版（テーブル形式・見やすさUP）
+   ============================================ */
+.dec-tt--v2 {
+  min-width: 900px;
+  font-size: 0.95rem;
+  table-layout: fixed;
+}
+.dec-tt--v2 thead th {
+  padding: 14px 6px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+.dec-tt--v2 thead .dec-tt__venue {
+  width: 200px;
+}
+.dec-tt--v2 thead tr th:not(.dec-tt__venue) {
+  font-family: var(--fsn-font-num);
+  font-size: 0.95rem;
+}
+
+.dec-tt--v2 tbody th {
+  padding: 18px 16px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  width: 200px;
+  color: var(--fsn-navy-deep);
+}
+.dec-tt--v2 tbody th i {
+  color: var(--fsn-orange);
+  margin-right: 6px;
+}
+
+.dec-tt--v2 tbody td {
+  padding: 14px 8px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  height: 72px;
+  vertical-align: middle;
+}
+.dec-tt--v2 tbody td.dec-tt__bar {
+  position: relative;
+}
+.dec-tt--v2 tbody td.dec-tt__bar small {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.85;
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+.dec-tt--v2 tbody td.dec-tt__empty {
+  background: var(--fsn-gray-50);
+}
+
+/* バー（既存色を踏襲、文字を見やすく） */
+.dec-tt__bar--navy   { background: linear-gradient(135deg, #1F3A8A, #15276B); }
+.dec-tt__bar--blue   { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+.dec-tt__bar--orange { background: linear-gradient(135deg, #F97316, #EA580C); }
+.dec-tt__bar--yellow { background: linear-gradient(135deg, #F59E0B, #D97706); }
+.dec-tt__bar--pink   { background: linear-gradient(135deg, #EC4899, #BE185D); }
+.dec-tt__bar--green  { background: linear-gradient(135deg, #16A34A, #15803D); }
+.dec-tt__bar--purple { background: linear-gradient(135deg, #9333EA, #7E22CE); }
+
+/* 特別セミナー専用ハイライト（テーブル下） */
+.dec-tt__special {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+  color: var(--fsn-white);
+  border-radius: 0 0 var(--fsn-radius-md) var(--fsn-radius-md);
+  margin-top: -1px;
+}
+.dec-tt__special i {
+  font-size: 1.4rem;
+}
+.dec-tt__special strong {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-right: 6px;
+}
+.dec-tt__special small {
+  display: block;
+  font-size: 0.82rem;
+  opacity: 0.9;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Day1/2 タイムテーブルブロックの追加スタイル */
+.dec-tt-block {
+  background: var(--fsn-white);
+  border-radius: var(--fsn-radius-lg);
+  box-shadow: var(--fsn-shadow-md);
+  overflow: hidden;
+  margin: 36px 0 28px;
+}
+
+@media (max-width: 768px) {
+  .dec-tt--v2 tbody th {
+    padding: 12px 10px;
+    font-size: 0.85rem;
+    width: 150px;
+  }
+  .dec-tt--v2 tbody td {
+    padding: 10px 6px;
+    font-size: 0.82rem;
+    height: 60px;
+  }
+  .dec-tt--v2 tbody td.dec-tt__bar small {
+    font-size: 0.65rem;
+  }
+}
