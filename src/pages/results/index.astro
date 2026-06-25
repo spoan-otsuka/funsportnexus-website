@@ -76,7 +76,7 @@ const formatDateRange = (startIso, endIso) => {
                       <i class="fa-regular fa-flag"></i>
                     </span>
                   )}
-                  {(item.eventDate || item.venue) && (
+                  {(item.eventDate || (item.venue ?? item.Venue)) && (
                     <span class="rs-card__meta-badge">
                       {item.eventDate && (
                         <span class="rs-card__meta-date">
@@ -84,10 +84,10 @@ const formatDateRange = (startIso, endIso) => {
                           {formatDateRange(item.eventDate, item.eventEndDate)}
                         </span>
                       )}
-                      {item.venue && (
+                      {(item.venue ?? item.Venue) && (
                         <span class="rs-card__meta-venue">
                           <i class="fa-solid fa-location-dot"></i>
-                          {item.venue}
+                          {(item.venue ?? item.Venue)}
                         </span>
                       )}
                     </span>
@@ -102,16 +102,16 @@ const formatDateRange = (startIso, endIso) => {
                 <span class="rs-card__body">
                   <h2 class="rs-card__title">{item.title}</h2>
                   <ul class="rs-card__facts">
-                    {item.venue && (
+                    {(item.venue ?? item.Venue) && (
                       <li>
                         <i class="fa-solid fa-location-dot"></i>
-                        <span>{item.venue}</span>
+                        <span>{(item.venue ?? item.Venue)}</span>
                       </li>
                     )}
-                    {item.participants && (
+                    {(item.participants ?? item.particiant) && (
                       <li>
                         <i class="fa-solid fa-users"></i>
-                        <span>参加者 {item.participants}名</span>
+                        <span>参加者 {(item.participants ?? item.particiant)}名</span>
                       </li>
                     )}
                     {item.partnerOrgs && (

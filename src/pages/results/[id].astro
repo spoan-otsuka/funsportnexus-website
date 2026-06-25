@@ -99,16 +99,16 @@ const articleDescription = article
             <dd>{formatDateRange(article.eventDate, article.eventEndDate)}</dd>
           </div>
         )}
-        {article.venue && (
+        {(article.venue ?? article.Venue) && (
           <div class="rs-fact">
             <dt><i class="fa-solid fa-location-dot"></i> 会場</dt>
-            <dd>{article.venue}</dd>
+            <dd>{(article.venue ?? article.Venue)}</dd>
           </div>
         )}
-        {article.participants && (
+        {(article.participants ?? article.particiant) && (
           <div class="rs-fact">
             <dt><i class="fa-solid fa-users"></i> 参加者数</dt>
-            <dd>{article.participants}名</dd>
+            <dd>{(article.participants ?? article.particiant)}名</dd>
           </div>
         )}
         {article.partnerOrgs && (
