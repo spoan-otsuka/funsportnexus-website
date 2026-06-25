@@ -1,0 +1,204 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fetchNewsDetail } from '../../lib/microcms';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+
+let article = null;
+let fetchError = null;
+
+try {
+  article = await fetchNewsDetail(Astro.locals, id);
+} catch (err) {
+  console.error('Failed to fetch news detail:', err);
+  fetchError = err.message;
+}
+
+if (!article && !fetchError) {
+  return Astro.redirect('/news/');
+}
+
+const formatDate = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}.${m}.${day}`;
+};
+
+const categoryLabel =
+  article?.category
+    ? (typeof article.category === 'string' ? article.category : article.category?.name ?? '')
+    : '';
+---
+<BaseLayout
+  title={article?.title ?? 'お知らせ'}
+  description={article?.title ? `fun sport nexus お知らせ：${article.title}` : 'お知らせ詳細'}
+>
+
+  <article class="news-article">
+    <header class="news-article__head">
+      <nav class="news-article__breadcrumb">
+        <a href="/">トップ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/news/">お知らせ</a>
+      </nav>
+
+      {fetchError ? (
+        <div class="news-article__error">
+          <h1>記事を読み込めませんでした</h1>
+          <p>しばらくしてから、再度お試しください。</p>
+          <p style="font-size:0.78rem;color:var(--fsn-gray-500);margin-top:8px;">エラー：{fetchError}</p>
+          <p style="margin-top:24px;">
+            <a href="/news/" class="news-article__back">
+              <i class="fa-solid fa-arrow-left"></i> お知らせ一覧に戻る
+            </a>
+          </p>
+        </div>
+      ) : (
+        <>
+          <div class="news-article__meta">
+            <time class="news-article__date" datetime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
+            {categoryLabel && <span class="news-article__category">{categoryLabel}</span>}
+          </div>
+          <h1 class="news-article__title">{article.title}</h1>
+        </>
+      )}
+    </header>
+
+    {!fetchError && article && (
+      <div class="news-article__body" set:html={article.content || article.body || ''}></div>
+    )}
+
+    {!fetchError && article && (
+      <div class="news-article__footer">
+        <a href="/news/" class="news-article__back">
+          <i class="fa-solid fa-arrow-left"></i>
+          お知らせ一覧に戻る
+        </a>
+      </div>
+    )}
+  </article>
+
+</BaseLayout>
+
+<style>
+  .news-article {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+    min-height: 60vh;
+  }
+  .news-article__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--fsn-gray-500);
+    margin: 0 0 32px;
+  }
+  .news-article__breadcrumb a {
+    color: var(--fsn-navy);
+    text-decoration: none;
+  }
+  .news-article__breadcrumb a:hover { color: var(--fsn-orange); }
+  .news-article__breadcrumb i { color: var(--fsn-gray-300); font-size: 0.72rem; }
+
+  .news-article__meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 16px;
+  }
+  .news-article__date {
+    font-family: var(--fsn-font-num);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--fsn-gray-500);
+  }
+  .news-article__category {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--fsn-cyan);
+    color: var(--fsn-navy);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+  .news-article__title {
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 32px;
+    line-height: 1.5;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--fsn-gray-200);
+  }
+  .news-article__body {
+    font-size: 1rem;
+    line-height: 2;
+    color: var(--fsn-gray-900);
+  }
+  .news-article__body :global(h2) {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 48px 0 16px;
+    padding-left: 16px;
+    border-left: 4px solid var(--fsn-orange);
+  }
+  .news-article__body :global(h3) {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--fsn-navy);
+    margin: 32px 0 12px;
+  }
+  .news-article__body :global(p) {
+    margin: 0 0 18px;
+  }
+  .news-article__body :global(a) {
+    color: var(--fsn-orange);
+    text-decoration: underline;
+  }
+  .news-article__body :global(img) {
+    margin: 24px 0;
+    border-radius: var(--fsn-radius-md);
+  }
+  .news-article__body :global(ul),
+  .news-article__body :global(ol) {
+    margin: 16px 0;
+    padding-left: 24px;
+  }
+
+  .news-article__footer {
+    margin: 56px 0 0;
+    padding-top: 32px;
+    border-top: 1px solid var(--fsn-gray-200);
+  }
+  .news-article__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    text-decoration: none;
+    font-weight: 700;
+    transition: background 0.2s;
+  }
+  .news-article__back:hover {
+    background: #050d2e;
+    color: var(--fsn-white);
+  }
+
+  .news-article__error {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-md);
+  }
+</style>

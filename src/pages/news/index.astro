@@ -1,0 +1,189 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fetchNewsList } from '../../lib/microcms';
+
+export const prerender = false;
+
+let newsList = [];
+let fetchError = null;
+
+try {
+  const data = await fetchNewsList(Astro.locals);
+  newsList = data?.contents ?? [];
+} catch (err) {
+  console.error('Failed to fetch news:', err);
+  fetchError = err.message;
+}
+
+const formatDate = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}.${m}.${day}`;
+};
+---
+<BaseLayout
+  title="お知らせ"
+  description="fun sport nexus からの、お知らせ・更新情報の一覧です。"
+>
+
+  <section class="news-hero">
+    <div class="news-hero__inner">
+      <p class="news-hero__label">NEWS</p>
+      <h1 class="news-hero__title">お知らせ</h1>
+      <p class="news-hero__lead">
+        fun sport nexus からの、お知らせ・更新情報を、お届けいたします。
+      </p>
+    </div>
+  </section>
+
+  <section class="news-section">
+    <div class="news-section__inner">
+      {fetchError ? (
+        <div class="news-error">
+          <p>お知らせの取得に失敗しました。しばらくしてから、再度お試しください。</p>
+          <p style="font-size:0.78rem;color:var(--fsn-gray-500);margin-top:8px;">エラー：{fetchError}</p>
+        </div>
+      ) : newsList.length === 0 ? (
+        <div class="news-empty">
+          <i class="fa-regular fa-newspaper" style="font-size: 3rem; color: var(--fsn-gray-300); margin-bottom: 16px;"></i>
+          <p>現在、お知らせは、ございません。</p>
+        </div>
+      ) : (
+        <ul class="news-list">
+          {newsList.map(item => (
+            <li class="news-item">
+              <a href={`/news/${item.id}/`} class="news-item__link">
+                <time class="news-item__date" datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
+                {item.category && (
+                  <span class="news-item__category">{typeof item.category === 'string' ? item.category : item.category?.name ?? ''}</span>
+                )}
+                <h2 class="news-item__title">{item.title}</h2>
+                <i class="fa-solid fa-chevron-right news-item__arrow"></i>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  .news-hero {
+    background: linear-gradient(135deg, var(--fsn-navy-deep), var(--fsn-navy));
+    color: var(--fsn-white);
+    padding: 80px 24px 60px;
+    text-align: center;
+  }
+  .news-hero__inner { max-width: 800px; margin: 0 auto; }
+  .news-hero__label {
+    display: inline-block;
+    padding: 6px 18px;
+    background: rgba(249, 115, 22, 0.18);
+    color: var(--fsn-orange);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    margin: 0 0 16px;
+  }
+  .news-hero__title {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 800;
+    color: var(--fsn-white);
+    margin: 0 0 16px;
+  }
+  .news-hero__lead {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0;
+  }
+
+  .news-section {
+    padding: 64px 24px 96px;
+    background: var(--fsn-gray-50);
+    min-height: 50vh;
+  }
+  .news-section__inner {
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  .news-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: var(--fsn-white);
+    border-radius: var(--fsn-radius-md);
+    box-shadow: var(--fsn-shadow-sm);
+    overflow: hidden;
+  }
+  .news-item {
+    border-bottom: 1px solid var(--fsn-gray-100);
+  }
+  .news-item:last-child { border-bottom: 0; }
+  .news-item__link {
+    display: grid;
+    grid-template-columns: 120px auto 1fr auto;
+    gap: 20px;
+    align-items: center;
+    padding: 20px 28px;
+    color: inherit;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .news-item__link:hover {
+    background: var(--fsn-gray-50);
+    color: inherit;
+  }
+  .news-item__date {
+    font-family: var(--fsn-font-num);
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--fsn-gray-500);
+  }
+  .news-item__category {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--fsn-cyan);
+    color: var(--fsn-navy);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .news-item__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--fsn-navy-deep);
+    margin: 0;
+    line-height: 1.6;
+  }
+  .news-item__arrow {
+    color: var(--fsn-orange);
+    font-size: 0.85rem;
+  }
+
+  .news-empty,
+  .news-error {
+    text-align: center;
+    padding: 64px 24px;
+    background: var(--fsn-white);
+    border-radius: var(--fsn-radius-md);
+    color: var(--fsn-gray-700);
+  }
+
+  @media (max-width: 700px) {
+    .news-item__link {
+      grid-template-columns: 1fr;
+      gap: 6px;
+      padding: 18px 20px;
+    }
+    .news-item__arrow { display: none; }
+  }
+</style>
