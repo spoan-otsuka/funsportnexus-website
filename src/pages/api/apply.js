@@ -10,7 +10,9 @@
  * - email_logs に送信結果を記録
  */
 
-export async function onRequestPost(context) {
+export const prerender = false;
+
+export async function POST({ request, locals }) {
   return new Response(JSON.stringify({
     error: 'Not implemented yet',
     message: 'Phase 3 で本格実装予定',

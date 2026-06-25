@@ -2,12 +2,21 @@
  * GET /api/slots
  * プログラム枠一覧と残席数を返す
  *
- * Cloudflare Pages Functions
- * env.DB ─ D1 データベース (fsn-apply-db)
+ * Astro API Route（Cloudflare runtime）
+ * env.DB（D1 バインディング）にアクセス
  */
 
-export async function onRequestGet(context) {
-  const { env } = context;
+export const prerender = false;
+
+export async function GET({ locals }) {
+  const env = locals.runtime?.env ?? {};
+
+  if (!env.DB) {
+    return jsonResponse({
+      error: 'DB binding not available',
+      message: 'D1 binding "DB" is not configured on this environment',
+    }, 503);
+  }
 
   try {
     const result = await env.DB.prepare(`
@@ -25,14 +34,14 @@ export async function onRequestGet(context) {
       ORDER BY s.sort_order, s.id
     `).all();
 
-    return json({ slots: result.results });
+    return jsonResponse({ slots: result.results });
   } catch (err) {
     console.error('Error fetching slots:', err);
-    return json({ error: 'Failed to fetch slots', message: err.message }, 500);
+    return jsonResponse({ error: 'Failed to fetch slots', message: err.message }, 500);
   }
 }
 
-function json(body, status = 200) {
+function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {

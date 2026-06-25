@@ -1,7 +1,15 @@
 name = "funsportnexus-website"
+main = "./dist/_worker.js/index.js"
 compatibility_date = "2026-06-25"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = "./dist"
+
+# ============================================
+# 静的アセット（Astro ビルド成果物）
+# ============================================
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
 
 # ============================================
 # Cloudflare D1 データベース（申込システム統合）
@@ -12,7 +20,7 @@ database_name = "fsn-apply-db"
 database_id = "358323e4-53c6-4fa2-b0ac-b871133b2cd0"
 
 # ============================================
-# 環境変数（Cloudflare Pages ダッシュボードで設定）
+# 環境変数（Cloudflare ダッシュボードで設定）
 # ============================================
 # RESEND_API_KEY       ─ Resend API キー
 # FROM_EMAIL           ─ info@funsportnexus.org

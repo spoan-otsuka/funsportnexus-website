@@ -8,5 +8,4 @@ export default defineConfig({
     platformProxy: { enabled: true },
   }),
   site: 'https://funsportnexus.org',
-  // ハイブリッドモード：基本は静的、申込APIだけサーバーサイド
 });
