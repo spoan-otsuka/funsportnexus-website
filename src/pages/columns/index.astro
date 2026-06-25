@@ -67,7 +67,15 @@ const formatDate = (iso) => {
                   )}
                 </span>
                 <span class="cols-card__body">
-                  <time class="cols-card__date" datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
+                  <span class="cols-card__meta">
+                    {item.intervieweeName && (
+                      <span class="cols-card__series">
+                        <i class="fa-solid fa-microphone-lines"></i>
+                        Spo-An Talk
+                      </span>
+                    )}
+                    <time class="cols-card__date" datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
+                  </span>
                   <h2 class="cols-card__title">{item.title}</h2>
                   {item.excerpt && (
                     <p class="cols-card__excerpt">{item.excerpt}</p>
@@ -183,6 +191,25 @@ const formatDate = (iso) => {
     gap: 10px;
     flex: 1;
   }
+  .cols-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .cols-card__series {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .cols-card__series i { font-size: 0.85em; }
   .cols-card__date {
     font-family: var(--fsn-font-num);
     font-weight: 700;

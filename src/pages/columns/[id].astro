@@ -65,6 +65,12 @@ const articleDescription = article
       ) : (
         <>
           <div class="cols-article__meta">
+            {article.intervieweeName && (
+              <span class="cols-article__series">
+                <i class="fa-solid fa-microphone-lines"></i>
+                Spo-An Talk
+              </span>
+            )}
             <time class="cols-article__date" datetime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
             {article.author && (
               <span class="cols-article__author">
@@ -90,6 +96,38 @@ const articleDescription = article
           decoding="async"
         />
       </figure>
+    )}
+
+    {!fetchError && article && article.intervieweeName && (
+      <section class="cols-interviewee">
+        <p class="cols-interviewee__label">
+          <i class="fa-regular fa-comment-dots"></i>
+          お話を伺った方
+        </p>
+        <div class="cols-interviewee__body">
+          {article.intervieweePhoto?.url && (
+            <div class="cols-interviewee__photo">
+              <img
+                src={`${article.intervieweePhoto.url}?w=400&h=400&fit=crop`}
+                srcset={`${article.intervieweePhoto.url}?w=200&h=200&fit=crop 200w, ${article.intervieweePhoto.url}?w=400&h=400&fit=crop 400w, ${article.intervieweePhoto.url}?w=600&h=600&fit=crop 600w`}
+                sizes="(max-width: 600px) 120px, 180px"
+                alt={article.intervieweeName}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          )}
+          <div class="cols-interviewee__info">
+            <h2 class="cols-interviewee__name">{article.intervieweeName}</h2>
+            {article.intervieweeTitle && (
+              <p class="cols-interviewee__title">{article.intervieweeTitle}</p>
+            )}
+            {article.intervieweeProfile && (
+              <p class="cols-interviewee__profile">{article.intervieweeProfile}</p>
+            )}
+          </div>
+        </div>
+      </section>
     )}
 
     {!fetchError && article && (
@@ -173,6 +211,94 @@ const articleDescription = article
     height: auto;
     display: block;
   }
+  .cols-article__series {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+  }
+  .cols-article__series i { font-size: 0.85em; }
+
+  /* ============ Interviewee ============ */
+  .cols-interviewee {
+    margin: 0 0 40px;
+    padding: 28px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-md);
+    border-left: 4px solid var(--fsn-orange);
+  }
+  .cols-interviewee__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--fsn-orange-dark);
+    letter-spacing: 0.08em;
+    margin: 0 0 16px;
+  }
+  .cols-interviewee__label i { color: var(--fsn-orange); }
+  .cols-interviewee__body {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 600px) {
+    .cols-interviewee { padding: 20px; }
+    .cols-interviewee__body { grid-template-columns: 1fr; gap: 16px; }
+  }
+  .cols-interviewee__photo {
+    width: 180px;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--fsn-radius-md);
+    overflow: hidden;
+    background: var(--fsn-gray-200);
+    box-shadow: var(--fsn-shadow-sm);
+  }
+  @media (max-width: 600px) {
+    .cols-interviewee__photo { width: 120px; }
+  }
+  .cols-interviewee__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .cols-interviewee__info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .cols-interviewee__name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0;
+    line-height: 1.4;
+  }
+  .cols-interviewee__title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--fsn-orange-dark);
+    margin: 0;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+  .cols-interviewee__profile {
+    font-size: 0.88rem;
+    line-height: 1.85;
+    color: var(--fsn-gray-700);
+    margin: 6px 0 0;
+    white-space: pre-line;
+  }
+
   .cols-article__body {
     font-size: 1rem;
     line-height: 2;
