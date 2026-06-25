@@ -20,6 +20,24 @@ const formatDate = (iso) => {
   const d = new Date(iso);
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 };
+
+const formatDateRange = (startIso, endIso) => {
+  if (!startIso) return '';
+  if (!endIso) return formatDate(startIso);
+  const s = new Date(startIso);
+  const e = new Date(endIso);
+  const sy = s.getFullYear(), sm = s.getMonth() + 1, sd = s.getDate();
+  const ey = e.getFullYear(), em = e.getMonth() + 1, ed = e.getDate();
+  if (sy === ey && sm === em && sd === ed) return formatDate(startIso);
+  const pad = (n) => String(n).padStart(2, '0');
+  if (sy === ey && sm === em) {
+    return `${sy}.${pad(sm)}.${pad(sd)}-${pad(ed)}`;
+  }
+  if (sy === ey) {
+    return `${sy}.${pad(sm)}.${pad(sd)}-${pad(em)}.${pad(ed)}`;
+  }
+  return `${sy}.${pad(sm)}.${pad(sd)}-${ey}.${pad(em)}.${pad(ed)}`;
+};
 ---
 <BaseLayout
   title="開催実績"
@@ -58,9 +76,20 @@ const formatDate = (iso) => {
                       <i class="fa-regular fa-flag"></i>
                     </span>
                   )}
-                  {item.eventDate && (
-                    <span class="rs-card__date-badge">
-                      {formatDate(item.eventDate)}
+                  {(item.eventDate || item.venue) && (
+                    <span class="rs-card__meta-badge">
+                      {item.eventDate && (
+                        <span class="rs-card__meta-date">
+                          <i class="fa-regular fa-calendar"></i>
+                          {formatDateRange(item.eventDate, item.eventEndDate)}
+                        </span>
+                      )}
+                      {item.venue && (
+                        <span class="rs-card__meta-venue">
+                          <i class="fa-solid fa-location-dot"></i>
+                          {item.venue}
+                        </span>
+                      )}
                     </span>
                   )}
                   {Array.isArray(item.gallery) && item.gallery.length > 0 && (
@@ -206,18 +235,45 @@ const formatDate = (iso) => {
     backdrop-filter: blur(4px);
   }
   .rs-card__gallery-badge i { font-size: 0.85em; }
-  .rs-card__date-badge {
+  .rs-card__meta-badge {
     position: absolute;
     left: 16px;
     top: 16px;
-    padding: 6px 14px;
-    background: var(--fsn-navy-deep);
+    right: auto;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    max-width: calc(100% - 32px - 88px);
+  }
+  .rs-card__meta-date,
+  .rs-card__meta-venue {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(15, 26, 78, 0.92);
     color: var(--fsn-white);
     border-radius: var(--fsn-radius-pill);
-    font-family: var(--fsn-font-num);
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 700;
     box-shadow: var(--fsn-shadow-sm);
+    backdrop-filter: blur(4px);
+    line-height: 1.3;
+  }
+  .rs-card__meta-date i,
+  .rs-card__meta-venue i {
+    color: var(--fsn-orange);
+    font-size: 0.85em;
+  }
+  .rs-card__meta-date {
+    font-family: var(--fsn-font-num);
+  }
+  .rs-card__meta-venue {
+    background: rgba(249, 115, 22, 0.92);
+  }
+  .rs-card__meta-venue i {
+    color: var(--fsn-white);
   }
   .rs-card__body {
     padding: 22px 24px 26px;

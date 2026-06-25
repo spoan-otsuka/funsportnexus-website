@@ -26,6 +26,24 @@ const formatDate = (iso) => {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 };
 
+const formatDateRange = (startIso, endIso) => {
+  if (!startIso) return '';
+  if (!endIso) return formatDate(startIso);
+  const s = new Date(startIso);
+  const e = new Date(endIso);
+  const sy = s.getFullYear(), sm = s.getMonth() + 1, sd = s.getDate();
+  const ey = e.getFullYear(), em = e.getMonth() + 1, ed = e.getDate();
+  if (sy === ey && sm === em && sd === ed) return formatDate(startIso);
+  const pad = (n) => String(n).padStart(2, '0');
+  if (sy === ey && sm === em) {
+    return `${sy}.${pad(sm)}.${pad(sd)} - ${pad(ed)}`;
+  }
+  if (sy === ey) {
+    return `${sy}.${pad(sm)}.${pad(sd)} - ${pad(em)}.${pad(ed)}`;
+  }
+  return `${sy}.${pad(sm)}.${pad(sd)} - ${ey}.${pad(em)}.${pad(ed)}`;
+};
+
 const eyecatchUrl = article?.eyecatch?.url ?? null;
 const ogImageUrl = eyecatchUrl ? `${eyecatchUrl}?w=1200&h=630&fit=crop` : '/og-default.png';
 
@@ -78,7 +96,7 @@ const articleDescription = article
         {article.eventDate && (
           <div class="rs-fact">
             <dt><i class="fa-regular fa-calendar"></i> 開催日</dt>
-            <dd>{formatDate(article.eventDate)}</dd>
+            <dd>{formatDateRange(article.eventDate, article.eventEndDate)}</dd>
           </div>
         )}
         {article.venue && (
