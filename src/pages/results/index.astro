@@ -70,7 +70,14 @@ const formatDateRange = (startIso, endIso) => {
               <a href={`/results/${item.id}/`} class="rs-card">
                 <span class="rs-card__thumb">
                   {thumb ? (
-                    <img src={`${thumb}?w=900&h=540&fit=crop`} alt="" loading="lazy" />
+                    <img
+                      src={`${thumb}?w=900&h=540&fit=crop`}
+                      srcset={`${thumb}?w=500&h=300&fit=crop 500w, ${thumb}?w=900&h=540&fit=crop 900w, ${thumb}?w=1400&h=840&fit=crop 1400w`}
+                      sizes="(max-width: 760px) 100vw, 50vw"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
                   ) : (
                     <span class="rs-card__placeholder">
                       <i class="fa-regular fa-flag"></i>

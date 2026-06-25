@@ -1,0 +1,76 @@
+---
+/**
+ * microCMS画像をレスポンシブ表示するコンポーネント
+ * - URL指定だけで srcset を自動生成（自動最適化）
+ * - mobileUrl を渡せば PC/スマホ で別画像を出し分け（picture）
+ *
+ * 例: <MicrocmsImage url={article.eyecatch.url} alt="..." ratio="16/9" mobileUrl={article.eyecatchMobile?.url} />
+ */
+import { srcset, srcsetCrop, src, srcCrop } from '../lib/microcms-image';
+
+interface Props {
+  url: string;
+  mobileUrl?: string | null;
+  alt?: string;
+  ratio?: string;        // 例: '16/9', '5/3', '1/1' — 指定があればクロップ
+  width?: number;        // src用の幅（デフォルト1200）
+  sizes?: string;        // <img sizes> 属性
+  loading?: 'lazy' | 'eager';
+  class?: string;
+  decoding?: 'async' | 'sync' | 'auto';
+  mobileBreakpoint?: number; // PC/スマホ切替閾値（デフォルト760）
+  fetchpriority?: 'high' | 'low' | 'auto';
+}
+
+const {
+  url,
+  mobileUrl,
+  alt = '',
+  ratio,
+  width = 1200,
+  sizes = '(max-width: 760px) 100vw, 1200px',
+  loading = 'lazy',
+  class: className = '',
+  decoding = 'async',
+  mobileBreakpoint = 760,
+  fetchpriority,
+} = Astro.props;
+
+const buildSrc = ratio ? srcCrop(url, width, ratio) : src(url, width);
+const buildSrcset = ratio ? srcsetCrop(url, ratio) : srcset(url);
+const buildMobileSrcset = mobileUrl ? (ratio ? srcsetCrop(mobileUrl, ratio) : srcset(mobileUrl)) : null;
+---
+
+{mobileUrl && buildMobileSrcset ? (
+  <picture>
+    <source
+      media={`(max-width: ${mobileBreakpoint}px)`}
+      srcset={buildMobileSrcset}
+      sizes={sizes}
+    />
+    <source
+      media={`(min-width: ${mobileBreakpoint + 1}px)`}
+      srcset={buildSrcset}
+      sizes={sizes}
+    />
+    <img
+      src={buildSrc}
+      alt={alt}
+      loading={loading}
+      decoding={decoding}
+      class={className}
+      fetchpriority={fetchpriority}
+    />
+  </picture>
+) : (
+  <img
+    src={buildSrc}
+    srcset={buildSrcset}
+    sizes={sizes}
+    alt={alt}
+    loading={loading}
+    decoding={decoding}
+    class={className}
+    fetchpriority={fetchpriority}
+  />
+)}

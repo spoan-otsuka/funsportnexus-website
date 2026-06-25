@@ -60,7 +60,14 @@ const formatDate = (iso) => {
                 <a href={`/news/${item.id}/`} class="news-item__link">
                   {thumb ? (
                     <span class="news-item__thumb">
-                      <img src={`${thumb}?w=200&h=140&fit=crop`} alt="" loading="lazy" />
+                      <img
+                        src={`${thumb}?w=200&h=140&fit=crop`}
+                        srcset={`${thumb}?w=140&h=98&fit=crop 140w, ${thumb}?w=200&h=140&fit=crop 200w, ${thumb}?w=400&h=280&fit=crop 400w`}
+                        sizes="(max-width: 700px) 100px, 140px"
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
                     </span>
                   ) : (
                     <span class="news-item__thumb news-item__thumb--placeholder">

@@ -52,7 +52,14 @@ const formatDate = (iso) => {
               <a href={`/columns/${item.id}/`} class="cols-card">
                 <span class="cols-card__thumb">
                   {thumb ? (
-                    <img src={`${thumb}?w=800&h=520&fit=crop`} alt="" loading="lazy" />
+                    <img
+                      src={`${thumb}?w=800&h=520&fit=crop`}
+                      srcset={`${thumb}?w=400&h=260&fit=crop 400w, ${thumb}?w=600&h=390&fit=crop 600w, ${thumb}?w=800&h=520&fit=crop 800w, ${thumb}?w=1200&h=780&fit=crop 1200w`}
+                      sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
                   ) : (
                     <span class="cols-card__placeholder">
                       <i class="fa-regular fa-pen-to-square"></i>

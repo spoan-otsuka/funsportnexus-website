@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import MicrocmsImage from '../../components/MicrocmsImage.astro';
 import { fetchResultDetail } from '../../lib/microcms';
 
 export const prerender = false;
@@ -45,6 +46,7 @@ const formatDateRange = (startIso, endIso) => {
 };
 
 const eyecatchUrl = article?.eyecatch?.url ?? null;
+const eyecatchMobileUrl = article?.eyecatchMobile?.url ?? null;
 const ogImageUrl = eyecatchUrl ? `${eyecatchUrl}?w=1200&h=630&fit=crop` : '/og-default.png';
 
 const stripHtml = (html) => {
@@ -87,7 +89,15 @@ const articleDescription = article
 
     {!fetchError && article && eyecatchUrl && (
       <figure class="rs-article__eyecatch">
-        <img src={`${eyecatchUrl}?w=1200`} alt={article.title} loading="lazy" />
+        <MicrocmsImage
+          url={eyecatchUrl}
+          mobileUrl={eyecatchMobileUrl}
+          alt={article.title}
+          width={1200}
+          sizes="(max-width: 860px) 100vw, 860px"
+          loading="eager"
+          fetchpriority="high"
+        />
       </figure>
     )}
 
@@ -144,7 +154,14 @@ const articleDescription = article
                 data-index={i}
                 aria-label={caption || `写真 ${i + 1}`}
               >
-                <img src={`${url}?w=500&h=380&fit=crop`} alt={caption} loading="lazy" />
+                <img
+                  src={`${url}?w=500&h=400&fit=crop`}
+                  srcset={`${url}?w=300&h=240&fit=crop 300w, ${url}?w=500&h=400&fit=crop 500w, ${url}?w=800&h=640&fit=crop 800w`}
+                  sizes="(max-width: 440px) 100vw, (max-width: 760px) 50vw, 33vw"
+                  alt={caption}
+                  loading="lazy"
+                  decoding="async"
+                />
                 {caption && <span class="rs-gallery__caption">{caption}</span>}
               </button>
             );

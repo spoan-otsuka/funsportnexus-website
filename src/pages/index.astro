@@ -114,7 +114,14 @@ const formatDate = (iso) => {
               <a href={`/news/${item.id}/`} class="latest-news-card">
                 <span class="latest-news-card__thumb">
                   {thumb ? (
-                    <img src={`${thumb}?w=600&h=400&fit=crop`} alt="" loading="lazy" />
+                    <img
+                      src={`${thumb}?w=600&h=400&fit=crop`}
+                      srcset={`${thumb}?w=400&h=267&fit=crop 400w, ${thumb}?w=600&h=400&fit=crop 600w, ${thumb}?w=900&h=600&fit=crop 900w`}
+                      sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
                   ) : (
                     <span class="latest-news-card__placeholder">
                       <i class="fa-regular fa-newspaper"></i>
