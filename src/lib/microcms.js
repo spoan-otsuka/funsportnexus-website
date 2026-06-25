@@ -82,3 +82,29 @@ export async function fetchColumnDetail(locals, contentId) {
     contentId,
   });
 }
+
+/**
+ * 実績一覧を取得
+ */
+export async function fetchResultsList(locals, queries = {}) {
+  const client = getMicroCmsClient(locals);
+  return client.get({
+    endpoint: 'results',
+    queries: {
+      orders: '-eventDate',
+      limit: 20,
+      ...queries,
+    },
+  });
+}
+
+/**
+ * 実績詳細を取得
+ */
+export async function fetchResultDetail(locals, contentId) {
+  const client = getMicroCmsClient(locals);
+  return client.getListDetail({
+    endpoint: 'results',
+    contentId,
+  });
+}

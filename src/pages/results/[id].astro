@@ -1,0 +1,264 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fetchResultDetail } from '../../lib/microcms';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+
+let article = null;
+let fetchError = null;
+
+try {
+  article = await fetchResultDetail(Astro.locals, id);
+} catch (err) {
+  console.error('Failed to fetch result detail:', err);
+  fetchError = err.message;
+}
+
+if (!article && !fetchError) {
+  return Astro.redirect('/results/');
+}
+
+const formatDate = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const eyecatchUrl = article?.eyecatch?.url ?? null;
+const ogImageUrl = eyecatchUrl ? `${eyecatchUrl}?w=1200&h=630&fit=crop` : '/og-default.png';
+
+const stripHtml = (html) => {
+  if (!html) return '';
+  return html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 120);
+};
+const articleDescription = article
+  ? (stripHtml(article.body) || `fun sport nexus 実績：${article.title}`)
+  : '実績詳細';
+---
+<BaseLayout
+  title={article?.title ?? '実績'}
+  description={articleDescription}
+  ogImage={ogImageUrl}
+>
+
+  <article class="rs-article">
+    <header class="rs-article__head">
+      <nav class="rs-article__breadcrumb">
+        <a href="/">トップ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/results/">開催実績</a>
+      </nav>
+
+      {fetchError ? (
+        <div class="rs-article__error">
+          <h1>実績を読み込めませんでした</h1>
+          <p>しばらくしてから、再度お試しください。</p>
+          <p style="font-size:0.78rem;color:var(--fsn-gray-500);margin-top:8px;">エラー：{fetchError}</p>
+          <p style="margin-top:24px;">
+            <a href="/results/" class="rs-article__back">
+              <i class="fa-solid fa-arrow-left"></i> 実績一覧に戻る
+            </a>
+          </p>
+        </div>
+      ) : (
+        <h1 class="rs-article__title">{article.title}</h1>
+      )}
+    </header>
+
+    {!fetchError && article && eyecatchUrl && (
+      <figure class="rs-article__eyecatch">
+        <img src={`${eyecatchUrl}?w=1200`} alt={article.title} loading="lazy" />
+      </figure>
+    )}
+
+    {!fetchError && article && (
+      <dl class="rs-article__facts">
+        {article.eventDate && (
+          <div class="rs-fact">
+            <dt><i class="fa-regular fa-calendar"></i> 開催日</dt>
+            <dd>{formatDate(article.eventDate)}</dd>
+          </div>
+        )}
+        {article.venue && (
+          <div class="rs-fact">
+            <dt><i class="fa-solid fa-location-dot"></i> 会場</dt>
+            <dd>{article.venue}</dd>
+          </div>
+        )}
+        {article.participants && (
+          <div class="rs-fact">
+            <dt><i class="fa-solid fa-users"></i> 参加者数</dt>
+            <dd>{article.participants}名</dd>
+          </div>
+        )}
+        {article.partnerOrgs && (
+          <div class="rs-fact">
+            <dt><i class="fa-solid fa-handshake"></i> 連携団体</dt>
+            <dd>{article.partnerOrgs}</dd>
+          </div>
+        )}
+      </dl>
+    )}
+
+    {!fetchError && article && article.body && (
+      <div class="rs-article__body" set:html={article.body}></div>
+    )}
+
+    {!fetchError && article && (
+      <div class="rs-article__footer">
+        <a href="/results/" class="rs-article__back">
+          <i class="fa-solid fa-arrow-left"></i>
+          実績一覧に戻る
+        </a>
+      </div>
+    )}
+  </article>
+
+</BaseLayout>
+
+<style>
+  .rs-article {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+    min-height: 60vh;
+  }
+  .rs-article__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--fsn-gray-500);
+    margin: 0 0 32px;
+  }
+  .rs-article__breadcrumb a { color: var(--fsn-navy); text-decoration: none; }
+  .rs-article__breadcrumb a:hover { color: var(--fsn-orange); }
+  .rs-article__breadcrumb i { color: var(--fsn-gray-300); font-size: 0.72rem; }
+
+  .rs-article__title {
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 32px;
+    line-height: 1.5;
+    padding-bottom: 24px;
+    border-bottom: 3px solid var(--fsn-orange);
+  }
+
+  .rs-article__eyecatch {
+    margin: 0 0 32px;
+    border-radius: var(--fsn-radius-md);
+    overflow: hidden;
+    box-shadow: var(--fsn-shadow-sm);
+  }
+  .rs-article__eyecatch img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .rs-article__facts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 24px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-md);
+    padding: 24px 28px;
+    margin: 0 0 40px;
+  }
+  @media (max-width: 600px) { .rs-article__facts { grid-template-columns: 1fr; } }
+  .rs-fact { display: flex; flex-direction: column; gap: 6px; }
+  .rs-fact dt {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--fsn-orange-dark);
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .rs-fact dt i { color: var(--fsn-orange); font-size: 0.88em; }
+  .rs-fact dd {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--fsn-navy-deep);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .rs-article__body {
+    font-size: 1rem;
+    line-height: 2;
+    color: var(--fsn-gray-900);
+  }
+  .rs-article__body :global(h2) { display: none; }
+  .rs-article__body :global(h3) {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 48px 0 16px;
+    padding-left: 14px;
+    border-left: 4px solid var(--fsn-orange);
+  }
+  .rs-article__body :global(h4) {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--fsn-navy);
+    margin: 32px 0 12px;
+  }
+  .rs-article__body :global(p) { margin: 0 0 18px; }
+  .rs-article__body :global(a) {
+    color: var(--fsn-orange);
+    text-decoration: underline;
+  }
+  .rs-article__body :global(img) {
+    margin: 24px 0;
+    border-radius: var(--fsn-radius-md);
+    max-width: 100%;
+    height: auto;
+  }
+  .rs-article__body :global(ul),
+  .rs-article__body :global(ol) {
+    margin: 16px 0;
+    padding-left: 24px;
+  }
+  .rs-article__body :global(blockquote) {
+    margin: 24px 0;
+    padding: 16px 20px;
+    background: var(--fsn-gray-50);
+    border-left: 4px solid var(--fsn-orange);
+    color: var(--fsn-gray-700);
+    border-radius: 0 var(--fsn-radius-sm) var(--fsn-radius-sm) 0;
+  }
+
+  .rs-article__footer {
+    margin: 56px 0 0;
+    padding-top: 32px;
+    border-top: 1px solid var(--fsn-gray-200);
+  }
+  .rs-article__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    text-decoration: none;
+    font-weight: 700;
+    transition: background 0.2s;
+  }
+  .rs-article__back:hover {
+    background: #050d2e;
+    color: var(--fsn-white);
+  }
+
+  .rs-article__error {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-md);
+  }
+</style>

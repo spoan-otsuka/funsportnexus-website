@@ -1,0 +1,244 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fetchResultsList } from '../../lib/microcms';
+
+export const prerender = false;
+
+let results = [];
+let fetchError = null;
+
+try {
+  const data = await fetchResultsList(Astro.locals);
+  results = data?.contents ?? [];
+} catch (err) {
+  console.error('Failed to fetch results:', err);
+  fetchError = err.message;
+}
+
+const formatDate = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+};
+---
+<BaseLayout
+  title="開催実績"
+  description="fun sport nexus が実際に開催してきた、イベントの記録・レポートをご紹介します。"
+>
+
+  <section class="rs-hero">
+    <div class="rs-hero__inner">
+      <p class="rs-hero__label">RESULTS</p>
+      <h1 class="rs-hero__title">開催実績</h1>
+      <p class="rs-hero__lead">
+        全国各地で、開催してきた、fun sport nexus の、<br>
+        記録と、レポートを、お届けいたします。
+      </p>
+    </div>
+  </section>
+
+  <section class="rs-section">
+    <div class="rs-section__inner">
+      {fetchError || results.length === 0 ? (
+        <div class="rs-empty">
+          <i class="fa-regular fa-flag" style="font-size: 3rem; color: var(--fsn-gray-300); margin-bottom: 16px;"></i>
+          <p>現在、実績の準備を、進めております。<br>近日、公開予定です。</p>
+        </div>
+      ) : (
+        <div class="rs-grid">
+          {results.map(item => {
+            const thumb = item.eyecatch?.url ?? null;
+            return (
+              <a href={`/results/${item.id}/`} class="rs-card">
+                <span class="rs-card__thumb">
+                  {thumb ? (
+                    <img src={`${thumb}?w=900&h=540&fit=crop`} alt="" loading="lazy" />
+                  ) : (
+                    <span class="rs-card__placeholder">
+                      <i class="fa-regular fa-flag"></i>
+                    </span>
+                  )}
+                  {item.eventDate && (
+                    <span class="rs-card__date-badge">
+                      {formatDate(item.eventDate)}
+                    </span>
+                  )}
+                </span>
+                <span class="rs-card__body">
+                  <h2 class="rs-card__title">{item.title}</h2>
+                  <ul class="rs-card__facts">
+                    {item.venue && (
+                      <li>
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>{item.venue}</span>
+                      </li>
+                    )}
+                    {item.participants && (
+                      <li>
+                        <i class="fa-solid fa-users"></i>
+                        <span>参加者 {item.participants}名</span>
+                      </li>
+                    )}
+                    {item.partnerOrgs && (
+                      <li>
+                        <i class="fa-solid fa-handshake"></i>
+                        <span>{item.partnerOrgs}</span>
+                      </li>
+                    )}
+                  </ul>
+                </span>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  .rs-hero {
+    background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+    color: var(--fsn-white);
+    padding: 80px 24px 60px;
+    text-align: center;
+  }
+  .rs-hero__inner { max-width: 800px; margin: 0 auto; }
+  .rs-hero__label {
+    display: inline-block;
+    padding: 6px 18px;
+    background: rgba(255, 255, 255, 0.22);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    margin: 0 0 16px;
+  }
+  .rs-hero__title {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 800;
+    color: var(--fsn-white);
+    margin: 0 0 16px;
+  }
+  .rs-hero__lead {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0;
+  }
+
+  .rs-section {
+    padding: 64px 24px 96px;
+    background: var(--fsn-gray-50);
+    min-height: 50vh;
+  }
+  .rs-section__inner {
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+
+  .rs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+  @media (max-width: 760px) { .rs-grid { grid-template-columns: 1fr; gap: 24px; } }
+
+  .rs-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--fsn-white);
+    border-radius: var(--fsn-radius-md);
+    overflow: hidden;
+    box-shadow: var(--fsn-shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .rs-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--fsn-shadow-md);
+    color: inherit;
+  }
+  .rs-card__thumb {
+    aspect-ratio: 5 / 3;
+    background: linear-gradient(135deg, var(--fsn-gray-100), var(--fsn-gray-200));
+    overflow: hidden;
+    display: block;
+    position: relative;
+  }
+  .rs-card__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .rs-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fsn-gray-300);
+    font-size: 3rem;
+  }
+  .rs-card__date-badge {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    padding: 6px 14px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-family: var(--fsn-font-num);
+    font-size: 0.78rem;
+    font-weight: 700;
+    box-shadow: var(--fsn-shadow-sm);
+  }
+  .rs-card__body {
+    padding: 22px 24px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .rs-card__title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .rs-card__facts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .rs-card__facts li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--fsn-gray-700);
+    line-height: 1.6;
+  }
+  .rs-card__facts li i {
+    color: var(--fsn-orange);
+    width: 16px;
+    text-align: center;
+    margin-top: 4px;
+    font-size: 0.85em;
+  }
+
+  .rs-empty {
+    text-align: center;
+    padding: 64px 24px;
+    background: var(--fsn-white);
+    border-radius: var(--fsn-radius-md);
+    color: var(--fsn-gray-700);
+  }
+</style>
