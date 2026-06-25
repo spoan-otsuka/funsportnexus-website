@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { fetchNewsList } from '../lib/microcms';
+import { fetchNewsList, fetchColumnsList } from '../lib/microcms';
 
 export const prerender = false;
 
@@ -10,6 +10,14 @@ try {
   latestNews = data?.contents ?? [];
 } catch (err) {
   console.error('Failed to fetch latest news:', err);
+}
+
+let latestColumns = [];
+try {
+  const data = await fetchColumnsList(Astro.locals, { limit: 10 });
+  latestColumns = data?.contents ?? [];
+} catch (err) {
+  console.error('Failed to fetch latest columns:', err);
 }
 
 const formatDate = (iso) => {
@@ -171,6 +179,74 @@ const formatDate = (iso) => {
     </div>
   </section>
 
+  <!-- コラム カルーセル -->
+  {latestColumns.length > 0 && (
+    <section class="cols-carousel">
+      <div class="cols-carousel__inner">
+        <div class="cols-carousel__head">
+          <div>
+            <p class="section-label section-label--orange">COLUMNS</p>
+            <h2 class="section-title">コラム</h2>
+          </div>
+          <a href="/columns/" class="cols-carousel__more">
+            一覧を見る
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="cols-carousel__viewport">
+          <button type="button" class="cols-carousel__nav cols-carousel__nav--prev" data-carousel-prev aria-label="前へ">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <div class="cols-carousel__track" data-carousel-track>
+            {latestColumns.map(item => {
+              const thumb = item.eyecatch?.url ?? null;
+              const isSpoAnTalk = !!(item.intervieweeName ?? item.interveweeName);
+              return (
+                <a href={`/columns/${item.id}/`} class="cols-carousel__card">
+                  <span class="cols-carousel__thumb">
+                    {thumb ? (
+                      <img
+                        src={`${thumb}?w=600&h=400&fit=crop`}
+                        srcset={`${thumb}?w=400&h=267&fit=crop 400w, ${thumb}?w=600&h=400&fit=crop 600w, ${thumb}?w=900&h=600&fit=crop 900w`}
+                        sizes="320px"
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : (
+                      <span class="cols-carousel__placeholder">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                      </span>
+                    )}
+                    {isSpoAnTalk && (
+                      <span class="cols-carousel__series">
+                        <i class="fa-solid fa-microphone-lines"></i>
+                        Spo-An Talk
+                      </span>
+                    )}
+                  </span>
+                  <span class="cols-carousel__body">
+                    <time class="cols-carousel__date" datetime={item.publishedAt}>
+                      {(() => {
+                        const d = new Date(item.publishedAt);
+                        return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+                      })()}
+                    </time>
+                    <h3 class="cols-carousel__title">{item.title}</h3>
+                  </span>
+                </a>
+              );
+            })}
+          </div>
+          <button type="button" class="cols-carousel__nav cols-carousel__nav--next" data-carousel-next aria-label="次へ">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+  )}
+
   <!-- 事業領域 -->
   <section class="business">
     <div class="business__inner">
@@ -230,6 +306,33 @@ const formatDate = (iso) => {
   </section>
 
 </BaseLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const track = document.querySelector('[data-carousel-track]');
+    const prev = document.querySelector('[data-carousel-prev]');
+    const next = document.querySelector('[data-carousel-next]');
+    if (!track || !prev || !next) return;
+
+    const scrollBy = (direction) => {
+      const cardWidth = track.querySelector('.cols-carousel__card')?.offsetWidth ?? 320;
+      const gap = 20;
+      track.scrollBy({ left: (cardWidth + gap) * direction, behavior: 'smooth' });
+    };
+
+    const updateButtons = () => {
+      const max = track.scrollWidth - track.clientWidth - 2;
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft >= max;
+    };
+
+    prev.addEventListener('click', () => scrollBy(-1));
+    next.addEventListener('click', () => scrollBy(1));
+    track.addEventListener('scroll', updateButtons, { passive: true });
+    window.addEventListener('resize', updateButtons);
+    updateButtons();
+  });
+</script>
 
 <style>
   /* ============ Hero ============ */
@@ -557,6 +660,184 @@ const formatDate = (iso) => {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  /* ============ Columns Carousel ============ */
+  .cols-carousel {
+    padding: 80px 0 64px;
+    background: var(--fsn-white);
+  }
+  .cols-carousel__inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .cols-carousel__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 32px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .cols-carousel__head .section-title { text-align: left; margin: 0; }
+  .cols-carousel__head .section-title::after { margin: 16px 0 0; }
+  .cols-carousel__head .section-label { margin: 0 0 12px; }
+  .cols-carousel__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .cols-carousel__more:hover {
+    background: #050d2e;
+    color: var(--fsn-white);
+    transform: translateY(-2px);
+  }
+  .cols-carousel__more i { color: var(--fsn-orange); }
+
+  .cols-carousel__viewport {
+    position: relative;
+  }
+  .cols-carousel__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 320px;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding: 4px 8px 24px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cols-carousel__track::-webkit-scrollbar { display: none; }
+
+  .cols-carousel__card {
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    background: var(--fsn-white);
+    border-radius: var(--fsn-radius-md);
+    overflow: hidden;
+    box-shadow: var(--fsn-shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .cols-carousel__card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--fsn-shadow-md);
+    color: inherit;
+  }
+  .cols-carousel__thumb {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    background: linear-gradient(135deg, var(--fsn-gray-100), var(--fsn-gray-200));
+    overflow: hidden;
+    display: block;
+  }
+  .cols-carousel__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .cols-carousel__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fsn-gray-300);
+    font-size: 2.4rem;
+  }
+  .cols-carousel__series {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.7rem;
+    font-weight: 800;
+    box-shadow: var(--fsn-shadow-sm);
+  }
+  .cols-carousel__series i { font-size: 0.85em; }
+  .cols-carousel__body {
+    padding: 16px 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+  .cols-carousel__date {
+    font-family: var(--fsn-font-num);
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--fsn-gray-500);
+  }
+  .cols-carousel__title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0;
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .cols-carousel__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--fsn-white);
+    border: 1px solid var(--fsn-gray-200);
+    color: var(--fsn-navy-deep);
+    box-shadow: var(--fsn-shadow-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: background 0.15s, transform 0.15s, opacity 0.15s;
+  }
+  .cols-carousel__nav:hover {
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border-color: var(--fsn-orange);
+  }
+  .cols-carousel__nav:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .cols-carousel__nav:disabled:hover {
+    background: var(--fsn-white);
+    color: var(--fsn-navy-deep);
+    border-color: var(--fsn-gray-200);
+  }
+  .cols-carousel__nav--prev { left: -10px; }
+  .cols-carousel__nav--next { right: -10px; }
+
+  @media (max-width: 900px) {
+    .cols-carousel__track { grid-auto-columns: 280px; }
+    .cols-carousel__nav { display: none; }
   }
 
   /* ============ Event Banner ============ */
