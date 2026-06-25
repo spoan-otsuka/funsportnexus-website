@@ -56,3 +56,29 @@ export async function fetchNewsDetail(locals, contentId) {
     contentId,
   });
 }
+
+/**
+ * コラム一覧を取得
+ */
+export async function fetchColumnsList(locals, queries = {}) {
+  const client = getMicroCmsClient(locals);
+  return client.get({
+    endpoint: 'columns',
+    queries: {
+      orders: '-publishedAt',
+      limit: 20,
+      ...queries,
+    },
+  });
+}
+
+/**
+ * コラム詳細を取得
+ */
+export async function fetchColumnDetail(locals, contentId) {
+  const client = getMicroCmsClient(locals);
+  return client.getListDetail({
+    endpoint: 'columns',
+    contentId,
+  });
+}

@@ -1,0 +1,245 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fetchColumnDetail } from '../../lib/microcms';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+
+let article = null;
+let fetchError = null;
+
+try {
+  article = await fetchColumnDetail(Astro.locals, id);
+} catch (err) {
+  console.error('Failed to fetch column detail:', err);
+  fetchError = err.message;
+}
+
+if (!article && !fetchError) {
+  return Astro.redirect('/columns/');
+}
+
+const formatDate = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const eyecatchUrl = article?.eyecatch?.url ?? null;
+const ogImageUrl = eyecatchUrl ? `${eyecatchUrl}?w=1200&h=630&fit=crop` : '/og-default.png';
+
+const stripHtml = (html) => {
+  if (!html) return '';
+  return html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 120);
+};
+const articleDescription = article
+  ? (article.excerpt || stripHtml(article.body || article.content) || `fun sport nexus コラム：${article.title}`)
+  : 'コラム詳細';
+---
+<BaseLayout
+  title={article?.title ?? 'コラム'}
+  description={articleDescription}
+  ogImage={ogImageUrl}
+>
+
+  <article class="cols-article">
+    <header class="cols-article__head">
+      <nav class="cols-article__breadcrumb">
+        <a href="/">トップ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/columns/">コラム</a>
+      </nav>
+
+      {fetchError ? (
+        <div class="cols-article__error">
+          <h1>記事を読み込めませんでした</h1>
+          <p>しばらくしてから、再度お試しください。</p>
+          <p style="font-size:0.78rem;color:var(--fsn-gray-500);margin-top:8px;">エラー：{fetchError}</p>
+          <p style="margin-top:24px;">
+            <a href="/columns/" class="cols-article__back">
+              <i class="fa-solid fa-arrow-left"></i> コラム一覧に戻る
+            </a>
+          </p>
+        </div>
+      ) : (
+        <>
+          <div class="cols-article__meta">
+            <time class="cols-article__date" datetime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
+            {article.author && (
+              <span class="cols-article__author">
+                <i class="fa-regular fa-user"></i>
+                {article.author}
+              </span>
+            )}
+          </div>
+          <h1 class="cols-article__title">{article.title}</h1>
+        </>
+      )}
+    </header>
+
+    {!fetchError && article && eyecatchUrl && (
+      <figure class="cols-article__eyecatch">
+        <img src={`${eyecatchUrl}?w=1200`} alt={article.title} loading="lazy" />
+      </figure>
+    )}
+
+    {!fetchError && article && (
+      <div class="cols-article__body" set:html={article.body || article.content || ''}></div>
+    )}
+
+    {!fetchError && article && (
+      <div class="cols-article__footer">
+        <a href="/columns/" class="cols-article__back">
+          <i class="fa-solid fa-arrow-left"></i>
+          コラム一覧に戻る
+        </a>
+      </div>
+    )}
+  </article>
+
+</BaseLayout>
+
+<style>
+  .cols-article {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+    min-height: 60vh;
+  }
+  .cols-article__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--fsn-gray-500);
+    margin: 0 0 32px;
+  }
+  .cols-article__breadcrumb a {
+    color: var(--fsn-navy);
+    text-decoration: none;
+  }
+  .cols-article__breadcrumb a:hover { color: var(--fsn-orange); }
+  .cols-article__breadcrumb i { color: var(--fsn-gray-300); font-size: 0.72rem; }
+
+  .cols-article__meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 0 0 16px;
+    flex-wrap: wrap;
+  }
+  .cols-article__date {
+    font-family: var(--fsn-font-num);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--fsn-gray-500);
+  }
+  .cols-article__author {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--fsn-gray-700);
+    font-weight: 600;
+  }
+  .cols-article__author i { color: var(--fsn-orange); }
+
+  .cols-article__title {
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 32px;
+    line-height: 1.5;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--fsn-gray-200);
+  }
+  .cols-article__eyecatch {
+    margin: 0 0 32px;
+    border-radius: var(--fsn-radius-md);
+    overflow: hidden;
+    box-shadow: var(--fsn-shadow-sm);
+  }
+  .cols-article__eyecatch img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .cols-article__body {
+    font-size: 1rem;
+    line-height: 2;
+    color: var(--fsn-gray-900);
+  }
+  .cols-article__body :global(h2) {
+    display: none;
+  }
+  .cols-article__body :global(h3) {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 48px 0 16px;
+    padding-left: 14px;
+    border-left: 4px solid var(--fsn-orange);
+  }
+  .cols-article__body :global(h4) {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--fsn-navy);
+    margin: 32px 0 12px;
+  }
+  .cols-article__body :global(p) {
+    margin: 0 0 18px;
+  }
+  .cols-article__body :global(a) {
+    color: var(--fsn-orange);
+    text-decoration: underline;
+  }
+  .cols-article__body :global(img) {
+    margin: 24px 0;
+    border-radius: var(--fsn-radius-md);
+    max-width: 100%;
+    height: auto;
+  }
+  .cols-article__body :global(ul),
+  .cols-article__body :global(ol) {
+    margin: 16px 0;
+    padding-left: 24px;
+  }
+  .cols-article__body :global(blockquote) {
+    margin: 24px 0;
+    padding: 16px 20px;
+    background: var(--fsn-gray-50);
+    border-left: 4px solid var(--fsn-orange);
+    color: var(--fsn-gray-700);
+    border-radius: 0 var(--fsn-radius-sm) var(--fsn-radius-sm) 0;
+  }
+
+  .cols-article__footer {
+    margin: 56px 0 0;
+    padding-top: 32px;
+    border-top: 1px solid var(--fsn-gray-200);
+  }
+  .cols-article__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    text-decoration: none;
+    font-weight: 700;
+    transition: background 0.2s;
+  }
+  .cols-article__back:hover {
+    background: #050d2e;
+    color: var(--fsn-white);
+  }
+
+  .cols-article__error {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-md);
+  }
+</style>

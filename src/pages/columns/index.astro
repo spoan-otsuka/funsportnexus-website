@@ -1,0 +1,224 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fetchColumnsList } from '../../lib/microcms';
+
+export const prerender = false;
+
+let columns = [];
+let fetchError = null;
+
+try {
+  const data = await fetchColumnsList(Astro.locals);
+  columns = data?.contents ?? [];
+} catch (err) {
+  console.error('Failed to fetch columns:', err);
+  fetchError = err.message;
+}
+
+const formatDate = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+};
+---
+<BaseLayout
+  title="コラム"
+  description="fun sport nexus がお届けする、スポーツと文化、地域、若者支援などのコラムです。"
+>
+
+  <section class="cols-hero">
+    <div class="cols-hero__inner">
+      <p class="cols-hero__label">COLUMNS</p>
+      <h1 class="cols-hero__title">コラム</h1>
+      <p class="cols-hero__lead">
+        スポーツ・文化・地域・若者支援などについて、<br>
+        fun sport nexus からのまなざしを、お届けいたします。
+      </p>
+    </div>
+  </section>
+
+  <section class="cols-section">
+    <div class="cols-section__inner">
+      {fetchError || columns.length === 0 ? (
+        <div class="cols-empty">
+          <i class="fa-regular fa-pen-to-square" style="font-size: 3rem; color: var(--fsn-gray-300); margin-bottom: 16px;"></i>
+          <p>現在、コラムは、準備中です。<br>近日、公開予定です。</p>
+        </div>
+      ) : (
+        <div class="cols-grid">
+          {columns.map(item => {
+            const thumb = item.eyecatch?.url ?? null;
+            return (
+              <a href={`/columns/${item.id}/`} class="cols-card">
+                <span class="cols-card__thumb">
+                  {thumb ? (
+                    <img src={`${thumb}?w=800&h=520&fit=crop`} alt="" loading="lazy" />
+                  ) : (
+                    <span class="cols-card__placeholder">
+                      <i class="fa-regular fa-pen-to-square"></i>
+                    </span>
+                  )}
+                </span>
+                <span class="cols-card__body">
+                  <time class="cols-card__date" datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
+                  <h2 class="cols-card__title">{item.title}</h2>
+                  {item.excerpt && (
+                    <p class="cols-card__excerpt">{item.excerpt}</p>
+                  )}
+                  {item.author && (
+                    <p class="cols-card__author">
+                      <i class="fa-regular fa-user"></i>
+                      {item.author}
+                    </p>
+                  )}
+                </span>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  .cols-hero {
+    background: linear-gradient(135deg, var(--fsn-navy-deep), var(--fsn-navy));
+    color: var(--fsn-white);
+    padding: 80px 24px 60px;
+    text-align: center;
+  }
+  .cols-hero__inner { max-width: 800px; margin: 0 auto; }
+  .cols-hero__label {
+    display: inline-block;
+    padding: 6px 18px;
+    background: rgba(249, 115, 22, 0.18);
+    color: var(--fsn-orange);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    margin: 0 0 16px;
+  }
+  .cols-hero__title {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 800;
+    color: var(--fsn-white);
+    margin: 0 0 16px;
+  }
+  .cols-hero__lead {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0;
+  }
+
+  .cols-section {
+    padding: 64px 24px 96px;
+    background: var(--fsn-gray-50);
+    min-height: 50vh;
+  }
+  .cols-section__inner {
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+
+  .cols-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  @media (max-width: 900px) { .cols-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .cols-grid { grid-template-columns: 1fr; } }
+
+  .cols-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--fsn-white);
+    border-radius: var(--fsn-radius-md);
+    overflow: hidden;
+    box-shadow: var(--fsn-shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .cols-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--fsn-shadow-md);
+    color: inherit;
+  }
+  .cols-card__thumb {
+    aspect-ratio: 5 / 3;
+    background: linear-gradient(135deg, var(--fsn-gray-100), var(--fsn-gray-200));
+    overflow: hidden;
+    display: block;
+  }
+  .cols-card__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .cols-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fsn-gray-300);
+    font-size: 3rem;
+  }
+  .cols-card__body {
+    padding: 22px 24px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+  }
+  .cols-card__date {
+    font-family: var(--fsn-font-num);
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--fsn-gray-500);
+  }
+  .cols-card__title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0;
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .cols-card__excerpt {
+    font-size: 0.85rem;
+    color: var(--fsn-gray-700);
+    line-height: 1.7;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .cols-card__author {
+    font-size: 0.78rem;
+    color: var(--fsn-gray-500);
+    margin: 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cols-card__author i { color: var(--fsn-orange); }
+
+  .cols-empty,
+  .cols-error {
+    text-align: center;
+    padding: 64px 24px;
+    background: var(--fsn-white);
+    border-radius: var(--fsn-radius-md);
+    color: var(--fsn-gray-700);
+  }
+</style>
