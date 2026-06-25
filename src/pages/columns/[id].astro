@@ -43,7 +43,7 @@ const articleDescription = article
   ogImage={ogImageUrl}
 >
 
-  <article class={`cols-article ${article?.intervieweeName || article?.interveweeName ? 'cols-article--with-interviewee' : ''}`}>
+  <article class="cols-article">
     <header class="cols-article__head">
       <nav class="cols-article__breadcrumb">
         <a href="/">トップ</a>
@@ -98,6 +98,10 @@ const articleDescription = article
       </figure>
     )}
 
+    {!fetchError && article && (
+      <div class="cols-article__body" set:html={article.body || article.content || ''}></div>
+    )}
+
     {!fetchError && article && (article.intervieweeName ?? article.interveweeName) && (
       <section class="cols-interviewee">
         <p class="cols-interviewee__label">
@@ -131,10 +135,6 @@ const articleDescription = article
     )}
 
     {!fetchError && article && (
-      <div class="cols-article__body" set:html={article.body || article.content || ''}></div>
-    )}
-
-    {!fetchError && article && (
       <div class="cols-article__footer">
         <a href="/columns/" class="cols-article__back">
           <i class="fa-solid fa-arrow-left"></i>
@@ -152,49 +152,6 @@ const articleDescription = article
     margin: 0 auto;
     padding: 64px 24px 96px;
     min-height: 60vh;
-  }
-
-  /* PC: 著者ありなら 2カラム（左 著者sticky / 右 本文） */
-  @media (min-width: 960px) {
-    .cols-article.cols-article--with-interviewee {
-      max-width: 1180px;
-      display: grid;
-      grid-template-columns: 300px 1fr;
-      column-gap: 48px;
-      grid-template-areas:
-        "head     head"
-        "eyecatch eyecatch"
-        "side     body"
-        "foot     foot";
-    }
-    .cols-article--with-interviewee > .cols-article__head { grid-area: head; }
-    .cols-article--with-interviewee > .cols-article__eyecatch { grid-area: eyecatch; }
-    .cols-article--with-interviewee > .cols-interviewee { grid-area: side; }
-    .cols-article--with-interviewee > .cols-article__body { grid-area: body; }
-    .cols-article--with-interviewee > .cols-article__footer { grid-area: foot; }
-
-    .cols-article--with-interviewee > .cols-interviewee {
-      position: sticky;
-      top: 96px;
-      align-self: start;
-      margin: 0;
-    }
-    .cols-article--with-interviewee > .cols-interviewee .cols-interviewee__body {
-      grid-template-columns: 1fr;
-      gap: 16px;
-      text-align: center;
-    }
-    .cols-article--with-interviewee > .cols-interviewee .cols-interviewee__photo {
-      margin: 0 auto;
-      width: 160px;
-    }
-    .cols-article--with-interviewee > .cols-interviewee .cols-interviewee__info {
-      align-items: center;
-      text-align: left;
-    }
-    .cols-article--with-interviewee > .cols-interviewee .cols-interviewee__title {
-      text-align: center;
-    }
   }
   .cols-article__breadcrumb {
     display: flex;
@@ -268,9 +225,9 @@ const articleDescription = article
   }
   .cols-article__series i { font-size: 0.85em; }
 
-  /* ============ Interviewee ============ */
+  /* ============ Interviewee（記事下表示） ============ */
   .cols-interviewee {
-    margin: 0 0 40px;
+    margin: 56px 0 0;
     padding: 28px;
     background: var(--fsn-gray-50);
     border-radius: var(--fsn-radius-md);
@@ -346,12 +303,6 @@ const articleDescription = article
     font-size: 1rem;
     line-height: 2;
     color: var(--fsn-gray-900);
-  }
-  @media (min-width: 960px) {
-    .cols-article--with-interviewee > .cols-article__body {
-      font-size: 1.02rem;
-      line-height: 2.05;
-    }
   }
   .cols-article__body :global(h2) {
     display: none;
