@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { fetchNewsList, fetchColumnsList } from '../lib/microcms';
+import { fetchNewsList, fetchColumnsList, fetchResultsList } from '../lib/microcms';
 
 export const prerender = false;
 
@@ -19,6 +19,28 @@ try {
 } catch (err) {
   console.error('Failed to fetch latest columns:', err);
 }
+
+let latestResults = [];
+try {
+  const data = await fetchResultsList(Astro.locals, { limit: 3 });
+  latestResults = data?.contents ?? [];
+} catch (err) {
+  console.error('Failed to fetch latest results:', err);
+}
+
+const fmtDateRange = (startIso, endIso) => {
+  if (!startIso) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  const s = new Date(startIso);
+  const sy = s.getFullYear(), sm = s.getMonth() + 1, sd = s.getDate();
+  if (!endIso) return `${sy}.${pad(sm)}.${pad(sd)}`;
+  const e = new Date(endIso);
+  const ey = e.getFullYear(), em = e.getMonth() + 1, ed = e.getDate();
+  if (sy === ey && sm === em && sd === ed) return `${sy}.${pad(sm)}.${pad(sd)}`;
+  if (sy === ey && sm === em) return `${sy}.${pad(sm)}.${pad(sd)}-${pad(ed)}`;
+  if (sy === ey) return `${sy}.${pad(sm)}.${pad(sd)}-${pad(em)}.${pad(ed)}`;
+  return `${sy}.${pad(sm)}.${pad(sd)}-${ey}.${pad(em)}.${pad(ed)}`;
+};
 
 const formatDate = (iso) => {
   if (!iso) return '';
@@ -242,6 +264,80 @@ const formatDate = (iso) => {
           <button type="button" class="cols-carousel__nav cols-carousel__nav--next" data-carousel-next aria-label="次へ">
             <i class="fa-solid fa-chevron-right"></i>
           </button>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- 最新実績 -->
+  {latestResults.length > 0 && (
+    <section class="latest-results">
+      <div class="latest-results__inner">
+        <div class="latest-results__head">
+          <div>
+            <p class="section-label">RESULTS</p>
+            <h2 class="section-title">開催実績</h2>
+          </div>
+          <a href="/results/" class="latest-results__more">
+            すべての実績を見る
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="latest-results__grid">
+          {latestResults.map(item => {
+            const thumb = item.eyecatch?.url ?? null;
+            const venue = item.venue ?? item.Venue;
+            const participants = item.participants ?? item.particiant;
+            return (
+              <a href={`/results/${item.id}/`} class="latest-results__card">
+                <span class="latest-results__thumb">
+                  {thumb ? (
+                    <img
+                      src={`${thumb}?w=800&h=480&fit=crop`}
+                      srcset={`${thumb}?w=500&h=300&fit=crop 500w, ${thumb}?w=800&h=480&fit=crop 800w, ${thumb}?w=1200&h=720&fit=crop 1200w`}
+                      sizes="(max-width: 760px) 100vw, 400px"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <span class="latest-results__placeholder">
+                      <i class="fa-regular fa-flag"></i>
+                    </span>
+                  )}
+                  {item.eventDate && (
+                    <span class="latest-results__date-badge">
+                      {fmtDateRange(item.eventDate, item.eventEndDate)}
+                    </span>
+                  )}
+                  {Array.isArray(item.gallery) && item.gallery.length > 0 && (
+                    <span class="latest-results__gallery-badge">
+                      <i class="fa-regular fa-images"></i>
+                      {item.gallery.length}
+                    </span>
+                  )}
+                </span>
+                <span class="latest-results__body">
+                  <h3 class="latest-results__title">{item.title}</h3>
+                  <ul class="latest-results__facts">
+                    {venue && (
+                      <li>
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>{venue}</span>
+                      </li>
+                    )}
+                    {participants && (
+                      <li>
+                        <i class="fa-solid fa-users"></i>
+                        <span>参加者 {participants}名</span>
+                      </li>
+                    )}
+                  </ul>
+                </span>
+              </a>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -838,6 +934,163 @@ const formatDate = (iso) => {
   @media (max-width: 900px) {
     .cols-carousel__track { grid-auto-columns: 280px; }
     .cols-carousel__nav { display: none; }
+  }
+
+  /* ============ Latest Results ============ */
+  .latest-results {
+    padding: 80px 0 96px;
+    background: var(--fsn-gray-50);
+  }
+  .latest-results__inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .latest-results__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 36px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .latest-results__head .section-title { text-align: left; margin: 0; }
+  .latest-results__head .section-title::after { margin: 16px 0 0; }
+  .latest-results__head .section-label { margin: 0 0 12px; }
+  .latest-results__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+  }
+  .latest-results__more:hover {
+    background: var(--fsn-orange-dark);
+    color: var(--fsn-white);
+    transform: translateY(-2px);
+  }
+
+  .latest-results__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  @media (max-width: 900px) { .latest-results__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .latest-results__grid { grid-template-columns: 1fr; } }
+
+  .latest-results__card {
+    display: flex;
+    flex-direction: column;
+    background: var(--fsn-white);
+    border-radius: var(--fsn-radius-md);
+    overflow: hidden;
+    box-shadow: var(--fsn-shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .latest-results__card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--fsn-shadow-md);
+    color: inherit;
+  }
+  .latest-results__thumb {
+    position: relative;
+    aspect-ratio: 5 / 3;
+    background: linear-gradient(135deg, var(--fsn-gray-100), var(--fsn-gray-200));
+    overflow: hidden;
+    display: block;
+  }
+  .latest-results__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .latest-results__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fsn-gray-300);
+    font-size: 2.6rem;
+  }
+  .latest-results__date-badge {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    padding: 5px 12px;
+    background: rgba(15, 26, 78, 0.92);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-family: var(--fsn-font-num);
+    font-size: 0.75rem;
+    font-weight: 700;
+    backdrop-filter: blur(4px);
+  }
+  .latest-results__gallery-badge {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    padding: 5px 11px;
+    background: rgba(0, 0, 0, 0.6);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    backdrop-filter: blur(4px);
+  }
+  .latest-results__gallery-badge i { font-size: 0.85em; }
+  .latest-results__body {
+    padding: 18px 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .latest-results__title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .latest-results__facts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .latest-results__facts li {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: 0.8rem;
+    color: var(--fsn-gray-700);
+    line-height: 1.5;
+  }
+  .latest-results__facts li i {
+    color: var(--fsn-orange);
+    width: 14px;
+    text-align: center;
+    margin-top: 3px;
+    font-size: 0.85em;
   }
 
   /* ============ Event Banner ============ */
