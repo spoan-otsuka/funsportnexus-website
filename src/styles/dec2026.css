@@ -1000,3 +1000,172 @@
   }
   .ttslot-time__main { font-size: 1.3rem; }
 }
+
+
+
+/* ============================================
+   TIMETABLE 会場別グルーピング（v3）
+   各会場ごとに、開催時間を横並びカードで表示
+   ============================================ */
+.venuelist {
+  background: var(--fsn-white);
+  border-radius: var(--fsn-radius-lg);
+  box-shadow: var(--fsn-shadow-sm);
+  overflow: hidden;
+  margin: 36px 0 28px;
+}
+.venuelist__head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 28px;
+  color: var(--fsn-white);
+  flex-wrap: wrap;
+}
+.venuelist__head--navy   { background: linear-gradient(135deg, var(--fsn-navy), var(--fsn-navy-deep)); }
+.venuelist__head--orange { background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark)); }
+.venuelist__num {
+  background: rgba(255, 255, 255, 0.18);
+  padding: 5px 16px;
+  border-radius: var(--fsn-radius-sm);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+.venuelist__date {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.venuelist__theme {
+  margin-left: auto;
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 0.92;
+}
+
+.venuelist__row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  padding: 18px 28px;
+  border-top: 1px solid var(--fsn-gray-100);
+  align-items: center;
+}
+.venuelist__row:nth-child(odd) {
+  background: var(--fsn-gray-50);
+}
+.venuelist__row--special {
+  background: linear-gradient(135deg, var(--fsn-orange-light), #fff) !important;
+  border-top: 2px solid var(--fsn-orange);
+}
+
+.venuelist__venue {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--fsn-navy-deep);
+  letter-spacing: 0.02em;
+}
+.venuelist__venue i {
+  color: var(--fsn-orange);
+  font-size: 0.95em;
+}
+.venuelist__venue--special {
+  color: var(--fsn-orange-dark);
+}
+.venuelist__venue--special i {
+  color: var(--fsn-orange-dark);
+}
+
+.venuelist__times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.venuelist__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--fsn-white);
+  border: 1.5px solid var(--fsn-gray-300);
+  border-radius: var(--fsn-radius-pill);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--fsn-gray-700);
+  line-height: 1.3;
+  white-space: nowrap;
+  transition: transform 0.2s;
+}
+.venuelist__chip b {
+  font-family: var(--fsn-font-num);
+  font-weight: 800;
+  color: var(--fsn-navy-deep);
+  background: var(--fsn-gray-100);
+  padding: 2px 8px;
+  border-radius: var(--fsn-radius-sm);
+  font-size: 0.85em;
+}
+.venuelist__chip:hover {
+  transform: translateY(-1px);
+}
+
+/* 色別 */
+.venuelist__chip--orange      { border-color: var(--fsn-orange); }
+.venuelist__chip--orange b    { background: var(--fsn-orange-light); color: var(--fsn-orange-dark); }
+.venuelist__chip--orange-soft { border-color: #FDBA74; }
+.venuelist__chip--orange-soft b { background: var(--fsn-orange-light); color: var(--fsn-orange-dark); }
+.venuelist__chip--pink        { border-color: #EC4899; }
+.venuelist__chip--pink b      { background: #FCE7F3; color: #BE185D; }
+.venuelist__chip--green       { border-color: var(--fsn-green-text); }
+.venuelist__chip--green b     { background: var(--fsn-green); color: var(--fsn-green-text); }
+.venuelist__chip--yellow      { border-color: #F59E0B; }
+.venuelist__chip--yellow b    { background: #FEF3C7; color: #B45309; }
+.venuelist__chip--purple      { border-color: #9333EA; }
+.venuelist__chip--purple b    { background: #F3E8FF; color: #6B21A8; }
+.venuelist__chip--blue        { border-color: var(--fsn-blue-accent); }
+.venuelist__chip--blue b      { background: var(--fsn-cyan); color: var(--fsn-navy); }
+.venuelist__chip--navy        { border-color: var(--fsn-navy-deep); }
+.venuelist__chip--navy b      { background: var(--fsn-cyan); color: var(--fsn-navy-deep); }
+.venuelist__chip--special {
+  background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+  color: var(--fsn-white);
+  border-color: var(--fsn-orange-dark);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 12px 18px;
+}
+.venuelist__chip--special b {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--fsn-white);
+}
+
+/* 終日カプセル：少し幅広に */
+.venuelist__chip--allday {
+  font-size: 0.9rem;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .venuelist__head { padding: 18px 20px; }
+  .venuelist__theme {
+    margin-left: 0;
+    width: 100%;
+    font-size: 0.88rem;
+  }
+  .venuelist__row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px 20px;
+  }
+  .venuelist__venue {
+    font-size: 0.95rem;
+  }
+  .venuelist__chip {
+    font-size: 0.82rem;
+    padding: 6px 12px;
+  }
+}
