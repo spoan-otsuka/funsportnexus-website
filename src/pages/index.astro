@@ -1,23 +1,515 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="fun sport nexus" description="明るく、楽しく、人と人をつなぐ。fun sport nexus 公式サイト">
+<BaseLayout
+  title="fun sport nexus"
+  description="多様なスポーツや文化を、いっしょに楽しめる場をつくります。fun sport nexus 公式サイト。"
+>
 
-  <main style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--fsn-navy-deep), var(--fsn-navy)); color: white; padding: 40px 20px;">
-    <div style="text-align: center; max-width: 720px;">
-      <p style="font-size: 0.78rem; font-weight: 700; letter-spacing: 0.3em; color: var(--fsn-orange); margin: 0 0 16px;">FUN SPORT NEXUS</p>
-      <h1 style="font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 800; color: white; margin: 0 0 28px; line-height: 1.4;">
-        明るく、楽しく、<br>人と人をつなぐ。
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero__bg"></div>
+    <div class="hero__overlay"></div>
+    <div class="hero__inner">
+      <p class="hero__label">FUN SPORT NEXUS</p>
+      <h1 class="hero__catch">
+        明るく、楽しく、<br>
+        人と人をつなぐ。
       </h1>
-      <p style="font-size: 1.05rem; line-height: 1.9; color: rgba(255,255,255,0.92); margin: 0 0 32px;">
-        公式サイトを、ただいま準備中です。<br>
-        2026年9月の公開を、目指しております。
+      <p class="hero__lead">
+        多様なスポーツや文化を、いっしょに楽しめる場をつくります。<br>
+        子どもからおとなまで、「やってみたい」を、いちばん大切に。
       </p>
-      <p style="font-size: 0.9rem; color: rgba(255,255,255,0.7); margin: 32px 0 0;">
-        公益財団法人 スポーツ安全協会<br>
-        <a href="mailto:funsportnexus@spoan.or.jp" style="color: var(--fsn-orange); border-bottom: 1px dashed rgba(249,115,22,0.4); padding-bottom: 2px;">funsportnexus@spoan.or.jp</a>
-      </p>
+      <div class="hero__cta">
+        <a href="/dec2026/" class="btn btn--primary btn--lg">
+          <i class="fa-solid fa-calendar-days"></i>
+          2026.12 開催情報を見る
+        </a>
+        <a href="/business" class="btn btn--ghost btn--lg">
+          事業について知る
+        </a>
+      </div>
     </div>
-  </main>
+  </section>
+
+  <!-- 3つの柱 -->
+  <section class="pillars">
+    <div class="pillars__inner">
+      <p class="section-label">CORE VALUES</p>
+      <h2 class="section-title">fun sport nexus の3つの柱</h2>
+
+      <div class="pillars__grid">
+        <article class="pillar">
+          <div class="pillar__icon pillar__icon--connect">
+            <i class="fa-solid fa-link"></i>
+          </div>
+          <p class="pillar__en">CONNECT</p>
+          <h3 class="pillar__title">つながる</h3>
+          <p class="pillar__text">
+            世代や地域、立場をこえて、人と人が、つながる機会を、つくります。
+          </p>
+        </article>
+
+        <article class="pillar">
+          <div class="pillar__icon pillar__icon--enjoy">
+            <i class="fa-solid fa-face-smile-beam"></i>
+          </div>
+          <p class="pillar__en">ENJOY</p>
+          <h3 class="pillar__title">たのしむ</h3>
+          <p class="pillar__text">
+            勝敗ではなく、「やってみたい」を、すべての起点にした体験を、ひらきます。
+          </p>
+        </article>
+
+        <article class="pillar">
+          <div class="pillar__icon pillar__icon--expand">
+            <i class="fa-solid fa-arrows-to-circle"></i>
+          </div>
+          <p class="pillar__en">EXPAND</p>
+          <h3 class="pillar__title">ひろがる</h3>
+          <p class="pillar__text">
+            多様なスポーツ・文化との出会いで、自分の世界を、ひとまわり、ひろげます。
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12月開催告知 -->
+  <section class="event-banner">
+    <div class="event-banner__inner">
+      <div class="event-banner__content">
+        <p class="event-banner__date">2026.12.19（土） - 20（日）</p>
+        <h2 class="event-banner__title">
+          fun sport nexus <span>2026.12</span>
+        </h2>
+        <p class="event-banner__venue">
+          <i class="fa-solid fa-location-dot"></i>
+          国立オリンピック記念青少年総合センター
+        </p>
+        <p class="event-banner__lead">
+          多種多様なスポーツや文化を、無料で体験できる2日間。<br>
+          益子直美さん、為末大さん、田丸尚稔さんら、第一線の方々も登壇いたします。
+        </p>
+        <a href="/dec2026/" class="btn btn--white btn--lg">
+          詳細・申込を見る
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 事業領域 -->
+  <section class="business">
+    <div class="business__inner">
+      <p class="section-label">BUSINESS AREAS</p>
+      <h2 class="section-title">事業領域</h2>
+      <p class="section-lead">
+        fun sport nexus は、イベント開催・大学モデル開発・地域展開支援の3軸で、<br>
+        新しいスポーツ文化の定着に、取り組んでまいります。
+      </p>
+
+      <div class="business__grid">
+        <a href="/events" class="business-card">
+          <div class="business-card__icon"><i class="fa-solid fa-calendar-days"></i></div>
+          <h3 class="business-card__title">イベント開催</h3>
+          <p class="business-card__text">
+            12月オリセン開催を、軸に。<br>
+            全国の各拠点で、年間を通じて、ひらいてまいります。
+          </p>
+          <span class="business-card__more">詳しく見る <i class="fa-solid fa-arrow-right"></i></span>
+        </a>
+
+        <a href="/business" class="business-card">
+          <div class="business-card__icon"><i class="fa-solid fa-graduation-cap"></i></div>
+          <h3 class="business-card__title">大学モデル開発</h3>
+          <p class="business-card__text">
+            青山学院、神戸親和、北海道、福岡など。<br>
+            学生主体・3年スパンの共創モデルを、つくります。
+          </p>
+          <span class="business-card__more">詳しく見る <i class="fa-solid fa-arrow-right"></i></span>
+        </a>
+
+        <a href="/results" class="business-card">
+          <div class="business-card__icon"><i class="fa-solid fa-map-location-dot"></i></div>
+          <h3 class="business-card__title">地域展開支援</h3>
+          <p class="business-card__text">
+            全国の県スポ協・地域団体と、連携。<br>
+            ぱん食い競走を、地域に、根づかせます。
+          </p>
+          <span class="business-card__more">詳しく見る <i class="fa-solid fa-arrow-right"></i></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- お問い合わせ -->
+  <section class="cta">
+    <div class="cta__inner">
+      <h2 class="cta__title">お問い合わせ・ご連携のご相談</h2>
+      <p class="cta__lead">
+        共催・後援・取材・取組のご相談など、お気軽にご連絡ください。
+      </p>
+      <a href="mailto:funsportnexus@spoan.or.jp" class="btn btn--primary btn--lg">
+        <i class="fa-solid fa-envelope"></i>
+        funsportnexus@spoan.or.jp
+      </a>
+    </div>
+  </section>
 
 </BaseLayout>
+
+<style>
+  /* ============ Hero ============ */
+  .hero {
+    position: relative;
+    min-height: calc(100vh - 72px);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+  }
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(249, 115, 22, 0.25), transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(29, 78, 216, 0.3), transparent 50%),
+      linear-gradient(135deg, #0A1A4D, #15276B);
+  }
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .hero__inner {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 24px;
+    text-align: center;
+    width: 100%;
+  }
+  .hero__label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    color: var(--fsn-orange);
+    margin: 0 0 24px;
+  }
+  .hero__catch {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800;
+    color: var(--fsn-white);
+    margin: 0 0 32px;
+    line-height: 1.4;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+  }
+  .hero__lead {
+    font-size: 1.1rem;
+    line-height: 2;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0 0 40px;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+  }
+  .hero__cta {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ============ 共通ボタン ============ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 36px;
+    border-radius: var(--fsn-radius-pill);
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform .2s, box-shadow .2s, background .2s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+  .btn--primary {
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+  }
+  .btn--primary:hover {
+    background: var(--fsn-orange-dark);
+    color: var(--fsn-white);
+  }
+  .btn--ghost {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--fsn-white);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(6px);
+  }
+  .btn--ghost:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--fsn-white);
+  }
+  .btn--white {
+    background: var(--fsn-white);
+    color: var(--fsn-navy-deep);
+  }
+  .btn--white:hover {
+    color: var(--fsn-navy-deep);
+  }
+  .btn--lg { padding: 18px 42px; font-size: 1rem; }
+
+  /* ============ セクション共通 ============ */
+  .section-label {
+    display: inline-block;
+    padding: 6px 16px;
+    background: var(--fsn-cyan);
+    color: var(--fsn-navy);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.25em;
+    margin: 0 0 16px;
+  }
+  .section-title {
+    font-size: clamp(1.8rem, 3vw, 2.2rem);
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 16px;
+    line-height: 1.5;
+  }
+  .section-title::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: var(--fsn-orange);
+    margin: 16px auto 0;
+    border-radius: 2px;
+  }
+  .section-lead {
+    font-size: 1rem;
+    line-height: 1.95;
+    color: var(--fsn-gray-700);
+    margin: 0 auto;
+    max-width: 720px;
+    text-align: center;
+  }
+
+  /* ============ Pillars ============ */
+  .pillars {
+    padding: 96px 24px;
+    background: var(--fsn-white);
+    text-align: center;
+  }
+  .pillars__inner { max-width: 1160px; margin: 0 auto; }
+  .pillars__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin: 56px 0 0;
+  }
+  .pillar {
+    padding: 40px 28px;
+    background: var(--fsn-white);
+    border: 1px solid var(--fsn-gray-200);
+    border-radius: var(--fsn-radius-lg);
+    box-shadow: var(--fsn-shadow-sm);
+    transition: transform .25s, box-shadow .25s;
+  }
+  .pillar:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--fsn-shadow-lg);
+  }
+  .pillar__icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 2rem;
+    color: var(--fsn-white);
+  }
+  .pillar__icon--connect { background: linear-gradient(135deg, var(--fsn-navy), var(--fsn-blue-accent)); }
+  .pillar__icon--enjoy   { background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark)); }
+  .pillar__icon--expand  { background: linear-gradient(135deg, var(--fsn-green-text), var(--fsn-green)); }
+  .pillar__icon--expand i { color: var(--fsn-white); }
+
+  .pillar__en {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    color: var(--fsn-orange);
+    margin: 0 0 8px;
+  }
+  .pillar__title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 16px;
+  }
+  .pillar__text {
+    font-size: 0.95rem;
+    line-height: 1.95;
+    color: var(--fsn-gray-700);
+    margin: 0;
+  }
+
+  /* ============ Event Banner ============ */
+  .event-banner {
+    background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+    padding: 80px 24px;
+    color: var(--fsn-white);
+    overflow: hidden;
+    position: relative;
+  }
+  .event-banner::before {
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 60%; height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent 60%);
+    pointer-events: none;
+  }
+  .event-banner__inner {
+    position: relative;
+    max-width: 1160px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .event-banner__date {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0 0 12px;
+  }
+  .event-banner__title {
+    font-size: clamp(2.2rem, 4vw, 3rem);
+    font-weight: 800;
+    color: var(--fsn-white);
+    margin: 0 0 16px;
+    letter-spacing: 0.02em;
+  }
+  .event-banner__title span {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.7em;
+  }
+  .event-banner__venue {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0 0 24px;
+  }
+  .event-banner__venue i { margin-right: 8px; }
+  .event-banner__lead {
+    font-size: 1rem;
+    line-height: 1.95;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0 auto 32px;
+    max-width: 720px;
+  }
+
+  /* ============ Business ============ */
+  .business {
+    padding: 96px 24px;
+    background: var(--fsn-gray-50);
+    text-align: center;
+  }
+  .business__inner { max-width: 1160px; margin: 0 auto; }
+  .business__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    margin: 56px 0 0;
+  }
+  .business-card {
+    display: block;
+    padding: 40px 32px;
+    background: var(--fsn-white);
+    border-radius: var(--fsn-radius-lg);
+    box-shadow: var(--fsn-shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: transform .25s, box-shadow .25s;
+    text-align: left;
+    border-top: 4px solid transparent;
+  }
+  .business-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--fsn-shadow-lg);
+    border-top-color: var(--fsn-orange);
+  }
+  .business-card__icon {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--fsn-radius-md);
+    background: linear-gradient(135deg, var(--fsn-navy), var(--fsn-blue-accent));
+    color: var(--fsn-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin: 0 0 20px;
+  }
+  .business-card__title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 14px;
+  }
+  .business-card__text {
+    font-size: 0.92rem;
+    line-height: 1.9;
+    color: var(--fsn-gray-700);
+    margin: 0 0 20px;
+  }
+  .business-card__more {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--fsn-orange);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ============ CTA ============ */
+  .cta {
+    padding: 96px 24px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    text-align: center;
+  }
+  .cta__inner { max-width: 720px; margin: 0 auto; }
+  .cta__title {
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 800;
+    color: var(--fsn-white);
+    margin: 0 0 16px;
+  }
+  .cta__lead {
+    font-size: 1rem;
+    line-height: 1.95;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0 0 36px;
+  }
+
+  /* ============ Responsive ============ */
+  @media (max-width: 900px) {
+    .pillars__grid,
+    .business__grid {
+      grid-template-columns: 1fr;
+    }
+    .hero__cta { flex-direction: column; align-items: stretch; }
+    .hero__cta .btn { justify-content: center; }
+  }
+</style>

@@ -1,0 +1,192 @@
+---
+/**
+ * 共通フッター
+ * - 主催・共催・お問い合わせ情報
+ * - リンク集
+ * - copyright
+ */
+const year = 2026;
+---
+
+<footer class="fsn-footer">
+  <div class="fsn-footer__inner">
+    <div class="fsn-footer__top">
+      <div class="fsn-footer__brand">
+        <div class="fsn-footer__brand-logo">
+          <span class="fsn-footer__logo-fun">fun</span>
+          <span class="fsn-footer__logo-sport">sport</span>
+          <span class="fsn-footer__logo-nexus">nexus</span>
+        </div>
+        <p class="fsn-footer__tagline">明るく、楽しく、人と人をつなぐ。</p>
+      </div>
+
+      <div class="fsn-footer__cols">
+        <div class="fsn-footer__col">
+          <p class="fsn-footer__label">サイトメニュー</p>
+          <ul class="fsn-footer__links">
+            <li><a href="/news">お知らせ</a></li>
+            <li><a href="/events">募集イベント</a></li>
+            <li><a href="/results">実績</a></li>
+            <li><a href="/columns">コラム</a></li>
+            <li><a href="/business">事業紹介</a></li>
+          </ul>
+        </div>
+
+        <div class="fsn-footer__col">
+          <p class="fsn-footer__label">主催・運営</p>
+          <p class="fsn-footer__body">公益財団法人<br>スポーツ安全協会</p>
+        </div>
+
+        <div class="fsn-footer__col">
+          <p class="fsn-footer__label">お問い合わせ</p>
+          <p class="fsn-footer__body">
+            <a href="mailto:funsportnexus@spoan.or.jp" class="fsn-footer__email">
+              <i class="fa-solid fa-envelope"></i>
+              funsportnexus@spoan.or.jp
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="fsn-footer__bottom">
+      <div class="fsn-footer__legal">
+        <a href="/privacy">プライバシーポリシー</a>
+        <span class="fsn-footer__sep">／</span>
+        <a href="/terms">利用規約</a>
+      </div>
+      <p class="fsn-footer__copy">© {year} 公益財団法人 スポーツ安全協会</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .fsn-footer {
+    background: linear-gradient(180deg, var(--fsn-navy-deep), #050d2e);
+    color: rgba(255, 255, 255, 0.92);
+    padding: 64px 24px 24px;
+    border-top: 4px solid var(--fsn-orange);
+  }
+  .fsn-footer__inner {
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+  .fsn-footer__top {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 56px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .fsn-footer__brand-logo {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .fsn-footer__logo-fun { color: var(--fsn-orange); }
+  .fsn-footer__logo-sport,
+  .fsn-footer__logo-nexus { color: var(--fsn-white); }
+
+  .fsn-footer__tagline {
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  .fsn-footer__cols {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1.3fr;
+    gap: 36px;
+  }
+  .fsn-footer__label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: var(--fsn-orange);
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(249, 115, 22, 0.35);
+  }
+  .fsn-footer__body {
+    font-size: 0.92rem;
+    line-height: 1.85;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0;
+  }
+  .fsn-footer__links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+  }
+  .fsn-footer__links a {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: color .15s;
+  }
+  .fsn-footer__links a:hover { color: var(--fsn-orange); }
+  .fsn-footer__links a::before {
+    content: "›";
+    margin-right: 6px;
+    color: var(--fsn-orange);
+  }
+
+  .fsn-footer__email {
+    color: var(--fsn-white);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.4);
+    padding-bottom: 2px;
+    transition: color .15s, border-color .15s;
+  }
+  .fsn-footer__email:hover {
+    color: var(--fsn-orange);
+    border-bottom-color: var(--fsn-orange);
+  }
+  .fsn-footer__email i { color: var(--fsn-orange); }
+
+  .fsn-footer__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .fsn-footer__legal {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .fsn-footer__legal a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color .15s;
+  }
+  .fsn-footer__legal a:hover { color: var(--fsn-orange); }
+  .fsn-footer__sep { margin: 0 8px; color: rgba(255, 255, 255, 0.3); }
+  .fsn-footer__copy {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .fsn-footer__top {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .fsn-footer__cols {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+  }
+</style>
