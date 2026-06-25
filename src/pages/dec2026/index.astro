@@ -96,121 +96,197 @@ const programs = [
     </div>
   </section>
 
-  <!-- TIMETABLE -->
+  <!-- TIMETABLE 時間スロット式 -->
   <section class="dec-section dec-section--tint">
     <div class="dec-section__inner">
       <p class="dec-section__label">TIMETABLE</p>
       <h2 class="dec-section__title">プログラム スケジュール</h2>
       <p class="dec-section__lead">
-        Day1（12月19日 土）・Day2（12月20日 日）の、時間と会場の一覧です。<br>
+        各時間帯ごとに、開催プログラムを、一覧でご紹介します。<br>
         ※現時点の仮入れ。最終確定は、各団体との調整後に、ご案内いたします。
       </p>
 
-      <!-- Day1 -->
-      <div class="dec-tt-block">
-        <div class="dec-tt-block__head dec-tt-block__head--navy">
-          <span class="dec-tt-block__num">DAY 1</span>
-          <span class="dec-tt-block__date">12月19日（土）</span>
+      <!-- DAY 1 -->
+      <div class="ttslot-day">
+        <div class="ttslot-day__head ttslot-day__head--navy">
+          <span class="ttslot-day__num">DAY 1</span>
+          <span class="ttslot-day__date">12月19日（土）</span>
+          <span class="ttslot-day__theme">スポーツの源流</span>
         </div>
-        <div class="dec-tt-wrap">
-          <table class="dec-tt">
-            <thead>
-              <tr>
-                <th class="dec-tt__venue">会場</th>
-                <th>10:00</th><th>11:00</th><th>12:00</th><th>13:00</th><th>14:00</th><th>15:00</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><th>中央広場 受付</th><td colspan="6" class="dec-tt__bar dec-tt__bar--navy">受付</td></tr>
-              <tr><th>中央広場</th>
-                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い</td>
-                <td colspan="4"></td>
-                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い</td>
-              </tr>
-              <tr><th>第1体育室</th><td colspan="6" class="dec-tt__bar dec-tt__bar--blue">Baseball5</td></tr>
-              <tr><th>第2体育室</th><td colspan="6" class="dec-tt__bar dec-tt__bar--orange">レク協会（ピックルボール等）</td></tr>
-              <tr><th>第3体育室</th><td colspan="6" class="dec-tt__bar dec-tt__bar--yellow">バスケ(サンロッカーズ渋谷)</td></tr>
-              <tr><th>第4体育室</th>
-                <td class="dec-tt__bar dec-tt__bar--pink">Legit①</td><td></td>
-                <td class="dec-tt__bar dec-tt__bar--pink">Legit②</td><td></td>
-                <td class="dec-tt__bar dec-tt__bar--pink">Legit③</td><td></td>
-              </tr>
-              <tr><th>第5体育室</th>
-                <td></td><td class="dec-tt__bar dec-tt__bar--green">柔道</td>
-                <td></td><td class="dec-tt__bar dec-tt__bar--green">柔道</td>
-                <td></td><td class="dec-tt__bar dec-tt__bar--green">柔道</td>
-              </tr>
-              <tr><th>YCAPエリア</th>
-                <td class="dec-tt__bar dec-tt__bar--purple">YCAP①</td><td></td>
-                <td class="dec-tt__bar dec-tt__bar--purple">YCAP②</td><td></td>
-                <td class="dec-tt__bar dec-tt__bar--purple">YCAP③</td><td></td>
-              </tr>
-              <tr><th>体育室エントランス</th><td colspan="6" class="dec-tt__bar dec-tt__bar--blue">ボッチャ・将棋</td></tr>
-            </tbody>
-          </table>
+
+        <div class="ttslot-row">
+          <div class="ttslot-time">
+            <span class="ttslot-time__main">10:00</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--orange"><i class="fa-solid fa-bread-slice"></i> ぱん食い競走<small>中央広場</small></span>
+            <span class="ttslot-card ttslot-card--pink"><i class="fa-solid fa-music"></i> Legit ダンス ①<small>第4体育室</small></span>
+            <span class="ttslot-card ttslot-card--purple"><i class="fa-solid fa-people-group"></i> YCAP ①<small>YCAPエリア</small></span>
+            <span class="ttslot-card ttslot-card--blue ttslot-card--allday"><i class="fa-solid fa-baseball-bat-ball"></i> Baseball5<small>第1体育室 ／ 終日</small></span>
+            <span class="ttslot-card ttslot-card--orange-soft ttslot-card--allday"><i class="fa-solid fa-table-tennis-paddle-ball"></i> レク協会<small>第2体育室 ／ 終日</small></span>
+            <span class="ttslot-card ttslot-card--yellow ttslot-card--allday"><i class="fa-solid fa-basketball"></i> バスケ<small>第3体育室 ／ 終日</small></span>
+            <span class="ttslot-card ttslot-card--blue ttslot-card--allday"><i class="fa-solid fa-bullseye"></i> ボッチャ・将棋<small>体育室エントランス ／ 終日</small></span>
+          </div>
+        </div>
+
+        <div class="ttslot-row">
+          <div class="ttslot-time">
+            <span class="ttslot-time__main">11:00</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--green"><i class="fa-solid fa-hand-fist"></i> 柔道 ①<small>第5体育室</small></span>
+          </div>
+        </div>
+
+        <div class="ttslot-row">
+          <div class="ttslot-time">
+            <span class="ttslot-time__main">12:00</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--pink"><i class="fa-solid fa-music"></i> Legit ダンス ②<small>第4体育室</small></span>
+            <span class="ttslot-card ttslot-card--purple"><i class="fa-solid fa-people-group"></i> YCAP ②<small>YCAPエリア</small></span>
+          </div>
+        </div>
+
+        <div class="ttslot-row">
+          <div class="ttslot-time">
+            <span class="ttslot-time__main">13:00</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--green"><i class="fa-solid fa-hand-fist"></i> 柔道 ②<small>第5体育室</small></span>
+          </div>
+        </div>
+
+        <div class="ttslot-row">
+          <div class="ttslot-time">
+            <span class="ttslot-time__main">14:00</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--pink"><i class="fa-solid fa-music"></i> Legit ダンス ③<small>第4体育室</small></span>
+            <span class="ttslot-card ttslot-card--purple"><i class="fa-solid fa-people-group"></i> YCAP ③<small>YCAPエリア</small></span>
+          </div>
+        </div>
+
+        <div class="ttslot-row">
+          <div class="ttslot-time">
+            <span class="ttslot-time__main">15:00</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--orange"><i class="fa-solid fa-bread-slice"></i> ぱん食い競走<small>中央広場</small></span>
+            <span class="ttslot-card ttslot-card--green"><i class="fa-solid fa-hand-fist"></i> 柔道 ③<small>第5体育室</small></span>
+          </div>
+        </div>
+
+        <div class="ttslot-row ttslot-row--special">
+          <div class="ttslot-time ttslot-time--special">
+            <span class="ttslot-time__main">16:30</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--special"><i class="fa-solid fa-microphone-lines"></i> 特別セミナー（90分）<small>センター棟 ／ 基調講演＋WS＋交流会</small></span>
+          </div>
         </div>
       </div>
 
-      <!-- Day2 -->
-      <div class="dec-tt-block">
-        <div class="dec-tt-block__head dec-tt-block__head--orange">
-          <span class="dec-tt-block__num">DAY 2</span>
-          <span class="dec-tt-block__date">12月20日（日）</span>
+      <!-- DAY 2 -->
+      <div class="ttslot-day">
+        <div class="ttslot-day__head ttslot-day__head--orange">
+          <span class="ttslot-day__num">DAY 2</span>
+          <span class="ttslot-day__date">12月20日（日）</span>
+          <span class="ttslot-day__theme">体験会 ＋ 大会要素</span>
         </div>
-        <div class="dec-tt-wrap">
-          <table class="dec-tt">
-            <thead>
-              <tr>
-                <th class="dec-tt__venue">会場</th>
-                <th>10:00</th><th>11:00</th><th>12:00</th><th>13:00</th><th>14:00</th><th>15:00</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><th>中央広場 受付</th><td colspan="6" class="dec-tt__bar dec-tt__bar--navy">受付</td></tr>
-              <tr><th>中央広場</th>
-                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い</td>
-                <td colspan="2"></td>
-                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い</td>
-                <td colspan="2"></td>
-              </tr>
-              <tr><th>第1体育室</th>
-                <td></td><td class="dec-tt__bar dec-tt__bar--green">かけっこ</td>
-                <td colspan="2"></td>
-                <td class="dec-tt__bar dec-tt__bar--green">かけっこ</td><td></td>
-              </tr>
-              <tr><th>第2体育室</th>
-                <td colspan="2"></td>
-                <td colspan="4" class="dec-tt__bar dec-tt__bar--yellow">鬼ごっこ（仮）</td>
-              </tr>
-              <tr><th>第3体育室</th><td colspan="6" class="dec-tt__prep">調整中</td></tr>
-              <tr><th>第4体育室</th>
-                <td class="dec-tt__bar dec-tt__bar--orange">フェンシング</td><td></td>
-                <td class="dec-tt__bar dec-tt__bar--orange">フェンシング</td><td></td>
-                <td class="dec-tt__bar dec-tt__bar--orange">フェンシング</td><td></td>
-              </tr>
-              <tr><th>第5体育室</th>
-                <td></td><td class="dec-tt__bar dec-tt__bar--yellow">DIP①</td>
-                <td></td><td class="dec-tt__bar dec-tt__bar--yellow">DIP②</td>
-                <td></td><td class="dec-tt__bar dec-tt__bar--yellow">DIP③</td>
-              </tr>
-              <tr><th>YCAPエリア</th>
-                <td class="dec-tt__bar dec-tt__bar--purple">YCAP①</td><td></td>
-                <td class="dec-tt__bar dec-tt__bar--purple">YCAP②</td><td></td>
-                <td class="dec-tt__bar dec-tt__bar--purple">YCAP③</td><td></td>
-              </tr>
-              <tr><th>小ホール</th>
-                <td colspan="3"></td>
-                <td colspan="2" class="dec-tt__bar dec-tt__bar--navy">太鼓体験会</td>
-                <td class="dec-tt__bar dec-tt__bar--navy">太鼓発表会</td>
-              </tr>
-            </tbody>
-          </table>
+
+        <div class="ttslot-row">
+          <div class="ttslot-time">
+            <span class="ttslot-time__main">10:00</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--orange"><i class="fa-solid fa-bread-slice"></i> ぱん食い競走<small>中央広場</small></span>
+            <span class="ttslot-card ttslot-card--orange"><i class="fa-solid fa-khanda"></i> フェンシング ①<small>第4体育室</small></span>
+            <span class="ttslot-card ttslot-card--purple"><i class="fa-solid fa-people-group"></i> YCAP ①<small>YCAPエリア</small></span>
+          </div>
+        </div>
+
+        <div class="ttslot-row">
+          <div class="ttslot-time">
+            <span class="ttslot-time__main">11:00</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--green"><i class="fa-solid fa-person-running"></i> かけっこ教室 ①<small>第1体育室</small></span>
+            <span class="ttslot-card ttslot-card--yellow"><i class="fa-solid fa-record-vinyl"></i> DIP ①<small>第5体育室</small></span>
+          </div>
+        </div>
+
+        <div class="ttslot-row">
+          <div class="ttslot-time">
+            <span class="ttslot-time__main">12:00</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--orange"><i class="fa-solid fa-khanda"></i> フェンシング ②<small>第4体育室</small></span>
+            <span class="ttslot-card ttslot-card--purple"><i class="fa-solid fa-people-group"></i> YCAP ②<small>YCAPエリア</small></span>
+            <span class="ttslot-card ttslot-card--yellow ttslot-card--allday"><i class="fa-solid fa-children"></i> 鬼ごっこ<small>第2体育室 ／ 〜15:00</small></span>
+          </div>
+        </div>
+
+        <div class="ttslot-row">
+          <div class="ttslot-time">
+            <span class="ttslot-time__main">13:00</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--orange"><i class="fa-solid fa-bread-slice"></i> ぱん食い競走<small>中央広場</small></span>
+            <span class="ttslot-card ttslot-card--yellow"><i class="fa-solid fa-record-vinyl"></i> DIP ②<small>第5体育室</small></span>
+            <span class="ttslot-card ttslot-card--navy"><i class="fa-solid fa-drum"></i> 太鼓体験会<small>小ホール</small></span>
+          </div>
+        </div>
+
+        <div class="ttslot-row">
+          <div class="ttslot-time">
+            <span class="ttslot-time__main">14:00</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--green"><i class="fa-solid fa-person-running"></i> かけっこ教室 ②<small>第1体育室</small></span>
+            <span class="ttslot-card ttslot-card--orange"><i class="fa-solid fa-khanda"></i> フェンシング ③<small>第4体育室</small></span>
+            <span class="ttslot-card ttslot-card--purple"><i class="fa-solid fa-people-group"></i> YCAP ③<small>YCAPエリア</small></span>
+          </div>
+        </div>
+
+        <div class="ttslot-row">
+          <div class="ttslot-time">
+            <span class="ttslot-time__main">15:00</span>
+            <span class="ttslot-time__sub">スタート</span>
+          </div>
+          <div class="ttslot-progs">
+            <span class="ttslot-card ttslot-card--yellow"><i class="fa-solid fa-record-vinyl"></i> DIP ③<small>第5体育室</small></span>
+            <span class="ttslot-card ttslot-card--navy"><i class="fa-solid fa-masks-theater"></i> 太鼓発表会<small>小ホール</small></span>
+          </div>
         </div>
       </div>
 
-      <p style="text-align: center; font-size: 0.82rem; color: var(--fsn-gray-500); margin: 16px 0 0;">
-        ※スマートフォンの方は、表を横にスクロールしてご覧ください。
-      </p>
+      <!-- 凡例 -->
+      <div class="ttslot-legend">
+        <p class="ttslot-legend__label">凡例</p>
+        <div class="ttslot-legend__items">
+          <span class="ttslot-legend__item"><span class="ttslot-legend__dot ttslot-legend__dot--orange"></span>ぱん食い・フェンシング</span>
+          <span class="ttslot-legend__item"><span class="ttslot-legend__dot ttslot-legend__dot--pink"></span>ダンス</span>
+          <span class="ttslot-legend__item"><span class="ttslot-legend__dot ttslot-legend__dot--green"></span>かけっこ・柔道</span>
+          <span class="ttslot-legend__item"><span class="ttslot-legend__dot ttslot-legend__dot--yellow"></span>DIP・鬼ごっこ・バスケ</span>
+          <span class="ttslot-legend__item"><span class="ttslot-legend__dot ttslot-legend__dot--purple"></span>YCAP</span>
+          <span class="ttslot-legend__item"><span class="ttslot-legend__dot ttslot-legend__dot--blue"></span>Baseball5・ボッチャ</span>
+          <span class="ttslot-legend__item"><span class="ttslot-legend__dot ttslot-legend__dot--navy"></span>太鼓・受付</span>
+          <span class="ttslot-legend__item"><span class="ttslot-legend__dot ttslot-legend__dot--special"></span>セミナー</span>
+        </div>
+      </div>
     </div>
   </section>
 

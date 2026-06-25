@@ -747,3 +747,256 @@
   .dec-seminar__grid { grid-template-columns: 1fr; max-width: 380px; margin-left: auto; margin-right: auto; }
   .dec-progmini { min-height: auto; }
 }
+
+
+
+/* ============================================
+   TIMETABLE 時間スロット式（v2）
+   ============================================ */
+.ttslot-day {
+  background: var(--fsn-white);
+  border-radius: var(--fsn-radius-lg);
+  box-shadow: var(--fsn-shadow-sm);
+  overflow: hidden;
+  margin: 36px 0 28px;
+}
+.ttslot-day__head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 28px;
+  color: var(--fsn-white);
+  flex-wrap: wrap;
+}
+.ttslot-day__head--navy { background: linear-gradient(135deg, var(--fsn-navy), var(--fsn-navy-deep)); }
+.ttslot-day__head--orange { background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark)); }
+.ttslot-day__num {
+  background: rgba(255, 255, 255, 0.18);
+  padding: 5px 16px;
+  border-radius: var(--fsn-radius-sm);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+.ttslot-day__date {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.ttslot-day__theme {
+  margin-left: auto;
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 0.92;
+}
+
+.ttslot-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 24px;
+  padding: 20px 28px;
+  border-top: 1px solid var(--fsn-gray-100);
+  align-items: flex-start;
+}
+.ttslot-row:nth-child(odd) {
+  background: var(--fsn-gray-50);
+}
+.ttslot-row--special {
+  background: linear-gradient(135deg, var(--fsn-orange-light), #fff) !important;
+  border-top: 2px solid var(--fsn-orange);
+}
+
+.ttslot-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  background: var(--fsn-white);
+  border: 1.5px solid var(--fsn-navy);
+  border-radius: var(--fsn-radius-md);
+}
+.ttslot-time--special {
+  border-color: var(--fsn-orange);
+  background: var(--fsn-white);
+}
+.ttslot-time__main {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--fsn-navy-deep);
+  font-family: var(--fsn-font-num);
+  line-height: 1.1;
+}
+.ttslot-time--special .ttslot-time__main {
+  color: var(--fsn-orange-dark);
+}
+.ttslot-time__sub {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--fsn-gray-500);
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+.ttslot-progs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+/* プログラムカード（小カプセル） */
+.ttslot-card {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 18px;
+  background: var(--fsn-white);
+  border: 1.5px solid var(--fsn-gray-200);
+  border-radius: var(--fsn-radius-md);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--fsn-navy-deep);
+  line-height: 1.3;
+  box-shadow: 0 1px 3px rgba(15, 32, 89, 0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.ttslot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 32, 89, 0.12);
+}
+.ttslot-card i {
+  margin-right: 6px;
+  font-size: 0.85em;
+}
+.ttslot-card small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--fsn-gray-500);
+  letter-spacing: 0.02em;
+}
+
+/* 色別 */
+.ttslot-card--orange      { border-color: var(--fsn-orange); }
+.ttslot-card--orange i    { color: var(--fsn-orange); }
+.ttslot-card--orange-soft { border-color: #FDBA74; }
+.ttslot-card--orange-soft i { color: var(--fsn-orange); }
+.ttslot-card--pink        { border-color: #EC4899; }
+.ttslot-card--pink i      { color: #EC4899; }
+.ttslot-card--green       { border-color: var(--fsn-green-text); }
+.ttslot-card--green i     { color: var(--fsn-green-text); }
+.ttslot-card--yellow      { border-color: #F59E0B; }
+.ttslot-card--yellow i    { color: #F59E0B; }
+.ttslot-card--purple      { border-color: #9333EA; }
+.ttslot-card--purple i    { color: #9333EA; }
+.ttslot-card--blue        { border-color: var(--fsn-blue-accent); }
+.ttslot-card--blue i      { color: var(--fsn-blue-accent); }
+.ttslot-card--navy        { border-color: var(--fsn-navy-deep); }
+.ttslot-card--navy i      { color: var(--fsn-navy-deep); }
+.ttslot-card--special {
+  background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+  color: var(--fsn-white);
+  border-color: var(--fsn-orange-dark);
+  font-size: 1.05rem;
+}
+.ttslot-card--special i,
+.ttslot-card--special small { color: rgba(255,255,255,0.9); }
+
+/* 終日開催（薄めのバッジ追加） */
+.ttslot-card--allday {
+  background: linear-gradient(90deg, var(--fsn-white), var(--fsn-gray-50));
+  position: relative;
+}
+.ttslot-card--allday::after {
+  content: "終日";
+  position: absolute;
+  top: -8px;
+  right: 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  background: var(--fsn-gray-500);
+  color: var(--fsn-white);
+  border-radius: var(--fsn-radius-pill);
+  letter-spacing: 0.08em;
+}
+
+/* ---- 凡例 ---- */
+.ttslot-legend {
+  margin: 32px 0 0;
+  padding: 20px 24px;
+  background: var(--fsn-white);
+  border-radius: var(--fsn-radius-md);
+  border: 1px solid var(--fsn-gray-200);
+}
+.ttslot-legend__label {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--fsn-navy);
+  margin: 0 0 14px;
+  padding: 4px 12px;
+  background: var(--fsn-cyan);
+  border-radius: var(--fsn-radius-pill);
+}
+.ttslot-legend__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.ttslot-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--fsn-gray-700);
+}
+.ttslot-legend__dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.ttslot-legend__dot--orange  { background: var(--fsn-orange); }
+.ttslot-legend__dot--pink    { background: #EC4899; }
+.ttslot-legend__dot--green   { background: var(--fsn-green-text); }
+.ttslot-legend__dot--yellow  { background: #F59E0B; }
+.ttslot-legend__dot--purple  { background: #9333EA; }
+.ttslot-legend__dot--blue    { background: var(--fsn-blue-accent); }
+.ttslot-legend__dot--navy    { background: var(--fsn-navy-deep); }
+.ttslot-legend__dot--special { background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark)); }
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .ttslot-day__head { padding: 18px 20px; }
+  .ttslot-day__theme {
+    margin-left: 0;
+    width: 100%;
+    font-size: 0.88rem;
+  }
+  .ttslot-row {
+    grid-template-columns: 100px 1fr;
+    gap: 16px;
+    padding: 16px 20px;
+  }
+  .ttslot-time__main { font-size: 1.5rem; }
+  .ttslot-card {
+    padding: 10px 14px;
+    font-size: 0.88rem;
+  }
+  .ttslot-card small { font-size: 0.72rem; }
+}
+@media (max-width: 480px) {
+  .ttslot-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .ttslot-time {
+    flex-direction: row;
+    gap: 8px;
+    align-items: baseline;
+    justify-content: center;
+    padding: 8px 16px;
+  }
+  .ttslot-time__main { font-size: 1.3rem; }
+}
