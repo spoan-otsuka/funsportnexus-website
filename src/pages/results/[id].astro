@@ -94,7 +94,7 @@ const articleDescription = article
           mobileUrl={eyecatchMobileUrl}
           alt={article.title}
           width={1200}
-          sizes="(max-width: 860px) 100vw, 860px"
+          sizes="(max-width: 760px) 100vw, (max-width: 1040px) 100vw, 1000px"
           loading="eager"
           fetchpriority="high"
         />
@@ -258,6 +258,12 @@ const articleDescription = article
     margin: 0 auto;
     padding: 64px 24px 96px;
     min-height: 60vh;
+  }
+  @media (min-width: 960px) {
+    .rs-article {
+      max-width: 1040px;
+    }
+    .rs-article__body { font-size: 1.05rem; line-height: 2.1; }
   }
   .rs-article__breadcrumb {
     display: flex;
