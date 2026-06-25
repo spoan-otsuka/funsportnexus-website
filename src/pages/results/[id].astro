@@ -114,19 +114,20 @@ const articleDescription = article
         </h2>
         <div class="rs-gallery__grid" data-gallery>
           {article.gallery.map((g, i) => {
-            const url = g?.image?.url;
+            const url = g?.url ?? g?.image?.url;
             if (!url) return null;
+            const caption = g?.caption || '';
             return (
               <button
                 type="button"
                 class="rs-gallery__item"
                 data-full={`${url}?w=1600`}
-                data-caption={g.caption || ''}
+                data-caption={caption}
                 data-index={i}
-                aria-label={g.caption || `写真 ${i + 1}`}
+                aria-label={caption || `写真 ${i + 1}`}
               >
-                <img src={`${url}?w=500&h=380&fit=crop`} alt={g.caption || ''} loading="lazy" />
-                {g.caption && <span class="rs-gallery__caption">{g.caption}</span>}
+                <img src={`${url}?w=500&h=380&fit=crop`} alt={caption} loading="lazy" />
+                {caption && <span class="rs-gallery__caption">{caption}</span>}
               </button>
             );
           })}
