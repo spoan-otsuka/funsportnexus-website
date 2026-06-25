@@ -1,0 +1,50 @@
+---
+/**
+ * 共通レイアウト
+ * - ヘッダー / フッター / 共通スタイル を読み込む
+ * - SEO 用のメタタグを props で受け取る
+ */
+
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = 'fun sport nexus ― 明るく、楽しく、人と人をつなぐ。',
+  ogImage = '/og-default.png',
+  noindex = false,
+} = Astro.props;
+
+const fullTitle = title === 'fun sport nexus'
+  ? title
+  : `${title} ｜ fun sport nexus`;
+---
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+  {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={Astro.url.href} />
+  <meta property="og:image" content={new URL(ogImage, Astro.site).href} />
+
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+  <slot />
+</body>
+</html>

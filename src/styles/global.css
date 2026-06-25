@@ -1,0 +1,107 @@
+/* ============================================
+   fun sport nexus 公式サイト - グローバルCSS
+   デザイントークン + リセット + 共通スタイル
+   ============================================ */
+
+:root {
+  /* カラー */
+  --fsn-navy:        #1F3A8A;
+  --fsn-navy-dark:   #15276B;
+  --fsn-navy-deep:   #0A1A4D;
+  --fsn-orange:      #F97316;
+  --fsn-orange-dark: #EA580C;
+  --fsn-orange-light:#FFEDD5;
+  --fsn-blue-accent: #1d4ed8;
+  --fsn-cyan:        #DBEAFE;
+  --fsn-green:       #DCFCE7;
+  --fsn-green-text:  #15803D;
+  --fsn-white:       #FFFFFF;
+  --fsn-gray-50:     #F9FAFB;
+  --fsn-gray-100:    #F3F4F6;
+  --fsn-gray-200:    #E5E7EB;
+  --fsn-gray-300:    #D1D5DB;
+  --fsn-gray-500:    #6B7280;
+  --fsn-gray-700:    #374151;
+  --fsn-gray-900:    #111827;
+
+  /* タイポグラフィ */
+  --fsn-font-jp: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  --fsn-font-num: "Helvetica Neue", Arial, sans-serif;
+
+  /* スペーシング */
+  --fsn-radius-sm:  6px;
+  --fsn-radius-md:  12px;
+  --fsn-radius-lg:  20px;
+  --fsn-radius-pill: 999px;
+
+  /* シャドウ */
+  --fsn-shadow-sm: 0 2px 6px rgba(15, 32, 89, 0.06);
+  --fsn-shadow-md: 0 4px 12px rgba(15, 32, 89, 0.08);
+  --fsn-shadow-lg: 0 12px 32px rgba(15, 32, 89, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--fsn-font-jp);
+  color: var(--fsn-gray-900);
+  line-height: 1.7;
+  background: var(--fsn-white);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--fsn-navy);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+a:hover {
+  color: var(--fsn-orange);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  line-height: 1.4;
+  color: var(--fsn-navy-deep);
+}
+
+p {
+  margin: 0;
+  line-height: 1.9;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+}
+
+/* セクション共通 */
+.fsn-section {
+  padding: 80px 24px;
+}
+.fsn-section__inner {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+.fsn-section__label {
+  display: inline-block;
+  padding: 4px 14px;
+  background: var(--fsn-cyan);
+  color: var(--fsn-navy);
+  border-radius: var(--fsn-radius-pill);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+@media (max-width: 768px) {
+  .fsn-section { padding: 56px 20px; }
+}

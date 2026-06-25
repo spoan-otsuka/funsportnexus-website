@@ -1,0 +1,23 @@
+name = "funsportnexus-website"
+compatibility_date = "2026-06-25"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./dist"
+
+# ============================================
+# Cloudflare D1 データベース（申込システム統合）
+# ============================================
+[[d1_databases]]
+binding = "DB"
+database_name = "fsn-apply-db"
+database_id = "358323e4-53c6-4fa2-b0ac-b871133b2cd0"
+
+# ============================================
+# 環境変数（Cloudflare Pages ダッシュボードで設定）
+# ============================================
+# RESEND_API_KEY       ─ Resend API キー
+# FROM_EMAIL           ─ info@funsportnexus.org
+# FROM_NAME            ─ fun sport nexus 運営事務局
+# SLACK_WEBHOOK_URL    ─ Slack Webhook URL
+# ADMIN_EMAIL_FALLBACK ─ funsportnexus@spoan.or.jp
+# MICROCMS_SERVICE_DOMAIN ─ microCMS サービスドメイン（例：fsn）
+# MICROCMS_API_KEY     ─ microCMS API キー
