@@ -63,6 +63,12 @@ const formatDate = (iso) => {
                       {formatDate(item.eventDate)}
                     </span>
                   )}
+                  {Array.isArray(item.gallery) && item.gallery.length > 0 && (
+                    <span class="rs-card__gallery-badge">
+                      <i class="fa-regular fa-images"></i>
+                      写真 {item.gallery.length} 枚
+                    </span>
+                  )}
                 </span>
                 <span class="rs-card__body">
                   <h2 class="rs-card__title">{item.title}</h2>
@@ -184,6 +190,22 @@ const formatDate = (iso) => {
     color: var(--fsn-gray-300);
     font-size: 3rem;
   }
+  .rs-card__gallery-badge {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    padding: 6px 14px;
+    background: rgba(0, 0, 0, 0.6);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(4px);
+  }
+  .rs-card__gallery-badge i { font-size: 0.85em; }
   .rs-card__date-badge {
     position: absolute;
     left: 16px;

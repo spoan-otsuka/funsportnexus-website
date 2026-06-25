@@ -106,6 +106,34 @@ const articleDescription = article
       <div class="rs-article__body" set:html={article.body}></div>
     )}
 
+    {!fetchError && article && Array.isArray(article.gallery) && article.gallery.length > 0 && (
+      <section class="rs-gallery">
+        <h2 class="rs-gallery__heading">
+          <i class="fa-regular fa-images"></i>
+          写真ギャラリー
+        </h2>
+        <div class="rs-gallery__grid" data-gallery>
+          {article.gallery.map((g, i) => {
+            const url = g?.image?.url;
+            if (!url) return null;
+            return (
+              <button
+                type="button"
+                class="rs-gallery__item"
+                data-full={`${url}?w=1600`}
+                data-caption={g.caption || ''}
+                data-index={i}
+                aria-label={g.caption || `写真 ${i + 1}`}
+              >
+                <img src={`${url}?w=500&h=380&fit=crop`} alt={g.caption || ''} loading="lazy" />
+                {g.caption && <span class="rs-gallery__caption">{g.caption}</span>}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+    )}
+
     {!fetchError && article && (
       <div class="rs-article__footer">
         <a href="/results/" class="rs-article__back">
@@ -116,7 +144,77 @@ const articleDescription = article
     )}
   </article>
 
+  <!-- Lightbox -->
+  <div class="rs-lightbox" data-lightbox hidden>
+    <button class="rs-lightbox__close" type="button" data-lightbox-close aria-label="閉じる">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <button class="rs-lightbox__prev" type="button" data-lightbox-prev aria-label="前の写真">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <button class="rs-lightbox__next" type="button" data-lightbox-next aria-label="次の写真">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+    <figure class="rs-lightbox__figure">
+      <img class="rs-lightbox__img" data-lightbox-img alt="" />
+      <figcaption class="rs-lightbox__caption" data-lightbox-caption></figcaption>
+    </figure>
+  </div>
+
 </BaseLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const galleryEl = document.querySelector('[data-gallery]');
+    const lightbox = document.querySelector('[data-lightbox]');
+    if (!galleryEl || !lightbox) return;
+
+    const items = Array.from(galleryEl.querySelectorAll('.rs-gallery__item'));
+    const imgEl = lightbox.querySelector('[data-lightbox-img]');
+    const captionEl = lightbox.querySelector('[data-lightbox-caption]');
+    const closeBtn = lightbox.querySelector('[data-lightbox-close]');
+    const prevBtn = lightbox.querySelector('[data-lightbox-prev]');
+    const nextBtn = lightbox.querySelector('[data-lightbox-next]');
+
+    let currentIndex = -1;
+
+    const open = (i) => {
+      if (i < 0 || i >= items.length) return;
+      currentIndex = i;
+      const btn = items[i];
+      imgEl.src = btn.dataset.full || '';
+      imgEl.alt = btn.dataset.caption || '';
+      captionEl.textContent = btn.dataset.caption || '';
+      captionEl.style.display = btn.dataset.caption ? '' : 'none';
+      lightbox.hidden = false;
+      document.body.style.overflow = 'hidden';
+      prevBtn.style.visibility = items.length > 1 ? '' : 'hidden';
+      nextBtn.style.visibility = items.length > 1 ? '' : 'hidden';
+    };
+    const close = () => {
+      lightbox.hidden = true;
+      imgEl.src = '';
+      document.body.style.overflow = '';
+      currentIndex = -1;
+    };
+    const prev = () => open((currentIndex - 1 + items.length) % items.length);
+    const next = () => open((currentIndex + 1) % items.length);
+
+    items.forEach((btn, i) => btn.addEventListener('click', () => open(i)));
+    closeBtn.addEventListener('click', close);
+    prevBtn.addEventListener('click', prev);
+    nextBtn.addEventListener('click', next);
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (lightbox.hidden) return;
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'ArrowRight') next();
+    });
+  });
+</script>
 
 <style>
   .rs-article {
@@ -231,6 +329,145 @@ const articleDescription = article
     border-left: 4px solid var(--fsn-orange);
     color: var(--fsn-gray-700);
     border-radius: 0 var(--fsn-radius-sm) var(--fsn-radius-sm) 0;
+  }
+
+  /* ============ Gallery ============ */
+  .rs-gallery { margin: 48px 0 0; }
+  .rs-gallery__heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 20px;
+    padding-left: 14px;
+    border-left: 4px solid var(--fsn-orange);
+  }
+  .rs-gallery__heading i { color: var(--fsn-orange); font-size: 0.95em; }
+  .rs-gallery__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 760px) { .rs-gallery__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 440px) { .rs-gallery__grid { grid-template-columns: 1fr; } }
+
+  .rs-gallery__item {
+    position: relative;
+    border: 0;
+    background: none;
+    padding: 0;
+    cursor: zoom-in;
+    border-radius: var(--fsn-radius-sm);
+    overflow: hidden;
+    aspect-ratio: 5 / 4;
+    box-shadow: var(--fsn-shadow-sm);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .rs-gallery__item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--fsn-shadow-md);
+  }
+  .rs-gallery__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+  }
+  .rs-gallery__item:hover img { transform: scale(1.04); }
+  .rs-gallery__caption {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 8px 12px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-align: left;
+    line-height: 1.4;
+    pointer-events: none;
+  }
+
+  /* ============ Lightbox ============ */
+  .rs-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 60px;
+  }
+  .rs-lightbox[hidden] { display: none; }
+  .rs-lightbox__figure {
+    margin: 0;
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .rs-lightbox__img {
+    max-width: 100%;
+    max-height: calc(100vh - 140px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: var(--fsn-radius-sm);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+  }
+  .rs-lightbox__caption {
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: center;
+    max-width: 800px;
+    padding: 0 16px;
+  }
+  .rs-lightbox__close,
+  .rs-lightbox__prev,
+  .rs-lightbox__next {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.12);
+    border: 0;
+    color: #fff;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .rs-lightbox__close:hover,
+  .rs-lightbox__prev:hover,
+  .rs-lightbox__next:hover {
+    background: var(--fsn-orange);
+    transform: scale(1.08);
+  }
+  .rs-lightbox__close { top: 24px; right: 24px; }
+  .rs-lightbox__prev  { left: 24px; top: 50%; transform: translateY(-50%); }
+  .rs-lightbox__next  { right: 24px; top: 50%; transform: translateY(-50%); }
+  .rs-lightbox__prev:hover { transform: translateY(-50%) scale(1.08); }
+  .rs-lightbox__next:hover { transform: translateY(-50%) scale(1.08); }
+
+  @media (max-width: 600px) {
+    .rs-lightbox { padding: 20px 12px; }
+    .rs-lightbox__close,
+    .rs-lightbox__prev,
+    .rs-lightbox__next {
+      width: 40px; height: 40px;
+      font-size: 0.95rem;
+    }
+    .rs-lightbox__close { top: 12px; right: 12px; }
+    .rs-lightbox__prev { left: 8px; }
+    .rs-lightbox__next { right: 8px; }
   }
 
   .rs-article__footer {
