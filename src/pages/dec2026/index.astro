@@ -1,0 +1,374 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/dec2026.css';
+
+const programs = [
+  { code: 'panshoku',     name: 'スポあんぱん食い競走', time: '10:00 ／ 15:00 開始', venue: '中央広場',       day: 'Day1 ／ Day2', icon: 'fa-bread-slice',          featured: true },
+  { code: 'baseball5',    name: 'Baseball5 体験',       time: '10:00 - 15:00 通し',   venue: '第1体育室',     day: 'Day1',          icon: 'fa-baseball-bat-ball' },
+  { code: 'basket',       name: 'バスケットボール',     time: '10:00 - 15:00 通し',   venue: '第3体育室',     day: 'Day1',          icon: 'fa-basketball' },
+  { code: 'legit',        name: 'Legit ダンス',         time: '10:00 ／ 12:00 ／ 14:00', venue: '第4体育室',  day: 'Day1',          icon: 'fa-music' },
+  { code: 'judo',         name: '柔道体験',             time: '10:00 ／ 12:00 ／ 14:00', venue: '第5体育室',  day: 'Day1',          icon: 'fa-hand-fist' },
+  { code: 'pickle',       name: 'ピックルボール',       time: '10:00 - 15:00 通し',   venue: '第2体育室',     day: 'Day1',          icon: 'fa-table-tennis-paddle-ball' },
+  { code: 'boccia',       name: 'ボッチャ',             time: '自由参加 ／ 終日通し', venue: '体育室エントランス', day: 'Day1',     icon: 'fa-bullseye' },
+  { code: 'ycap',         name: 'YCAP チームビルディング', time: '10:00 ／ 12:00 ／ 14:00', venue: 'YCAPエリア', day: 'Day1 ／ Day2', icon: 'fa-people-group' },
+  { code: 'kakekko',      name: 'かけっこ教室',         time: '11:00 ／ 14:00',       venue: '第1体育室',     day: 'Day2',          icon: 'fa-person-running' },
+  { code: 'oni',          name: '鬼ごっこ',             time: '12:00 - 15:00 通し',   venue: '第2体育室',     day: 'Day2',          icon: 'fa-children' },
+  { code: 'fencing',      name: 'フェンシング体験',     time: '10:00 ／ 12:00 ／ 14:00', venue: '第4体育室',  day: 'Day2',          icon: 'fa-khanda' },
+  { code: 'dip',          name: 'DIP（ミュージックドリブル）', time: '11:00 ／ 13:00 ／ 15:00', venue: '第5体育室', day: 'Day2',    icon: 'fa-record-vinyl' },
+  { code: 'closing',      name: '閉会セレモニー＋演劇', time: '13:00 - 15:00',        venue: '小ホール',       day: 'Day2',          icon: 'fa-masks-theater', special: true },
+];
+---
+<BaseLayout
+  title="fun sport nexus 2026.12"
+  description="2026年12月19日（土）・20日（日）開催。国立オリンピック記念青少年総合センターで、明るく、楽しく、人と人をつなぐ2日間。"
+>
+
+  <!-- Hero -->
+  <section class="dec-hero">
+    <div class="dec-hero__bg" style="background-image: url('/logo-fsn.png');"></div>
+    <div class="dec-hero__overlay"></div>
+    <div class="dec-hero__inner">
+      <p class="dec-hero__label">FUN SPORT NEXUS  ／  2026 WINTER</p>
+      <h1 class="dec-hero__catch">明るく、楽しく、<br>人と人をつなぐ。</h1>
+      <p class="dec-hero__lead">
+        12月19日と20日の2日間、国立オリンピック記念青少年総合センターで、<br>
+        「fun sport nexus」を、ひらきます。
+      </p>
+      <div class="dec-hero__meta">
+        <span class="dec-hero__meta-item"><i class="fa-solid fa-calendar-days"></i> 2026.12.19（土） - 20（日）</span>
+        <span class="dec-hero__meta-item"><i class="fa-solid fa-location-dot"></i> 国立オリンピック記念青少年総合センター</span>
+        <span class="dec-hero__meta-item dec-hero__meta-item--free"><i class="fa-solid fa-ticket"></i> 参加費無料</span>
+      </div>
+      <p style="margin: 24px 0 0;">
+        <a href="/dec2026/apply/" class="dec-btn dec-btn--primary dec-btn--lg">
+          <i class="fa-solid fa-pen-to-square"></i>
+          参加を申し込む
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <!-- HIGHLIGHT PROGRAMS -->
+  <section class="dec-section">
+    <div class="dec-section__inner">
+      <p class="dec-section__label dec-section__label--orange">PROGRAMS</p>
+      <h2 class="dec-section__title">2日間で楽しめる、<br>多彩なプログラム</h2>
+      <p class="dec-section__lead">
+        ぱん食い競走、Baseball5、ダンス、ボッチャ、フェンシングなど、<br>
+        多種多様なスポーツや文化を、無料で体験できます。
+      </p>
+
+      <div class="dec-stats">
+        <div class="dec-stat">
+          <span class="dec-stat__num">15<span class="dec-stat__plus">+</span></span>
+          <span class="dec-stat__label">プログラム</span>
+        </div>
+        <div class="dec-stat">
+          <span class="dec-stat__num">2</span>
+          <span class="dec-stat__label">日間 開催</span>
+        </div>
+        <div class="dec-stat">
+          <span class="dec-stat__num dec-stat__num--text">無料</span>
+          <span class="dec-stat__label">参加費</span>
+        </div>
+      </div>
+
+      <div class="dec-progmini__grid">
+        {programs.map(p => (
+          <a href="/dec2026/programs/" class={`dec-progmini ${p.featured ? 'dec-progmini--featured' : ''} ${p.special ? 'dec-progmini--special' : ''}`}>
+            <span class="dec-progmini__image"></span>
+            <span class="dec-progmini__name">{p.name}</span>
+            <span class="dec-progmini__meta">
+              <span class="dec-progmini__time"><i class="fa-regular fa-clock"></i> {p.time}</span>
+              <span class="dec-progmini__venue"><i class="fa-solid fa-location-dot"></i> {p.venue}</span>
+            </span>
+            <span class="dec-progmini__day">{p.day}</span>
+          </a>
+        ))}
+      </div>
+
+      <p style="text-align: center; margin-top: 32px;">
+        <a href="/dec2026/programs/" class="dec-link">
+          プログラム詳細を見る
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <!-- TIMETABLE -->
+  <section class="dec-section dec-section--tint">
+    <div class="dec-section__inner">
+      <p class="dec-section__label">TIMETABLE</p>
+      <h2 class="dec-section__title">プログラム スケジュール</h2>
+      <p class="dec-section__lead">
+        Day1（12月19日 土）・Day2（12月20日 日）の、時間と会場の一覧です。<br>
+        ※現時点の仮入れ。最終確定は、各団体との調整後に、ご案内いたします。
+      </p>
+
+      <!-- Day1 -->
+      <div class="dec-tt-block">
+        <div class="dec-tt-block__head dec-tt-block__head--navy">
+          <span class="dec-tt-block__num">DAY 1</span>
+          <span class="dec-tt-block__date">12月19日（土）</span>
+        </div>
+        <div class="dec-tt-wrap">
+          <table class="dec-tt">
+            <thead>
+              <tr>
+                <th class="dec-tt__venue">会場</th>
+                <th>10:00</th><th>11:00</th><th>12:00</th><th>13:00</th><th>14:00</th><th>15:00</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th>中央広場 受付</th><td colspan="6" class="dec-tt__bar dec-tt__bar--navy">受付</td></tr>
+              <tr><th>中央広場</th>
+                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い</td>
+                <td colspan="4"></td>
+                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い</td>
+              </tr>
+              <tr><th>第1体育室</th><td colspan="6" class="dec-tt__bar dec-tt__bar--blue">Baseball5</td></tr>
+              <tr><th>第2体育室</th><td colspan="6" class="dec-tt__bar dec-tt__bar--orange">レク協会（ピックルボール等）</td></tr>
+              <tr><th>第3体育室</th><td colspan="6" class="dec-tt__bar dec-tt__bar--yellow">バスケ(サンロッカーズ渋谷)</td></tr>
+              <tr><th>第4体育室</th>
+                <td class="dec-tt__bar dec-tt__bar--pink">Legit①</td><td></td>
+                <td class="dec-tt__bar dec-tt__bar--pink">Legit②</td><td></td>
+                <td class="dec-tt__bar dec-tt__bar--pink">Legit③</td><td></td>
+              </tr>
+              <tr><th>第5体育室</th>
+                <td></td><td class="dec-tt__bar dec-tt__bar--green">柔道</td>
+                <td></td><td class="dec-tt__bar dec-tt__bar--green">柔道</td>
+                <td></td><td class="dec-tt__bar dec-tt__bar--green">柔道</td>
+              </tr>
+              <tr><th>YCAPエリア</th>
+                <td class="dec-tt__bar dec-tt__bar--purple">YCAP①</td><td></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">YCAP②</td><td></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">YCAP③</td><td></td>
+              </tr>
+              <tr><th>体育室エントランス</th><td colspan="6" class="dec-tt__bar dec-tt__bar--blue">ボッチャ・将棋</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Day2 -->
+      <div class="dec-tt-block">
+        <div class="dec-tt-block__head dec-tt-block__head--orange">
+          <span class="dec-tt-block__num">DAY 2</span>
+          <span class="dec-tt-block__date">12月20日（日）</span>
+        </div>
+        <div class="dec-tt-wrap">
+          <table class="dec-tt">
+            <thead>
+              <tr>
+                <th class="dec-tt__venue">会場</th>
+                <th>10:00</th><th>11:00</th><th>12:00</th><th>13:00</th><th>14:00</th><th>15:00</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th>中央広場 受付</th><td colspan="6" class="dec-tt__bar dec-tt__bar--navy">受付</td></tr>
+              <tr><th>中央広場</th>
+                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い</td>
+                <td colspan="2"></td>
+                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い</td>
+                <td colspan="2"></td>
+              </tr>
+              <tr><th>第1体育室</th>
+                <td></td><td class="dec-tt__bar dec-tt__bar--green">かけっこ</td>
+                <td colspan="2"></td>
+                <td class="dec-tt__bar dec-tt__bar--green">かけっこ</td><td></td>
+              </tr>
+              <tr><th>第2体育室</th>
+                <td colspan="2"></td>
+                <td colspan="4" class="dec-tt__bar dec-tt__bar--yellow">鬼ごっこ（仮）</td>
+              </tr>
+              <tr><th>第3体育室</th><td colspan="6" class="dec-tt__prep">調整中</td></tr>
+              <tr><th>第4体育室</th>
+                <td class="dec-tt__bar dec-tt__bar--orange">フェンシング</td><td></td>
+                <td class="dec-tt__bar dec-tt__bar--orange">フェンシング</td><td></td>
+                <td class="dec-tt__bar dec-tt__bar--orange">フェンシング</td><td></td>
+              </tr>
+              <tr><th>第5体育室</th>
+                <td></td><td class="dec-tt__bar dec-tt__bar--yellow">DIP①</td>
+                <td></td><td class="dec-tt__bar dec-tt__bar--yellow">DIP②</td>
+                <td></td><td class="dec-tt__bar dec-tt__bar--yellow">DIP③</td>
+              </tr>
+              <tr><th>YCAPエリア</th>
+                <td class="dec-tt__bar dec-tt__bar--purple">YCAP①</td><td></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">YCAP②</td><td></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">YCAP③</td><td></td>
+              </tr>
+              <tr><th>小ホール</th>
+                <td colspan="3"></td>
+                <td colspan="2" class="dec-tt__bar dec-tt__bar--navy">太鼓体験会</td>
+                <td class="dec-tt__bar dec-tt__bar--navy">太鼓発表会</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p style="text-align: center; font-size: 0.82rem; color: var(--fsn-gray-500); margin: 16px 0 0;">
+        ※スマートフォンの方は、表を横にスクロールしてご覧ください。
+      </p>
+    </div>
+  </section>
+
+  <!-- SPECIAL SEMINAR -->
+  <section class="dec-section">
+    <div class="dec-section__inner">
+      <p class="dec-section__label dec-section__label--orange">SPECIAL SEMINAR</p>
+      <h2 class="dec-section__title">特別セミナー</h2>
+      <p class="dec-section__lead">
+        Day1の夕方に、スポーツ・教育の第一線で活躍する方々を、お招きします。<br>
+        基調講演と、参加型ワークショップを、おこないます。
+      </p>
+
+      <div class="dec-seminar__info">
+        <div class="dec-seminar__info-item">
+          <span class="dec-seminar__info-label">日時</span>
+          <span class="dec-seminar__info-value">12月19日（土）16:30 - 18:00（90分）</span>
+        </div>
+        <div class="dec-seminar__info-item">
+          <span class="dec-seminar__info-label">会場</span>
+          <span class="dec-seminar__info-value">オリセン センター棟 内</span>
+        </div>
+        <div class="dec-seminar__info-item">
+          <span class="dec-seminar__info-label">構成</span>
+          <span class="dec-seminar__info-value">基調講演 ＋ ワークショップ ＋ 交流会</span>
+        </div>
+      </div>
+
+      <h3 class="dec-seminar__sub">登壇予定（敬称略）</h3>
+      <div class="dec-seminar__grid">
+        <article class="dec-seminar-card">
+          <div class="dec-seminar-card__photo" style="background-image: url('/logo-fsn.png');"></div>
+          <div class="dec-seminar-card__body">
+            <p class="dec-seminar-card__name">益子 直美</p>
+            <p class="dec-seminar-card__title">一般社団法人 監督が怒ってはいけない大会  代表理事</p>
+          </div>
+        </article>
+        <article class="dec-seminar-card">
+          <div class="dec-seminar-card__photo" style="background-image: url('/logo-fsn.png');"></div>
+          <div class="dec-seminar-card__body">
+            <p class="dec-seminar-card__name">為末 大</p>
+            <p class="dec-seminar-card__title">いっ"ぱん"社団法人 ぱん食い競走協会  会長 ／ 元 世界陸上 銅メダリスト</p>
+          </div>
+        </article>
+        <article class="dec-seminar-card">
+          <div class="dec-seminar-card__photo" style="background-image: url('/logo-fsn.png');"></div>
+          <div class="dec-seminar-card__body">
+            <p class="dec-seminar-card__name">田丸 尚稔</p>
+            <p class="dec-seminar-card__title">一般財団法人 渋谷区スポーツ協会  専務理事</p>
+          </div>
+        </article>
+        <article class="dec-seminar-card">
+          <div class="dec-seminar-card__photo dec-seminar-card__photo--tba">
+            <i class="fa-solid fa-user-plus"></i>
+          </div>
+          <div class="dec-seminar-card__body">
+            <p class="dec-seminar-card__name">調整中</p>
+            <p class="dec-seminar-card__title">スポーツ界・教育界の第一線の方々を、お招き予定です</p>
+          </div>
+        </article>
+      </div>
+      <p class="dec-seminar__note">※登壇者・内容は、確定次第ご案内いたします。</p>
+    </div>
+  </section>
+
+  <!-- ACCESS -->
+  <section class="dec-section dec-section--tint">
+    <div class="dec-section__inner">
+      <p class="dec-section__label">ACCESS</p>
+      <h2 class="dec-section__title">会場のご案内</h2>
+
+      <div class="dec-access__layout">
+        <div class="dec-access__info">
+          <p class="dec-access__name">国立オリンピック記念<br>青少年総合センター</p>
+          <p class="dec-access__row">
+            <i class="fa-solid fa-location-dot"></i>
+            〒151-0052<br>東京都 渋谷区 代々木神園町 3-1
+          </p>
+          <p class="dec-access__row">
+            <i class="fa-solid fa-train-subway"></i>
+            小田急線「参宮橋駅」 徒歩7分
+          </p>
+          <p class="dec-access__row">
+            <i class="fa-solid fa-train-subway"></i>
+            東京メトロ千代田線「代々木公園駅」 徒歩10分
+          </p>
+          <p class="dec-access__row">
+            <i class="fa-solid fa-bus"></i>
+            京王バス「オリンピックセンター」下車すぐ
+          </p>
+          <p style="margin-top: 24px;">
+            <a href="/dec2026/access/" class="dec-link">
+              アクセスの詳細を見る
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </p>
+        </div>
+        <div class="dec-access__map">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3240.7944!2d139.6855!3d35.6747!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188ca5b6b85771%3A0x9c7c8c0c2c0c0c0c!2z44CSMTUxLTAwNTLmnbHkuqzpg73muYvosLfljLrku6PjgIXmnKjnpZ7lnpLnlLozLTE!5e0!3m2!1sja!2sjp!4v1700000000000!5m2!1sja!2sjp"
+            width="100%" height="400" style="border:0; border-radius: 12px;"
+            allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+            title="国立オリンピック記念青少年総合センター 地図">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARTNERS -->
+  <section class="dec-section dec-section--tint">
+    <div class="dec-section__inner">
+      <p class="dec-section__label">PARTNERS</p>
+      <h2 class="dec-section__title">共催・協力団体</h2>
+      <p class="dec-section__lead">
+        多くの皆さまのご協力で、「fun sport nexus」は、ひらかれます。<br>
+        ご協力、ありがとうございます。
+      </p>
+
+      <dl class="dec-pt">
+        <div class="dec-pt__row">
+          <dt>主催</dt>
+          <dd>公益財団法人 スポーツ安全協会</dd>
+        </div>
+        <div class="dec-pt__row">
+          <dt>共催（予定）</dt>
+          <dd>独立行政法人 国立青少年教育振興機構 ／ 一般財団法人 渋谷区スポーツ協会</dd>
+        </div>
+        <div class="dec-pt__row">
+          <dt>参加団体（予定）</dt>
+          <dd>サンロッカーズ渋谷 ／ 監督が怒ってはいけない大会 ／ 渋谷未来デザイン ／ 日本フェンシング協会 ／ CyberAgent Legit ／ ぱん食い競走協会 ／ 東京演劇集団風 ／ 国立青少年教育振興機構（YCAP） ／ 全日本野球協会 BFJ ／ レクリエーション協会 ／ 三井住友海上 ／ 東京海上日動 ／ 鬼ごっこ協会</dd>
+        </div>
+        <div class="dec-pt__row">
+          <dt>後援</dt>
+          <dd>文化庁 ／ こども家庭庁 ／ 渋谷区</dd>
+        </div>
+      </dl>
+
+      <p style="text-align: center; font-size: 0.78rem; color: var(--fsn-gray-500); margin: 22px 0 0;">
+        ※団体・順不同。最終確定は、各団体との調整後にご案内いたします。
+      </p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="dec-cta">
+    <div class="dec-cta__inner">
+      <h2 class="dec-cta__title">ご参加を、お待ちしております。</h2>
+      <p class="dec-cta__lead">
+        入場は無料、事前のお申し込みで、当日スムーズに、ご参加いただけます。
+      </p>
+      <p>
+        <a href="/dec2026/apply/" class="dec-btn dec-btn--navy dec-btn--lg">
+          <i class="fa-solid fa-pen-to-square"></i>
+          参加を申し込む
+        </a>
+      </p>
+    </div>
+  </section>
+
+</BaseLayout>

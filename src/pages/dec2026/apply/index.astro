@@ -1,0 +1,205 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/dec2026.css';
+---
+<BaseLayout
+  title="参加申込 ｜ fun sport nexus 2026.12"
+  description="2026年12月19日（土）・20日（日）開催 fun sport nexus の参加申込フォーム。"
+>
+
+  <section class="dec-sub-hero">
+    <div class="dec-sub-hero__bg"></div>
+    <div class="dec-sub-hero__inner">
+      <nav class="dec-breadcrumb">
+        <a href="/dec2026/">dec2026 TOP</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <span>参加申込</span>
+      </nav>
+      <p class="dec-sub-hero__label">APPLY</p>
+      <h1 class="dec-sub-hero__title">参加申込</h1>
+      <p class="dec-sub-hero__lead">
+        お申し込みは、3分ほどで完了いたします。<br>
+        事前のお申し込みで、当日スムーズに、ご参加いただけます。
+      </p>
+    </div>
+  </section>
+
+  <!-- ステップ -->
+  <section class="dec-section">
+    <div class="dec-section__inner">
+      <p class="dec-section__label">HOW TO APPLY</p>
+      <h2 class="dec-section__title">お申し込みの流れ</h2>
+
+      <div class="step-grid">
+        <article class="step-card">
+          <span class="step-card__num">STEP 01</span>
+          <div class="step-card__icon"><i class="fa-solid fa-pen-to-square"></i></div>
+          <h3 class="step-card__title">フォーム入力</h3>
+          <p class="step-card__text">
+            下記の申込フォームに、必要事項を、ご入力ください。<br>
+            参加プログラムは、複数選択が、可能です。
+          </p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-card__num">STEP 02</span>
+          <div class="step-card__icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+          <h3 class="step-card__title">受付完了メール</h3>
+          <p class="step-card__text">
+            お申込みの内容を、ご入力のメールアドレス宛てに、自動でお送りいたします。<br>
+            内容を、ご確認ください。
+          </p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-card__num">STEP 03</span>
+          <div class="step-card__icon"><i class="fa-solid fa-calendar-check"></i></div>
+          <h3 class="step-card__title">当日ご来場</h3>
+          <p class="step-card__text">
+            受付完了メールを、当日の受付で、ご提示ください。<br>
+            紙でも、スマートフォン画面でも、構いません。
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- フォーム本体（Phase 3 で本格化） -->
+  <section class="dec-section dec-section--tint">
+    <div class="dec-section__inner">
+      <p class="dec-section__label dec-section__label--orange">ENTRY</p>
+      <h2 class="dec-section__title">申込フォーム</h2>
+      <p class="dec-section__lead">
+        ※フォームは現在、準備中です。10月の募集開始までに、本フォームを公開いたします。
+      </p>
+
+      <div class="form-placeholder">
+        <i class="fa-solid fa-clock" style="font-size: 3rem; color: var(--fsn-orange); margin: 0 0 16px;"></i>
+        <h3 style="font-size: 1.3rem; color: var(--fsn-navy); margin: 0 0 16px;">
+          申込フォームを、ただいま準備中です
+        </h3>
+        <p style="font-size: 0.95rem; color: var(--fsn-gray-700); line-height: 1.9; margin: 0 0 24px;">
+          2026年10月の募集開始までに、こちらに、申込フォームを公開いたします。<br>
+          各プログラム枠を、選択していただける、本格的なフォームを、ご用意します。
+        </p>
+        <p style="font-size: 0.88rem; color: var(--fsn-gray-500);">
+          お問い合わせ：
+          <a href="mailto:funsportnexus@spoan.or.jp" style="color: var(--fsn-navy); text-decoration: underline;">
+            funsportnexus@spoan.or.jp
+          </a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- プライバシー -->
+  <section class="dec-section">
+    <div class="dec-section__inner">
+      <div class="dec-notice__box" style="border-left-color: var(--fsn-navy); background: var(--fsn-cyan);">
+        <p class="dec-notice__label">
+          <i class="fa-solid fa-shield-halved" style="color: var(--fsn-navy);"></i>
+          個人情報のお取り扱いについて
+        </p>
+        <p style="font-size: 0.92rem; line-height: 1.9; color: var(--fsn-gray-700); margin: 6px 0;">
+          お申込み時にいただく個人情報は、本イベントの運営目的にのみ、使用いたします。<br>
+          ご本人の同意なく、第三者に提供することは、ございません。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- お問い合わせ -->
+  <section class="dec-section dec-section--tint">
+    <div class="dec-section__inner">
+      <p class="dec-section__label">CONTACT</p>
+      <h2 class="dec-section__title">お問い合わせ</h2>
+      <div style="max-width: 600px; margin: 32px auto 0; background: var(--fsn-white); border: 1.5px solid var(--fsn-gray-200); border-radius: 14px; padding: 32px 36px; text-align: center;">
+        <p style="font-size: 1.2rem; font-weight: 800; color: var(--fsn-navy); margin: 0 0 18px;">
+          funsportnexus 運営事務局
+        </p>
+        <p style="font-size: 1rem; color: var(--fsn-gray-700); margin: 8px 0;">
+          <i class="fa-solid fa-envelope" style="color: var(--fsn-orange); margin-right: 10px;"></i>
+          <a href="mailto:funsportnexus@spoan.or.jp" style="color: var(--fsn-navy); font-weight: 700; text-decoration: none; border-bottom: 2px solid transparent;">
+            funsportnexus@spoan.or.jp
+          </a>
+        </p>
+        <p style="font-size: 1rem; color: var(--fsn-gray-700); margin: 8px 0;">
+          <i class="fa-solid fa-building" style="color: var(--fsn-orange); margin-right: 10px;"></i>
+          公益財団法人 スポーツ安全協会
+        </p>
+        <p style="font-size: 0.85rem; color: var(--fsn-gray-500); margin: 18px 0 0; line-height: 1.7;">
+          お申込みに関するご質問は、上記のメールアドレスまで、お気軽にお問い合わせください。
+        </p>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  .step-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 48px 0 0;
+  }
+  .step-card {
+    background: var(--fsn-white);
+    border: 1px solid var(--fsn-gray-200);
+    border-radius: var(--fsn-radius-md);
+    padding: 32px 24px;
+    text-align: center;
+    position: relative;
+  }
+  .step-card__num {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 14px;
+    background: var(--fsn-navy);
+    color: var(--fsn-white);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    border-radius: var(--fsn-radius-pill);
+  }
+  .step-card__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+    color: var(--fsn-white);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin: 14px 0 18px;
+  }
+  .step-card__title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--fsn-navy);
+    margin: 0 0 12px;
+  }
+  .step-card__text {
+    font-size: 0.9rem;
+    line-height: 1.9;
+    color: var(--fsn-gray-700);
+    margin: 0;
+  }
+
+  .form-placeholder {
+    background: var(--fsn-white);
+    border: 2px dashed var(--fsn-orange);
+    border-radius: var(--fsn-radius-lg);
+    padding: 56px 32px;
+    margin: 32px auto 0;
+    max-width: 720px;
+    text-align: center;
+  }
+
+  @media (max-width: 900px) {
+    .step-grid { grid-template-columns: 1fr; max-width: 480px; margin-left: auto; margin-right: auto; }
+  }
+</style>

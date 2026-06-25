@@ -1,0 +1,232 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/dec2026.css';
+
+const day1 = [
+  { name: 'スポあんぱん食い競走', time: 'AM ／ PM の2回開催', venue: '中央広場', org: 'ぱん食い競走協会 ／ スポーツ安全協会', text: '名物プログラム。子どもからおとなまで、笑顔があふれます。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-bread-slice', featured: true },
+  { name: 'Baseball5 体験', time: '終日通し', venue: '第1体育室', org: '全日本野球協会 BFJ', text: 'ボールひとつで誰でも楽しめる、新しい野球です。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-baseball-bat-ball' },
+  { name: 'ピックルボール ／ テックボール', time: '終日通し', venue: '第2体育室', org: 'レクリエーション協会', text: 'いま注目の新しい競技。誰でもたのしめます。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-table-tennis-paddle-ball' },
+  { name: 'バスケットボール', time: '終日通し', venue: '第3体育室', org: 'サンロッカーズ渋谷', text: 'プロチームのコーチが直接指導。シュートチャレンジも。', tag: '中学生限定 ／ 全員参加可', tagClass: 'junior', icon: 'fa-basketball' },
+  { name: 'Legit ダンス体験', time: '3コマ開催', venue: '第4体育室', org: 'CyberAgent Legit', text: 'D.LEAGUE 優勝チームのメンバーが、ダンスを教えます。', tag: '5歳以上', tagClass: '5plus', icon: 'fa-music' },
+  { name: '柔道体験', time: '3コマ開催', venue: '第5体育室', org: '三井住友海上', text: '日本の伝統的なスポーツを、安全に体験できます。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-hand-fist' },
+  { name: 'YCAP チームビルディング', time: '3コマ開催', venue: 'YCAPエリア', org: '国立青少年教育振興機構', text: 'ゲーム感覚で、チーム作りの大切さをまなびます。', tag: '小学生以上', tagClass: 'elem', icon: 'fa-people-group' },
+  { name: 'ボッチャ 自由参加', time: '終日通し', venue: '体育室前スペース', org: '日本ボッチャ協会 ほか', text: '年齢・障がいをこえて、いっしょに楽しめるパラスポーツ。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-bullseye' },
+];
+
+const day2 = [
+  { name: 'スポあんぱん食い競走', time: 'AM ／ PM の2回開催', venue: '中央広場', org: 'ぱん食い競走協会 ／ スポーツ安全協会', text: 'Day2 もぱん食い競走を開催。ぜひ、ご参加ください。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-bread-slice', featured: true },
+  { name: 'かけっこ教室', time: '午前・午後 各1コマ', venue: '第1体育室', org: '三井住友海上', text: '「もっと、はやく走りたい」をかなえる教室です。', tag: '小学生以上', tagClass: 'elem', icon: 'fa-person-running' },
+  { name: '鬼ごっこ', time: '12:00 - 15:00 通し', venue: '第2体育室', org: '鬼ごっこ協会', text: 'みんな大好き鬼ごっこ。身体をおもいっきり動かしましょう。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-children' },
+  { name: 'フェンシング体験', time: '3コマ開催', venue: '第4体育室', org: '日本フェンシング協会', text: 'オリンピック競技を、専用の道具で安全に体験できます。', tag: '6歳以上', tagClass: '6plus', icon: 'fa-khanda' },
+  { name: 'DIP（ミュージックドリブル）', time: '3コマ開催', venue: '第5体育室', org: '渋谷区スポーツ協会', text: '音楽に合わせてボールをドリブル。リズム感と運動能力を。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-record-vinyl' },
+  { name: 'YCAP チームビルディング', time: '3コマ開催', venue: 'YCAPエリア', org: '国立青少年教育振興機構', text: 'Day2 も別テーマで開催。Day1 と違う体験ができます。', tag: '小学生以上', tagClass: 'elem', icon: 'fa-people-group' },
+  { name: '閉会セレモニー＋演劇発表', time: '15:30 - 17:00', venue: '小ホール', org: '東京演劇集団風 ほか', text: '2日間の最後はみんなで小ホールに集まって閉会。', tag: 'どなたでも ／ 全員集合', tagClass: 'all', icon: 'fa-masks-theater', special: true },
+];
+---
+<BaseLayout
+  title="プログラム ｜ fun sport nexus 2026.12"
+  description="Day1（12/19）・Day2（12/20）の全プログラム一覧。多種多様なスポーツや文化を、無料で体験できます。"
+>
+
+  <section class="dec-sub-hero">
+    <div class="dec-sub-hero__bg"></div>
+    <div class="dec-sub-hero__inner">
+      <nav class="dec-breadcrumb">
+        <a href="/dec2026/">dec2026 TOP</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <span>プログラム</span>
+      </nav>
+      <p class="dec-sub-hero__label">PROGRAMS</p>
+      <h1 class="dec-sub-hero__title">プログラム一覧</h1>
+      <p class="dec-sub-hero__lead">
+        Day1 と Day2 で、合計15以上のプログラムを、ご用意しております。<br>
+        気になったものから、ぜひ、お試しください。
+      </p>
+    </div>
+  </section>
+
+  <!-- Day1 -->
+  <section class="dec-section">
+    <div class="dec-section__inner">
+      <div class="prog-day__head" style="border-bottom: 2px solid var(--fsn-navy); padding-bottom: 24px; margin-bottom: 32px;">
+        <p style="display:inline-block;padding:6px 18px;background:var(--fsn-navy);color:#fff;border-radius:6px;font-size:0.82rem;font-weight:700;letter-spacing:0.2em;margin:0 0 8px;">DAY 1</p>
+        <h2 style="font-size:1.8rem;font-weight:800;color:var(--fsn-navy);margin:0 0 6px;">スポーツの源流</h2>
+        <p style="font-size:0.95rem;color:var(--fsn-gray-700);margin:0;">
+          <i class="fa-solid fa-calendar-day" style="color:var(--fsn-orange);margin-right:8px;"></i>
+          2026年12月19日（土）
+        </p>
+      </div>
+
+      <div class="prog-grid">
+        {day1.map(p => (
+          <article class={`prog-card ${p.featured ? 'prog-card--featured' : ''}`}>
+            <div class="prog-card__icon"><i class={`fa-solid ${p.icon}`}></i></div>
+            <h3 class="prog-card__title">{p.name}</h3>
+            <p class="prog-card__time"><i class="fa-regular fa-clock"></i> {p.time}</p>
+            <p class="prog-card__venue"><i class="fa-solid fa-location-dot"></i> {p.venue}</p>
+            <p class="prog-card__org">{p.org}</p>
+            <p class="prog-card__text">{p.text}</p>
+            <p class="prog-card__tag-wrap"><span class={`prog-tag prog-tag--${p.tagClass}`}>{p.tag}</span></p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Day2 -->
+  <section class="dec-section dec-section--tint">
+    <div class="dec-section__inner">
+      <div class="prog-day__head" style="border-bottom: 2px solid var(--fsn-orange); padding-bottom: 24px; margin-bottom: 32px;">
+        <p style="display:inline-block;padding:6px 18px;background:var(--fsn-orange);color:#fff;border-radius:6px;font-size:0.82rem;font-weight:700;letter-spacing:0.2em;margin:0 0 8px;">DAY 2</p>
+        <h2 style="font-size:1.8rem;font-weight:800;color:var(--fsn-orange-dark);margin:0 0 6px;">体験会 ＋ 大会要素</h2>
+        <p style="font-size:0.95rem;color:var(--fsn-gray-700);margin:0;">
+          <i class="fa-solid fa-calendar-day" style="color:var(--fsn-orange);margin-right:8px;"></i>
+          2026年12月20日（日）
+        </p>
+      </div>
+
+      <div class="prog-grid">
+        {day2.map(p => (
+          <article class={`prog-card ${p.featured ? 'prog-card--featured' : ''} ${p.special ? 'prog-card--special' : ''}`}>
+            <div class="prog-card__icon"><i class={`fa-solid ${p.icon}`}></i></div>
+            <h3 class="prog-card__title">{p.name}</h3>
+            <p class="prog-card__time"><i class="fa-regular fa-clock"></i> {p.time}</p>
+            <p class="prog-card__venue"><i class="fa-solid fa-location-dot"></i> {p.venue}</p>
+            <p class="prog-card__org">{p.org}</p>
+            <p class="prog-card__text">{p.text}</p>
+            <p class="prog-card__tag-wrap"><span class={`prog-tag prog-tag--${p.tagClass}`}>{p.tag}</span></p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Notice -->
+  <section class="dec-section">
+    <div class="dec-section__inner">
+      <div class="dec-notice__box">
+        <p class="dec-notice__label">
+          <i class="fa-solid fa-circle-info"></i>
+          ご参加にあたっての注意事項
+        </p>
+        <ul class="dec-notice__list">
+          <li>プログラムの時間・内容は、変更になる場合があります。</li>
+          <li>定員が、すでに埋まっている場合がございます。あらかじめ、ご了承ください。</li>
+          <li>運動しやすい服装と、室内用シューズを、ご持参ください。</li>
+          <li>ぱん食い競走で使用するパンには、小麦・卵・乳成分・大豆等のアレルギー物質が含まれます。</li>
+          <li>イベント中に撮影した写真や映像は、当協会の広報等で、使用させていただく場合があります。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="dec-cta">
+    <div class="dec-cta__inner">
+      <h2 class="dec-cta__title">気になるプログラムは、見つかりましたか？</h2>
+      <p class="dec-cta__lead">
+        事前のお申し込みで、当日スムーズに、ご参加いただけます。
+      </p>
+      <p>
+        <a href="/dec2026/apply/" class="dec-btn dec-btn--navy dec-btn--lg">
+          <i class="fa-solid fa-pen-to-square"></i>
+          参加を申し込む
+        </a>
+      </p>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  .prog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  .prog-card {
+    background: var(--fsn-white);
+    border: 1px solid var(--fsn-gray-200);
+    border-radius: var(--fsn-radius-md);
+    padding: 28px 24px;
+    transition: transform .25s, box-shadow .25s;
+  }
+  .prog-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--fsn-shadow-md);
+  }
+  .prog-card--featured {
+    background: linear-gradient(135deg, var(--fsn-orange-light), #fff);
+    border-color: var(--fsn-orange);
+  }
+  .prog-card--special {
+    background: linear-gradient(135deg, var(--fsn-cyan), #fff);
+    border-color: var(--fsn-navy);
+  }
+  .prog-card__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--fsn-navy), var(--fsn-blue-accent));
+    color: var(--fsn-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin: 0 0 16px;
+  }
+  .prog-card--featured .prog-card__icon {
+    background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+  }
+  .prog-card__title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--fsn-navy);
+    margin: 0 0 14px;
+    line-height: 1.4;
+  }
+  .prog-card__time,
+  .prog-card__venue {
+    font-size: 0.86rem;
+    color: var(--fsn-gray-700);
+    margin: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .prog-card__time i,
+  .prog-card__venue i {
+    color: var(--fsn-orange-dark);
+    width: 16px;
+    font-size: 0.82rem;
+  }
+  .prog-card__org {
+    font-size: 0.78rem;
+    color: var(--fsn-gray-500);
+    margin: 10px 0 12px;
+    padding: 6px 10px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-sm);
+  }
+  .prog-card__text {
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: var(--fsn-gray-700);
+    margin: 0 0 14px;
+  }
+  .prog-card__tag-wrap { margin: 12px 0 0; }
+  .prog-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.74rem;
+    font-weight: 700;
+    background: var(--fsn-gray-100);
+    color: var(--fsn-gray-700);
+  }
+  .prog-tag--all      { background: var(--fsn-green); color: var(--fsn-green-text); }
+  .prog-tag--elem     { background: var(--fsn-cyan); color: var(--fsn-navy); }
+  .prog-tag--junior   { background: var(--fsn-orange-light); color: var(--fsn-orange-dark); }
+  .prog-tag--5plus,
+  .prog-tag--6plus    { background: var(--fsn-cyan); color: var(--fsn-navy); }
+</style>
