@@ -65,7 +65,7 @@ const articleDescription = article
       ) : (
         <>
           <div class="cols-article__meta">
-            {article.intervieweeName && (
+            {(article.intervieweeName ?? article.interveweeName) && (
               <span class="cols-article__series">
                 <i class="fa-solid fa-microphone-lines"></i>
                 Spo-An Talk
@@ -98,7 +98,7 @@ const articleDescription = article
       </figure>
     )}
 
-    {!fetchError && article && article.intervieweeName && (
+    {!fetchError && article && (article.intervieweeName ?? article.interveweeName) && (
       <section class="cols-interviewee">
         <p class="cols-interviewee__label">
           <i class="fa-regular fa-comment-dots"></i>
@@ -111,16 +111,16 @@ const articleDescription = article
                 src={`${article.intervieweePhoto.url}?w=400&h=400&fit=crop`}
                 srcset={`${article.intervieweePhoto.url}?w=200&h=200&fit=crop 200w, ${article.intervieweePhoto.url}?w=400&h=400&fit=crop 400w, ${article.intervieweePhoto.url}?w=600&h=600&fit=crop 600w`}
                 sizes="(max-width: 600px) 120px, 180px"
-                alt={article.intervieweeName}
+                alt={(article.intervieweeName ?? article.interveweeName)}
                 loading="lazy"
                 decoding="async"
               />
             </div>
           )}
           <div class="cols-interviewee__info">
-            <h2 class="cols-interviewee__name">{article.intervieweeName}</h2>
-            {article.intervieweeTitle && (
-              <p class="cols-interviewee__title">{article.intervieweeTitle}</p>
+            <h2 class="cols-interviewee__name">{(article.intervieweeName ?? article.interveweeName)}</h2>
+            {(article.intervieweeTitle ?? article.interveweeTitle) && (
+              <p class="cols-interviewee__title">{(article.intervieweeTitle ?? article.interveweeTitle)}</p>
             )}
             {article.intervieweeProfile && (
               <p class="cols-interviewee__profile">{article.intervieweeProfile}</p>

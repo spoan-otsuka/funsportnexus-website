@@ -68,7 +68,7 @@ const formatDate = (iso) => {
                 </span>
                 <span class="cols-card__body">
                   <span class="cols-card__meta">
-                    {item.intervieweeName && (
+                    {(item.intervieweeName ?? item.interveweeName) && (
                       <span class="cols-card__series">
                         <i class="fa-solid fa-microphone-lines"></i>
                         Spo-An Talk
