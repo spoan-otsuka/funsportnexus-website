@@ -19,12 +19,14 @@ const navItems = [
 
 <header class="fsn-header">
   <div class="fsn-header__inner">
-    <a href="/" class="fsn-header__logo">
-      <span class="fsn-header__logo-text">
-        <span class="fsn-header__logo-fun">fun</span>
-        <span class="fsn-header__logo-sport">sport</span>
-        <span class="fsn-header__logo-nexus">nexus</span>
-      </span>
+    <a href="/" class="fsn-header__logo" aria-label="fun sport nexus トップへ">
+      <img
+        src="/logo-fsn.png"
+        alt="fun sport nexus"
+        class="fsn-header__logo-img"
+        width="180"
+        height="36"
+      />
     </a>
 
     <input type="checkbox" id="fsn-nav-toggle" class="fsn-header__nav-toggle" />
@@ -73,20 +75,19 @@ const navItems = [
     justify-content: space-between;
   }
   .fsn-header__logo {
+    display: inline-block;
     text-decoration: none;
     line-height: 1;
   }
-  .fsn-header__logo-text {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 6px;
-    font-size: 1.4rem;
-    font-weight: 800;
-    letter-spacing: 0.01em;
+  .fsn-header__logo-img {
+    display: block;
+    height: 40px;
+    width: auto;
+    max-height: 100%;
   }
-  .fsn-header__logo-fun { color: var(--fsn-orange); }
-  .fsn-header__logo-sport { color: var(--fsn-navy); }
-  .fsn-header__logo-nexus { color: var(--fsn-navy); }
+  @media (max-width: 600px) {
+    .fsn-header__logo-img { height: 32px; }
+  }
 
   .fsn-header__nav-toggle { display: none; }
   .fsn-header__hamburger {

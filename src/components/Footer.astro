@@ -12,11 +12,15 @@ const year = 2026;
   <div class="fsn-footer__inner">
     <div class="fsn-footer__top">
       <div class="fsn-footer__brand">
-        <div class="fsn-footer__brand-logo">
-          <span class="fsn-footer__logo-fun">fun</span>
-          <span class="fsn-footer__logo-sport">sport</span>
-          <span class="fsn-footer__logo-nexus">nexus</span>
-        </div>
+        <a href="/" class="fsn-footer__brand-logo" aria-label="fun sport nexus トップへ">
+          <img
+            src="/logo-fsn-gray.png"
+            alt="fun sport nexus"
+            class="fsn-footer__brand-logo-img"
+            width="220"
+            height="44"
+          />
+        </a>
         <p class="fsn-footer__tagline">明るく、楽しく、人と人をつなぐ。</p>
       </div>
 
@@ -79,16 +83,22 @@ const year = 2026;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
   .fsn-footer__brand-logo {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 6px;
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin-bottom: 12px;
+    display: inline-block;
+    margin-bottom: 16px;
+    text-decoration: none;
   }
-  .fsn-footer__logo-fun { color: var(--fsn-orange); }
-  .fsn-footer__logo-sport,
-  .fsn-footer__logo-nexus { color: var(--fsn-white); }
+  .fsn-footer__brand-logo-img {
+    display: block;
+    height: 44px;
+    width: auto;
+    /* グレーロゴをダーク背景でも見えるよう、明るさを上げる */
+    filter: brightness(0) invert(1);
+    opacity: 0.95;
+    transition: opacity 0.2s;
+  }
+  .fsn-footer__brand-logo:hover .fsn-footer__brand-logo-img {
+    opacity: 1;
+  }
 
   .fsn-footer__tagline {
     font-size: 0.92rem;
