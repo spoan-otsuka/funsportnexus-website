@@ -88,8 +88,8 @@ const articleDescription = article
       <figure class="cols-article__eyecatch">
         <img
           src={`${eyecatchUrl}?w=1200`}
-          srcset={`${eyecatchUrl}?w=600 600w, ${eyecatchUrl}?w=900 900w, ${eyecatchUrl}?w=1200 1200w, ${eyecatchUrl}?w=1600 1600w`}
-          sizes="(max-width: 760px) 100vw, 760px"
+          srcset={`${eyecatchUrl}?w=600 600w, ${eyecatchUrl}?w=900 900w, ${eyecatchUrl}?w=1200 1200w, ${eyecatchUrl}?w=1600 1600w, ${eyecatchUrl}?w=2000 2000w`}
+          sizes="(max-width: 760px) 100vw, (max-width: 1040px) 100vw, 1000px"
           alt={article.title}
           loading="eager"
           fetchpriority="high"
@@ -152,6 +152,12 @@ const articleDescription = article
     margin: 0 auto;
     padding: 64px 24px 96px;
     min-height: 60vh;
+  }
+  @media (min-width: 960px) {
+    .cols-article {
+      max-width: 1040px;
+    }
+    .cols-article__body { font-size: 1.05rem; line-height: 2.1; }
   }
   .cols-article__breadcrumb {
     display: flex;
