@@ -563,17 +563,12 @@ if (!success && env.DB) {
         attachSlotControls(card);
       }
 
-      // 値復元
-      list.querySelectorAll('input').forEach(inp => {
-        if (inp.type === 'checkbox') {
-          if (cache[inp.name + ':' + inp.value]) inp.checked = true;
-        } else {
-          if (cache[inp.name]) inp.value = cache[inp.name];
-        }
+      // 既存の参加者情報（name/furi/birth）のみ復元
+      // スロット選択は新規追加方式のため、復元しない（リビルド時はクリア）
+      list.querySelectorAll('input[type=text], input[type=date]').forEach(inp => {
+        if (cache[inp.name]) inp.value = cache[inp.name];
       });
-      // 復元後にlimits再評価
-      list.querySelectorAll('.ap-attendee').forEach(c => attachSlotControls(c));
-      // 生年月日 grade再描画
+      // 生年月日 → 学年再描画
       list.querySelectorAll('.ap-attendee').forEach(c => {
         const birth = c.querySelector('[data-birth]');
         const grade = c.querySelector('[data-grade]');
