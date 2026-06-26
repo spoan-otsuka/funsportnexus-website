@@ -1,0 +1,198 @@
+/**
+ * Apply / Lookup / QR 共通スタイル
+ * .ap-* prefix で名前空間
+ */
+.ap-section {
+  padding: 64px 24px 96px;
+  background: var(--fsn-gray-50);
+}
+.ap-section__inner {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.ap-form { display: flex; flex-direction: column; gap: 40px; }
+
+.ap-error-banner {
+  padding: 14px 18px;
+  background: #FEE2E2;
+  color: #991B1B;
+  border-radius: var(--fsn-radius-sm);
+  font-size: 0.92rem;
+  font-weight: 600;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+}
+.ap-error-banner i { font-size: 1.1em; margin-top: 2px; }
+
+.ap-step {
+  background: var(--fsn-white);
+  padding: 36px 40px;
+  border-radius: var(--fsn-radius-md);
+  box-shadow: var(--fsn-shadow-sm);
+}
+@media (max-width: 600px) { .ap-step { padding: 24px 20px; } }
+
+.ap-step__title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--fsn-navy-deep);
+  margin: 0 0 12px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--fsn-orange);
+}
+.ap-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--fsn-orange);
+  color: var(--fsn-white);
+  border-radius: 50%;
+  font-family: var(--fsn-font-num);
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+.ap-step__desc {
+  font-size: 0.9rem;
+  color: var(--fsn-gray-700);
+  line-height: 1.7;
+  margin: 0 0 24px;
+}
+
+.ap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 760px) { .ap-grid { grid-template-columns: 1fr; } }
+.ap-field { display: flex; flex-direction: column; gap: 6px; }
+.ap-field--full { grid-column: 1 / -1; }
+.ap-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--fsn-navy-deep);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ap-required {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--fsn-orange);
+  color: var(--fsn-white);
+  border-radius: var(--fsn-radius-sm);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+.ap-input {
+  padding: 10px 14px;
+  border: 1.5px solid var(--fsn-gray-200);
+  border-radius: var(--fsn-radius-sm);
+  font-size: 0.92rem;
+  font-family: inherit;
+  background: var(--fsn-white);
+  color: var(--fsn-gray-900);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.ap-input:focus {
+  outline: 0;
+  border-color: var(--fsn-orange);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
+}
+textarea.ap-input { resize: vertical; line-height: 1.7; }
+
+.ap-consents { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+.ap-consent {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  background: var(--fsn-gray-50);
+  border-radius: var(--fsn-radius-sm);
+  cursor: pointer;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--fsn-gray-900);
+}
+.ap-consent input[type="checkbox"] {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--fsn-orange);
+  flex-shrink: 0;
+}
+.ap-consent a { color: var(--fsn-orange); text-decoration: underline; }
+
+.ap-submit { text-align: center; margin-top: 8px; }
+.ap-submit__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 64px;
+  background: var(--fsn-orange);
+  color: var(--fsn-white);
+  border: 0;
+  border-radius: var(--fsn-radius-pill);
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.35);
+  transition: background 0.2s, transform 0.2s;
+  text-decoration: none;
+}
+.ap-submit__btn:hover {
+  background: var(--fsn-orange-dark);
+  transform: translateY(-2px);
+  color: var(--fsn-white);
+}
+
+/* 参加者カード（lookup/qr で使用） */
+.ap-attendee {
+  padding: 24px;
+  background: var(--fsn-gray-50);
+  border-radius: var(--fsn-radius-md);
+}
+.ap-attendee__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+.ap-attendee__num {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--fsn-navy-deep);
+  color: var(--fsn-white);
+  border-radius: var(--fsn-radius-pill);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+.ap-attendee__tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--fsn-orange);
+  color: var(--fsn-white);
+  border-radius: var(--fsn-radius-pill);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.ap-progrow__day {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--fsn-radius-pill);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--fsn-white);
+  margin-right: 8px;
+}
+.ap-progrow__day:empty { display: none; }
+.ap-progrow__day--navy { background: var(--fsn-navy-deep); }
+.ap-progrow__day--orange { background: var(--fsn-orange); }
