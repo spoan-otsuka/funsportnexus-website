@@ -64,6 +64,7 @@ export async function POST({ request, locals }) {
     consent_photo: form.get('consent_photo') ? 1 : 0,
     consent_allergy: form.get('consent_allergy') ? 1 : 0,
     consent_rules: form.get('consent_rules') ? 1 : 0,
+    participation_days: form.getAll('participation_days').map(v => v.toString()),
   };
 
   if (!data.name || !data.furigana || !data.email || !data.tel) {
@@ -77,6 +78,9 @@ export async function POST({ request, locals }) {
   }
   if (data.attendees < 1 || data.attendees > 10) {
     return redirect('/202612orisen/apply/?error=invalid_attendees');
+  }
+  if (data.participation_days.length === 0) {
+    return redirect('/202612orisen/apply/?error=no_days');
   }
 
   // 参加者情報・スロット選択を収集

@@ -17,6 +17,7 @@ const errorMessages = {
   invalid_email: 'メールアドレスの形式が正しくありません。',
   no_consent: '同意事項にチェックが入っていません。',
   invalid_attendees: '参加人数は1〜10名で入力してください。',
+  no_days: 'ご参加希望日（Day1 / Day2）を、ひとつ以上、お選びください。',
   missing_attendee_info: '参加者全員のお名前・ふりがな・生年月日を、ご入力ください。',
   no_slots: 'いずれかの参加者で、1つ以上のプログラムを、選択してください。',
   invalid_slot: '選択されたプログラムが、無効です。',
@@ -167,6 +168,31 @@ if (!success && env.DB) {
                 <label for="remarks" class="ap-label">ご要望・特記事項（任意）</label>
                 <textarea id="remarks" name="remarks" rows="3"
                   placeholder="アレルギー、車椅子のご利用、その他ご質問など" class="ap-input"></textarea>
+              </div>
+
+              <div class="ap-field ap-field--full">
+                <label class="ap-label">
+                  ご参加希望日 <span class="ap-required">必須</span>
+                </label>
+                <div class="ap-day-choice">
+                  <label class="ap-day-pill ap-day-pill--navy">
+                    <input type="checkbox" name="participation_days" value="Day1" data-pday checked />
+                    <span class="ap-day-pill__inner">
+                      <span class="ap-day-pill__num">DAY 1</span>
+                      <span class="ap-day-pill__date">12月19日（土）</span>
+                      <span class="ap-day-pill__theme">スポーツの源流</span>
+                    </span>
+                  </label>
+                  <label class="ap-day-pill ap-day-pill--orange">
+                    <input type="checkbox" name="participation_days" value="Day2" data-pday checked />
+                    <span class="ap-day-pill__inner">
+                      <span class="ap-day-pill__num">DAY 2</span>
+                      <span class="ap-day-pill__date">12月20日（日）</span>
+                      <span class="ap-day-pill__theme">体験＋大会</span>
+                    </span>
+                  </label>
+                </div>
+                <p class="ap-field-note">両日参加・片日参加、いずれも可能です。チェックを外すと、その日のプログラムは、選択肢から外れます。</p>
               </div>
             </div>
           </div>
@@ -414,18 +440,23 @@ if (!success && env.DB) {
         });
         return c;
       }
+      function getSelectedDays() {
+        return Array.from(document.querySelectorAll('[data-pday]:checked')).map(x => x.value);
+      }
       function updateRowOptions() {
-        // 全行の種目セレクトの選択肢を再生成（既に他行で選択されたkeyは除外）
         const selectedKeys = getSelectedProgramKeys();
         const dayCounts = countByDay();
+        const allowedDays = getSelectedDays();
         container.querySelectorAll('[data-progrow]').forEach(row => {
           const progSel = row.querySelector('[data-prog-select]');
           const ownKey = row.dataset.selectedKey || '';
           const current = progSel.value;
-          // 選択肢を作り直す
           let html = '<option value="">種目を選択してください</option>';
           const groupedByDay = { Day1: [], Day2: [] };
-          for (const g of programGroups) groupedByDay[g.day]?.push(g);
+          for (const g of programGroups) {
+            if (!allowedDays.includes(g.day)) continue;
+            groupedByDay[g.day]?.push(g);
+          }
           for (const day of ['Day1','Day2']) {
             const gs = groupedByDay[day] || [];
             if (!gs.length) continue;
@@ -437,11 +468,35 @@ if (!success && env.DB) {
               const allFull = g.slots.every(s => s.remaining <= 0);
               const disabled = usedByOther || dayOver || allFull;
               const note = allFull ? '（満席）' : (usedByOther ? '（選択済み）' : (dayOver ? '（同日3種目超過）' : ''));
-              html += '<option value="' + g.key + '"' + (disabled ? ' disabled' : '') + (current === g.key ? ' selected' : '') + '>' + escHtml(g.program_name) + note + '</option>';
+              const dayPrefix = day === 'Day1' ? '[DAY 1] ' : '[DAY 2] ';
+              html += '<option value="' + g.key + '"' + (disabled ? ' disabled' : '') + (current === g.key ? ' selected' : '') + '>' + dayPrefix + escHtml(g.program_name) + note + '</option>';
             }
             html += '</optgroup>';
           }
           progSel.innerHTML = html;
+          // 希望日から外れた場合、選択をクリア
+          if (row.dataset.selectedKey) {
+            const g = programGroups.find(x => x.key === row.dataset.selectedKey);
+            if (g && !allowedDays.includes(g.day)) {
+              row.dataset.selectedKey = '';
+              progSel.value = '';
+              const timeSel = row.querySelector('[data-time-select]');
+              const venueEl = row.querySelector('[data-venue]');
+              if (timeSel) {
+                timeSel.innerHTML = '<option value="">先に種目を選択してください</option>';
+                timeSel.disabled = true;
+              }
+              if (venueEl) venueEl.innerHTML = '';
+            }
+          }
+        });
+        // セミナーの表示制御（Day1選択時のみ有効）
+        document.querySelectorAll('.ap-prog-section--seminar').forEach(sec => {
+          const seminarVisible = allowedDays.includes('Day1');
+          sec.style.display = seminarVisible ? '' : 'none';
+          if (!seminarVisible) {
+            sec.querySelectorAll('input[data-seminar]').forEach(cb => { cb.checked = false; });
+          }
         });
       }
       function updateTimeSelect(row) {
@@ -458,7 +513,8 @@ if (!success && env.DB) {
         let html = '<option value="">時間を選択してください</option>';
         for (const s of g.slots) {
           const full = s.remaining <= 0;
-          html += '<option value="' + s.id + '"' + (full ? ' disabled' : '') + (String(s.id) === currentSlotId ? ' selected' : '') + '>' + s.time_start + ' 〜 ' + s.time_end + (full ? '（満席）' : '（残' + s.remaining + '）') + '</option>';
+          const dayPrefix = s.day === 'Day1' ? '[DAY 1] ' : '[DAY 2] ';
+          html += '<option value="' + s.id + '"' + (full ? ' disabled' : '') + (String(s.id) === currentSlotId ? ' selected' : '') + '>' + dayPrefix + s.time_start + ' 〜 ' + s.time_end + (full ? '（満席）' : '（残' + s.remaining + '）') + '</option>';
         }
         timeSel.innerHTML = html;
         timeSel.disabled = false;
@@ -497,7 +553,8 @@ if (!success && env.DB) {
           if (progSel.value) {
             const g = programGroups.find(x => x.key === progSel.value);
             if (g && venueEl) {
-              venueEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + escHtml(g.venue);
+              const dayLabel = g.day === 'Day1' ? '<span class="ap-day-tag ap-day-tag--navy">DAY 1 (12/19)</span>' : '<span class="ap-day-tag ap-day-tag--orange">DAY 2 (12/20)</span>';
+              venueEl.innerHTML = dayLabel + ' <i class="fa-solid fa-location-dot"></i> ' + escHtml(g.venue);
             }
           } else {
             if (venueEl) venueEl.innerHTML = '';
@@ -616,6 +673,20 @@ if (!success && env.DB) {
     attendeesSelect.addEventListener('change', () => { rebuild(); applySelfJoin(); });
     rebuild();
     applySelfJoin();
+
+    // 参加希望日チェックボックス変更で全カード再構築（スロット選択はリセット）
+    document.querySelectorAll('[data-pday]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const anyChecked = Array.from(document.querySelectorAll('[data-pday]')).some(x => x.checked);
+        if (!anyChecked) {
+          alert('Day1 または Day2 のいずれか、もしくは両方を、お選びください。');
+          cb.checked = true;
+          return;
+        }
+        rebuild();
+        applySelfJoin();
+      });
+    });
   });
 </script>
 
@@ -1206,6 +1277,69 @@ if (!success && env.DB) {
     color: var(--fsn-gray-700);
     cursor: not-allowed;
   }
+
+  /* 参加希望日ピル */
+  .ap-day-choice {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 600px) { .ap-day-choice { grid-template-columns: 1fr; } }
+  .ap-day-pill {
+    position: relative;
+    cursor: pointer;
+  }
+  .ap-day-pill input[type="checkbox"] {
+    position: absolute; opacity: 0; width: 0; height: 0;
+  }
+  .ap-day-pill__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 18px;
+    background: var(--fsn-white);
+    border: 2px solid var(--fsn-gray-200);
+    border-radius: var(--fsn-radius-sm);
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .ap-day-pill--navy:has(input:checked) .ap-day-pill__inner {
+    background: linear-gradient(135deg, var(--fsn-navy), var(--fsn-navy-deep));
+    border-color: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+  }
+  .ap-day-pill--orange:has(input:checked) .ap-day-pill__inner {
+    background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+    border-color: var(--fsn-orange-dark);
+    color: var(--fsn-white);
+  }
+  .ap-day-pill__num {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    opacity: 0.85;
+  }
+  .ap-day-pill__date {
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+  .ap-day-pill__theme {
+    font-size: 0.78rem;
+    opacity: 0.85;
+  }
+
+  /* 日タグ（プログラム枠内） */
+  .ap-day-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: var(--fsn-radius-sm);
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--fsn-white);
+    margin-right: 6px;
+    letter-spacing: 0.04em;
+  }
+  .ap-day-tag--navy { background: var(--fsn-navy-deep); }
+  .ap-day-tag--orange { background: var(--fsn-orange); }
 
   /* Consents */
   .ap-consents { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
