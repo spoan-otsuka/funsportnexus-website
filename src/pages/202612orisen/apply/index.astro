@@ -8,6 +8,7 @@ const env = Astro.locals?.runtime?.env ?? {};
 const success = Astro.url.searchParams.get('success') === '1';
 const errorParam = Astro.url.searchParams.get('error') || '';
 const fullSlot = Astro.url.searchParams.get('slot') || '';
+const conflictInfo = Astro.url.searchParams.get('conflict') || '';
 const entryId = Astro.url.searchParams.get('id') || '';
 
 const errorMessages = {
@@ -22,7 +23,7 @@ const errorMessages = {
   full: `満席のプログラムが含まれます${fullSlot ? `：${fullSlot}` : ''}。`,
   duplicate_program: '同じ参加者で、同じ種目を、複数選ばれています。マルチスポーツ体験のため、種目はおひとり1回までです。',
   daily_limit: 'おひとり1日に申し込めるのは、最大3つまでです。',
-  time_conflict: '時間帯が重複するプログラムが、選択されています。',
+  time_conflict: `時間帯が重複するプログラムが、選択されています。${conflictInfo ? `（${conflictInfo}）` : ''}`,
   db_unavailable: 'システム一時障害です。しばらく後にお試しください。',
   server_error: 'サーバーエラーが発生しました。お手数ですが、再度お試しください。',
 };

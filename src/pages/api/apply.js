@@ -154,10 +154,11 @@ export async function POST({ request, locals }) {
         byDay[s.day].push(s);
       }
       for (const day of Object.keys(byDay)) {
-        const list = byDay[day].sort((a, b) => a.time_start.localeCompare(b.time_start));
+        const list = byDay[day].sort((x, y) => x.time_start.localeCompare(y.time_start));
         for (let i = 0; i < list.length - 1; i++) {
           if (list[i].time_end > list[i+1].time_start) {
-            return redirect('/202612orisen/apply/?error=time_conflict');
+            const conflictInfo = `${list[i].program_name}(${list[i].time_start}-${list[i].time_end}) と ${list[i+1].program_name}(${list[i+1].time_start}-${list[i+1].time_end})`;
+            return redirect(`/202612orisen/apply/?error=time_conflict&conflict=${encodeURIComponent(conflictInfo)}`);
           }
         }
       }
