@@ -31,7 +31,7 @@
 | 旧 | 新 |
 |---|---|
 | funsportnexus.org（WordPress on Xserver）| funsportnexus.org（Astro on Cloudflare Pages）|
-| /dec2026/（WPの page-content）| /dec2026/（Astro pages）|
+| /202612orisen/（WPの page-content）| /202612orisen/（Astro pages）|
 | apply.funsportnexus.org（Cloudflare Worker）| funsportnexus.org/apply/（統合）|
 | WP投稿（お知らせ・コラム）| microCMS |
 | WPメディア | Cloudflare R2 |
@@ -87,7 +87,7 @@ npm run deploy       # Cloudflare Pages デプロイ
 - [ ] Step 1-B: 申込システム統合（apply.funsportnexus.org の機能を統合）
 - [ ] Step 1-C: GitHub 連携 + Cloudflare Pages デプロイ
 - [ ] Step 2-A: 共通レイアウト / デザイントークン
-- [ ] Step 2-B: dec2026 特設サイト（4ページ）Astro 化
+- [ ] Step 2-B: 202612orisen 特設サイト（4ページ）Astro 化
 - [ ] Step 3: microCMS 連携 / 既存WP記事移行
 - [ ] Step 4: DNS 切替 / 旧WP廃止
 

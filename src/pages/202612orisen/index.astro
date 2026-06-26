@@ -1,9 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import '../../styles/dec2026.css';
+import '../../styles/202612orisen.css';
 
 const programs = [
-  { code: 'panshoku',     name: 'スポあんぱん食い競走', time: '10:00 ／ 15:00 開始', venue: '中央広場',       day: 'Day1 ／ Day2', icon: 'fa-bread-slice',          featured: true },
+  { code: 'panshoku',     name: 'スポあんぱん食い競走', time: '10:00 ／ 15:00 開始（事前申込不要）', venue: '中央広場',       day: 'Day1 ／ Day2', icon: 'fa-bread-slice',          featured: true },
   { code: 'baseball5',    name: 'Baseball5 体験',       time: '10:00 - 15:00 通し',   venue: '第1体育室',     day: 'Day1',          icon: 'fa-baseball-bat-ball' },
   { code: 'basket',       name: 'バスケットボール',     time: '10:00 - 15:00 通し',   venue: '第3体育室',     day: 'Day1',          icon: 'fa-basketball' },
   { code: 'legit',        name: 'Legit ダンス',         time: '10:00 ／ 12:00 ／ 14:00', venue: '第4体育室',  day: 'Day1',          icon: 'fa-music' },
@@ -40,7 +40,7 @@ const programs = [
         <span class="dec-hero__meta-item dec-hero__meta-item--free"><i class="fa-solid fa-ticket"></i> 参加費無料</span>
       </div>
       <p style="margin: 24px 0 0;">
-        <a href="/dec2026/apply/" class="dec-btn dec-btn--primary dec-btn--lg">
+        <a href="/202612orisen/apply/" class="dec-btn dec-btn--primary dec-btn--lg">
           <i class="fa-solid fa-pen-to-square"></i>
           参加を申し込む
         </a>
@@ -75,7 +75,7 @@ const programs = [
 
       <div class="dec-progmini__grid">
         {programs.map(p => (
-          <a href="/dec2026/programs/" class={`dec-progmini ${p.featured ? 'dec-progmini--featured' : ''} ${p.special ? 'dec-progmini--special' : ''}`}>
+          <a href="/202612orisen/programs/" class={`dec-progmini ${p.featured ? 'dec-progmini--featured' : ''} ${p.special ? 'dec-progmini--special' : ''}`}>
             <span class="dec-progmini__image"></span>
             <span class="dec-progmini__name">{p.name}</span>
             <span class="dec-progmini__meta">
@@ -88,7 +88,7 @@ const programs = [
       </div>
 
       <p style="text-align: center; margin-top: 32px;">
-        <a href="/dec2026/programs/" class="dec-link">
+        <a href="/202612orisen/programs/" class="dec-link">
           プログラム詳細を見る
           <i class="fa-solid fa-arrow-right"></i>
         </a>
@@ -336,7 +336,7 @@ const programs = [
             京王バス「オリンピックセンター」下車すぐ
           </p>
           <p style="margin-top: 24px;">
-            <a href="/dec2026/access/" class="dec-link">
+            <a href="/202612orisen/access/" class="dec-link">
               アクセスの詳細を見る
               <i class="fa-solid fa-arrow-right"></i>
             </a>
@@ -397,7 +397,7 @@ const programs = [
         入場は無料、事前のお申し込みで、当日スムーズに、ご参加いただけます。
       </p>
       <p>
-        <a href="/dec2026/apply/" class="dec-btn dec-btn--navy dec-btn--lg">
+        <a href="/202612orisen/apply/" class="dec-btn dec-btn--navy dec-btn--lg">
           <i class="fa-solid fa-pen-to-square"></i>
           参加を申し込む
         </a>

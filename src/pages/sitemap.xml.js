@@ -16,10 +16,10 @@ const staticPages = [
   { path: '/events/',           priority: '0.9', changefreq: 'weekly' },
   { path: '/business/',         priority: '0.8', changefreq: 'monthly' },
   { path: '/contact/',          priority: '0.7', changefreq: 'yearly' },
-  { path: '/dec2026/',          priority: '0.95', changefreq: 'weekly' },
-  { path: '/dec2026/programs/', priority: '0.9', changefreq: 'weekly' },
-  { path: '/dec2026/access/',   priority: '0.8', changefreq: 'monthly' },
-  { path: '/dec2026/apply/',    priority: '0.9', changefreq: 'weekly' },
+  { path: '/202612orisen/',          priority: '0.95', changefreq: 'weekly' },
+  { path: '/202612orisen/programs/', priority: '0.9', changefreq: 'weekly' },
+  { path: '/202612orisen/access/',   priority: '0.8', changefreq: 'monthly' },
+  { path: '/202612orisen/apply/',    priority: '0.9', changefreq: 'weekly' },
 ];
 
 const toISO = (date) => {
