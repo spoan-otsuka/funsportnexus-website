@@ -846,8 +846,9 @@ if (!success && env.DB) {
     gap: 12px;
     align-items: end;
   }
-  @media (max-width: 600px) {
-    .ap-progrow__body { grid-template-columns: 1fr; }
+  @media (max-width: 760px) {
+    .ap-progrow__body { grid-template-columns: 1fr; gap: 14px; }
+    .ap-progrow__field select { font-size: 0.95rem; padding: 12px 14px; }
   }
   .ap-progrow__field { display: flex; flex-direction: column; gap: 6px; }
   .ap-progrow__label {
@@ -1173,7 +1174,7 @@ if (!success && env.DB) {
     grid-template-columns: 1fr 1fr;
     gap: 16px;
   }
-  @media (max-width: 600px) { .ap-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .ap-grid { grid-template-columns: 1fr; } }
   .ap-field { display: flex; flex-direction: column; gap: 6px; }
   .ap-field--full { grid-column: 1 / -1; }
   .ap-label {
@@ -1261,7 +1262,7 @@ if (!success && env.DB) {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
-  @media (max-width: 600px) { .ap-day-choice { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .ap-day-choice { grid-template-columns: 1fr; } }
   .ap-day-pill {
     position: relative;
     cursor: pointer;
