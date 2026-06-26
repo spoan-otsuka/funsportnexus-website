@@ -1,0 +1,177 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export const prerender = false;
+
+const env = Astro.locals?.runtime?.env ?? {};
+const { id } = Astro.params;
+const slotId = parseInt(id, 10);
+
+let slot = null;
+let participants = [];
+let errorMsg = null;
+
+if (env.DB && slotId) {
+  try {
+    slot = await env.DB.prepare(`
+      SELECT id, code, program_code, program_name, day, date, time_start, time_end, venue, capacity
+      FROM slots
+      WHERE id = ?
+    `).bind(slotId).first();
+
+    if (slot) {
+      const r = await env.DB.prepare(`
+        SELECT
+          a.position, a.name, a.furigana, a.grade, a.birth_date, a.is_representative,
+          a.panshoku_join, a.panshoku_allergy_ok,
+          e.id AS entry_id, e.tel, e.email, e.applicant_name
+        FROM entry_slots es
+        INNER JOIN entries e ON es.entry_id = e.id AND e.status = 'confirmed'
+        LEFT JOIN entry_attendees a ON es.attendee_id = a.id
+        WHERE es.slot_id = ?
+        ORDER BY a.name
+      `).bind(slotId).all();
+      participants = r?.results ?? [];
+    }
+  } catch (e) {
+    errorMsg = e.message;
+  }
+}
+
+const dayInfo = (day) => day === 'Day1' ? '12月19日（土）' : '12月20日（日）';
+---
+<BaseLayout
+  title={slot ? `${slot.program_name} 参加者リスト` : 'プログラム参加者リスト'}
+  description="運営用：プログラム参加者リスト"
+  noindex={true}
+  hideHeader={true}
+  hideFooter={true}
+>
+
+  <div class="admin-wrap">
+    <header class="admin-head no-print">
+      <h1>{slot ? slot.program_name : '参加者リスト'}</h1>
+      <div class="admin-actions">
+        <button onclick="window.print()" class="admin-btn">
+          <i class="fa-solid fa-print"></i> このプログラムを印刷
+        </button>
+        <a href="/admin/programs/" class="admin-btn admin-btn--ghost">一覧に戻る</a>
+      </div>
+    </header>
+
+    {errorMsg && <p style="color:#b00;">エラー：{errorMsg}</p>}
+    {!slot && !errorMsg && <p>プログラムが見つかりませんでした。</p>}
+
+    {slot && (
+      <section class="prog-sheet prog-sheet--single">
+        <div class="prog-sheet__head">
+          <div>
+            <span class={`day-tag day-tag--${slot.day === 'Day1' ? 'navy' : 'orange'}`}>{slot.day === 'Day1' ? 'DAY 1' : 'DAY 2'}</span>
+            <h2 class="prog-sheet__title">{slot.program_name}</h2>
+            <p class="prog-sheet__sub">
+              {dayInfo(slot.day)} {slot.time_start}〜{slot.time_end} ／ {slot.venue} ／ 定員 {slot.capacity}名
+            </p>
+          </div>
+          <div class="prog-sheet__count">
+            参加者 {participants.length} / {slot.capacity} 名
+          </div>
+        </div>
+
+        {participants.length === 0 ? (
+          <p class="prog-sheet__empty">参加者なし</p>
+        ) : (
+          <table class="prog-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>お名前（ふりがな）</th>
+                <th>学年</th>
+                <th>代表者</th>
+                <th>申込者</th>
+                <th>連絡先</th>
+                <th>ぱん食い</th>
+                <th>受付</th>
+              </tr>
+            </thead>
+            <tbody>
+              {participants.map((p, i) => (
+                <tr>
+                  <td>{i + 1}</td>
+                  <td>
+                    <strong>{p.name}</strong><br>
+                    <small>{p.furigana}</small>
+                  </td>
+                  <td>{p.grade || '-'}</td>
+                  <td>{p.is_representative ? '◯' : ''}</td>
+                  <td><small>{p.applicant_name}</small></td>
+                  <td><small>{p.tel}<br>{p.email}</small></td>
+                  <td>{p.panshoku_join ? '◯' : ''}</td>
+                  <td class="prog-table__check"></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        <p class="prog-sheet__footer no-print">
+          ※「受付」欄は当日チェック用の空欄です。<br>
+          ※印刷時、ヘッダー・フッターをブラウザ設定で消すと、より見やすくなります。
+        </p>
+      </section>
+    )}
+  </div>
+
+</BaseLayout>
+
+<style is:global>
+  .admin-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px;
+    color: var(--fsn-gray-900);
+  }
+  .admin-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--fsn-orange);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .admin-head h1 { font-size: 1.3rem; margin: 0; color: var(--fsn-navy-deep); }
+  .admin-actions { display: flex; gap: 8px; }
+  .admin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border: 0;
+    border-radius: var(--fsn-radius-sm);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .admin-btn--ghost { background: var(--fsn-white); color: var(--fsn-navy-deep); border: 1px solid var(--fsn-gray-300); }
+
+  .prog-sheet--single { margin: 0; page-break-after: auto; }
+  .prog-sheet__footer {
+    margin-top: 24px;
+    font-size: 0.8rem;
+    color: var(--fsn-gray-500);
+    line-height: 1.7;
+  }
+
+  @media print {
+    .no-print { display: none !important; }
+    body { background: #fff; }
+    .admin-wrap { padding: 0; max-width: none; }
+    .prog-table th { background: var(--fsn-gray-50) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .day-tag--navy { background: #0F1A4D !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .day-tag--orange { background: #F97316 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>

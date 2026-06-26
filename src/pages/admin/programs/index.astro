@@ -82,8 +82,13 @@ const dayInfo = (day) => day === 'Day1' ? '12月19日（土）' : '12月20日（
                 {dayInfo(s.day)} {s.time_start}〜{s.time_end} ／ {s.venue} ／ 定員 {s.capacity}名
               </p>
             </div>
-            <div class="prog-sheet__count">
-              参加者 {list.length} / {s.capacity} 名
+            <div class="prog-sheet__actions no-print">
+              <div class="prog-sheet__count">
+                参加者 {list.length} / {s.capacity} 名
+              </div>
+              <a href={`/admin/programs/${s.id}/`} class="admin-btn">
+                <i class="fa-solid fa-print"></i> このプログラムを印刷
+              </a>
             </div>
           </div>
 
@@ -174,6 +179,12 @@ const dayInfo = (day) => day === 'Day1' ? '12月19日（土）' : '12月20日（
   }
   .prog-sheet__title { font-size: 1.4rem; margin: 6px 0 4px; color: var(--fsn-navy-deep); }
   .prog-sheet__sub { font-size: 0.9rem; color: var(--fsn-gray-700); margin: 0; }
+  .prog-sheet__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+  }
   .prog-sheet__count {
     font-size: 1rem;
     font-weight: 800;
