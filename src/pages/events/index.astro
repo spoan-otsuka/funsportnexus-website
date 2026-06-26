@@ -1,30 +1,48 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-const upcomingEvents = [
-  {
-    title: 'fun sport nexus 2026.12',
-    catch: '明るく、楽しく、人と人をつなぐ。',
-    date: '2026年12月19日（土）- 20日（日）',
-    venue: '国立オリンピック記念青少年総合センター',
-    description: '15以上の多彩なスポーツや文化プログラムを、無料でお楽しみいただける2日間。益子直美さん、為末大さん、田丸尚稔さんら、第一線の方々も登壇いたします。',
-    badge: '募集中',
-    badgeColor: 'orange',
-    image: '/logo-fsn.png',
-    link: '/dec2026/',
-    cta: '詳細・申込を見る',
-  },
-];
+const featured = {
+  title: 'fun sport nexus 2026.12',
+  catch: '明るく、楽しく、人と人をつなぐ。',
+  date: '2026年12月19日（土）- 20日（日）',
+  venue: '国立オリンピック記念青少年総合センター',
+  fee: '参加費無料',
+  description: '15以上の多彩なスポーツや文化プログラムを、無料でお楽しみいただける2日間。益子直美さん、為末大さん、田丸尚稔さんら、第一線の方々も登壇いたします。',
+  highlights: [
+    { num: '15+', label: 'プログラム' },
+    { num: '2',   label: '日間 開催' },
+    { num: '無料', label: '参加費' },
+  ],
+  programs: [
+    { icon: 'fa-bread-slice',          name: 'スポあんぱん食い競走' },
+    { icon: 'fa-baseball-bat-ball',    name: 'Baseball5' },
+    { icon: 'fa-basketball',           name: 'バスケットボール' },
+    { icon: 'fa-music',                name: 'Legit ダンス' },
+    { icon: 'fa-hand-fist',            name: '柔道体験' },
+    { icon: 'fa-khanda',               name: 'フェンシング' },
+    { icon: 'fa-bullseye',             name: 'ボッチャ' },
+    { icon: 'fa-microphone-lines',     name: '特別セミナー' },
+  ],
+  speakers: ['益子 直美', '為末 大', '田丸 尚稔'],
+  badge: '募集中',
+  link: '/dec2026/',
+};
 
 const archivedEvents = [
   {
     title: 'fun sport nexus 2026.3',
     date: '2026年3月24日（土）- 25日（日）',
     venue: '国立オリンピック記念青少年総合センター',
-    description: '約1,000名にご来場いただいた、第1回開催。スポあんぱん食い競走、Baseball5、ダンス、ボッチャ、フェンシングなど、多彩なプログラムを実施。',
-    badge: '開催終了',
+    participants: 'のべ約1,000名',
+    description: '第1回開催。スポあんぱん食い競走、Baseball5、ダンス、ボッチャ、フェンシング、監督が怒ってはいけない大会、バリアフリー演劇など、多彩なプログラムを実施。',
     link: '/results/',
   },
+];
+
+const steps = [
+  { num: '1', title: 'プログラム確認', text: '特設サイトで、開催日・会場・プログラム一覧を、ご確認ください。' },
+  { num: '2', title: '申込フォーム', text: '参加したいプログラムを、選択して、お申込みください。先着順です。' },
+  { num: '3', title: '当日参加', text: '当日は、会場の受付で、お名前を、お伝えください。' },
 ];
 ---
 <BaseLayout
@@ -46,47 +64,115 @@ const archivedEvents = [
   <section class="ev-section">
     <div class="ev-section__inner">
 
-      {upcomingEvents.length > 0 && (
-        <>
-          <div class="ev-block-head">
-            <p class="ev-block-head__label">UPCOMING</p>
-            <h2 class="ev-block-head__title">募集中のイベント</h2>
-          </div>
+      <div class="ev-block-head">
+        <p class="ev-block-head__label">UPCOMING</p>
+        <h2 class="ev-block-head__title">募集中のイベント</h2>
+      </div>
 
-          <div class="ev-list">
-            {upcomingEvents.map(ev => (
-              <a href={ev.link} class="ev-card">
-                <div class="ev-card__image">
-                  <img src={ev.image} alt={ev.title} loading="lazy" />
-                  <span class={`ev-card__badge ev-card__badge--${ev.badgeColor || 'navy'}`}>
-                    {ev.badge}
-                  </span>
-                </div>
-                <div class="ev-card__body">
-                  <h3 class="ev-card__title">{ev.title}</h3>
-                  <p class="ev-card__catch">{ev.catch}</p>
-                  <ul class="ev-card__facts">
-                    <li>
-                      <i class="fa-regular fa-calendar"></i>
-                      <span>{ev.date}</span>
-                    </li>
-                    <li>
-                      <i class="fa-solid fa-location-dot"></i>
-                      <span>{ev.venue}</span>
-                    </li>
-                  </ul>
-                  <p class="ev-card__description">{ev.description}</p>
-                  <span class="ev-card__cta">
-                    {ev.cta}
-                    <i class="fa-solid fa-arrow-right"></i>
-                  </span>
-                </div>
-              </a>
+      <!-- Featured event -->
+      <article class="ev-featured">
+        <div class="ev-featured__visual">
+          <img src="/hero-bg.jpg" alt={featured.title} loading="lazy" />
+          <div class="ev-featured__visual-overlay"></div>
+          <span class="ev-featured__badge">{featured.badge}</span>
+          <div class="ev-featured__visual-text">
+            <p class="ev-featured__visual-date">2026.12.19 - 20</p>
+            <h3 class="ev-featured__visual-title">{featured.title}</h3>
+            <p class="ev-featured__visual-catch">{featured.catch}</p>
+          </div>
+        </div>
+
+        <div class="ev-featured__body">
+          <ul class="ev-featured__facts">
+            <li>
+              <i class="fa-regular fa-calendar"></i>
+              <div>
+                <span class="ev-fact-label">開催日</span>
+                <span class="ev-fact-value">{featured.date}</span>
+              </div>
+            </li>
+            <li>
+              <i class="fa-solid fa-location-dot"></i>
+              <div>
+                <span class="ev-fact-label">会場</span>
+                <span class="ev-fact-value">{featured.venue}</span>
+              </div>
+            </li>
+            <li>
+              <i class="fa-solid fa-ticket"></i>
+              <div>
+                <span class="ev-fact-label">参加費</span>
+                <span class="ev-fact-value ev-fact-value--free">{featured.fee}</span>
+              </div>
+            </li>
+          </ul>
+
+          <p class="ev-featured__description">{featured.description}</p>
+
+          <div class="ev-featured__highlights">
+            {featured.highlights.map(h => (
+              <div class="ev-highlight">
+                <span class="ev-highlight__num">{h.num}</span>
+                <span class="ev-highlight__label">{h.label}</span>
+              </div>
             ))}
           </div>
-        </>
-      )}
 
+          <div class="ev-featured__programs">
+            <p class="ev-featured__sub-label">
+              <i class="fa-regular fa-circle-check"></i>
+              主なプログラム
+            </p>
+            <div class="ev-programs-grid">
+              {featured.programs.map(p => (
+                <span class="ev-program-chip">
+                  <i class={`fa-solid ${p.icon}`}></i>
+                  {p.name}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div class="ev-featured__speakers">
+            <p class="ev-featured__sub-label">
+              <i class="fa-solid fa-microphone-lines"></i>
+              特別セミナー登壇予定
+            </p>
+            <ul class="ev-speakers-list">
+              {featured.speakers.map(s => (
+                <li>{s}</li>
+              ))}
+              <li class="ev-speakers-list__etc">他</li>
+            </ul>
+          </div>
+
+          <div class="ev-featured__cta">
+            <a href={featured.link} class="ev-featured__btn ev-featured__btn--primary">
+              <i class="fa-solid fa-arrow-right"></i>
+              特設サイトで詳細・申込
+            </a>
+            <a href="/dec2026/programs/" class="ev-featured__btn ev-featured__btn--ghost">
+              プログラム詳細
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- How to apply -->
+      <div class="ev-steps-wrap">
+        <h3 class="ev-steps-title">参加申込までの流れ</h3>
+        <div class="ev-steps">
+          {steps.map(s => (
+            <div class="ev-step">
+              <span class="ev-step__num">{s.num}</span>
+              <h4 class="ev-step__title">{s.title}</h4>
+              <p class="ev-step__text">{s.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Archive -->
       {archivedEvents.length > 0 && (
         <>
           <div class="ev-block-head" style="margin-top: 80px;">
@@ -98,7 +184,7 @@ const archivedEvents = [
             {archivedEvents.map(ev => (
               <a href={ev.link} class="ev-archive-item">
                 <div class="ev-archive-item__body">
-                  <span class="ev-archive-item__badge">{ev.badge}</span>
+                  <span class="ev-archive-item__badge">開催終了</span>
                   <h3 class="ev-archive-item__title">{ev.title}</h3>
                   <ul class="ev-archive-item__facts">
                     <li>
@@ -109,11 +195,15 @@ const archivedEvents = [
                       <i class="fa-solid fa-location-dot"></i>
                       {ev.venue}
                     </li>
+                    <li>
+                      <i class="fa-solid fa-users"></i>
+                      参加者 {ev.participants}
+                    </li>
                   </ul>
                   <p class="ev-archive-item__description">{ev.description}</p>
                 </div>
                 <span class="ev-archive-item__more">
-                  実績を見る
+                  レポートを見る
                   <i class="fa-solid fa-arrow-right"></i>
                 </span>
               </a>
@@ -188,116 +278,314 @@ const archivedEvents = [
     display: inline-block;
   }
 
-  .ev-list {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-  }
-  .ev-card {
-    display: grid;
-    grid-template-columns: 340px 1fr;
+  /* Featured */
+  .ev-featured {
     background: var(--fsn-white);
-    border-radius: var(--fsn-radius-md);
+    border-radius: var(--fsn-radius-lg);
     overflow: hidden;
-    box-shadow: var(--fsn-shadow-sm);
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .ev-card:hover {
-    transform: translateY(-4px);
     box-shadow: var(--fsn-shadow-md);
-    color: inherit;
-  }
-  @media (max-width: 760px) {
-    .ev-card { grid-template-columns: 1fr; }
+    margin-bottom: 64px;
   }
 
-  .ev-card__image {
+  .ev-featured__visual {
     position: relative;
-    aspect-ratio: 4 / 3;
-    background: linear-gradient(135deg, var(--fsn-navy-deep), var(--fsn-navy));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
+    aspect-ratio: 16 / 7;
+    overflow: hidden;
   }
-  .ev-card__image img {
-    max-width: 80%;
-    max-height: 60%;
-    object-fit: contain;
-    filter: brightness(0) invert(1);
+  .ev-featured__visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
-  .ev-card__badge {
+  .ev-featured__visual-overlay {
     position: absolute;
-    left: 16px;
-    top: 16px;
-    padding: 6px 14px;
-    border-radius: var(--fsn-radius-pill);
-    font-size: 0.78rem;
-    font-weight: 800;
-    box-shadow: var(--fsn-shadow-sm);
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 26, 77, 0.3) 0%, rgba(10, 26, 77, 0.85) 100%);
   }
-  .ev-card__badge--orange { background: var(--fsn-orange); color: var(--fsn-white); }
-  .ev-card__badge--navy { background: var(--fsn-navy-deep); color: var(--fsn-white); }
-
-  .ev-card__body {
-    padding: 28px 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .ev-card__title {
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: var(--fsn-navy-deep);
-    margin: 0;
-    line-height: 1.4;
-  }
-  .ev-card__catch {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--fsn-orange-dark);
-    margin: 0;
-  }
-  .ev-card__facts {
-    list-style: none;
-    margin: 8px 0;
-    padding: 12px 16px;
-    background: var(--fsn-gray-50);
-    border-radius: var(--fsn-radius-sm);
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .ev-card__facts li {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.88rem;
-    color: var(--fsn-gray-700);
-  }
-  .ev-card__facts li i { color: var(--fsn-orange); width: 16px; text-align: center; }
-  .ev-card__description {
-    font-size: 0.9rem;
-    line-height: 1.8;
-    color: var(--fsn-gray-700);
-    margin: 0;
-  }
-  .ev-card__cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
+  .ev-featured__badge {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    padding: 8px 20px;
     background: var(--fsn-orange);
     color: var(--fsn-white);
     border-radius: var(--fsn-radius-pill);
-    font-size: 0.92rem;
-    font-weight: 700;
-    align-self: flex-start;
-    margin-top: 8px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+  .ev-featured__visual-text {
+    position: absolute;
+    bottom: 36px;
+    left: 36px;
+    right: 36px;
+    color: var(--fsn-white);
+  }
+  @media (max-width: 600px) {
+    .ev-featured__visual { aspect-ratio: 4 / 3; }
+    .ev-featured__visual-text { bottom: 20px; left: 20px; right: 20px; }
+    .ev-featured__badge { top: 16px; right: 16px; }
+  }
+  .ev-featured__visual-date {
+    font-family: var(--fsn-font-num);
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
+    font-weight: 800;
+    color: var(--fsn-orange);
+    margin: 0 0 8px;
+    letter-spacing: 0.02em;
+  }
+  .ev-featured__visual-title {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 800;
+    color: var(--fsn-white);
+    margin: 0 0 8px;
+    line-height: 1.3;
+  }
+  .ev-featured__visual-catch {
+    font-size: clamp(0.95rem, 2vw, 1.1rem);
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0;
   }
 
+  .ev-featured__body {
+    padding: 40px;
+  }
+  @media (max-width: 600px) {
+    .ev-featured__body { padding: 28px 22px; }
+  }
+
+  .ev-featured__facts {
+    list-style: none;
+    margin: 0 0 24px;
+    padding: 24px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-md);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 760px) {
+    .ev-featured__facts { grid-template-columns: 1fr; gap: 14px; }
+  }
+  .ev-featured__facts li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .ev-featured__facts li > i {
+    color: var(--fsn-orange);
+    font-size: 1.1rem;
+    margin-top: 4px;
+  }
+  .ev-fact-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--fsn-gray-500);
+    letter-spacing: 0.08em;
+    margin-bottom: 2px;
+  }
+  .ev-fact-value {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--fsn-navy-deep);
+    line-height: 1.5;
+  }
+  .ev-fact-value--free { color: var(--fsn-orange-dark); }
+
+  .ev-featured__description {
+    font-size: 0.95rem;
+    line-height: 1.95;
+    color: var(--fsn-gray-700);
+    margin: 0 0 28px;
+  }
+
+  .ev-featured__highlights {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 0 0 32px;
+  }
+  .ev-highlight {
+    text-align: center;
+    padding: 20px 12px;
+    background: var(--fsn-cyan);
+    border-radius: var(--fsn-radius-md);
+  }
+  .ev-highlight__num {
+    display: block;
+    font-family: var(--fsn-font-num);
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--fsn-navy-deep);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .ev-highlight__label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--fsn-gray-700);
+  }
+
+  .ev-featured__sub-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--fsn-orange);
+  }
+  .ev-featured__sub-label i { color: var(--fsn-orange); }
+
+  .ev-featured__programs { margin-bottom: 28px; }
+  .ev-programs-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ev-program-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: var(--fsn-gray-50);
+    border: 1px solid var(--fsn-gray-200);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--fsn-gray-900);
+  }
+  .ev-program-chip i {
+    color: var(--fsn-orange);
+    font-size: 0.85em;
+  }
+
+  .ev-featured__speakers { margin-bottom: 32px; }
+  .ev-speakers-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ev-speakers-list li {
+    padding: 6px 14px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .ev-speakers-list__etc {
+    background: var(--fsn-gray-200) !important;
+    color: var(--fsn-gray-700) !important;
+  }
+
+  .ev-featured__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .ev-featured__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .ev-featured__btn--primary {
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
+  }
+  .ev-featured__btn--primary:hover {
+    background: var(--fsn-orange-dark);
+    color: var(--fsn-white);
+    transform: translateY(-2px);
+  }
+  .ev-featured__btn--ghost {
+    background: var(--fsn-white);
+    color: var(--fsn-navy-deep);
+    border: 1.5px solid var(--fsn-gray-200);
+  }
+  .ev-featured__btn--ghost:hover {
+    background: var(--fsn-gray-50);
+    color: var(--fsn-navy-deep);
+    border-color: var(--fsn-orange);
+    transform: translateY(-2px);
+  }
+
+  /* Steps */
+  .ev-steps-wrap {
+    background: var(--fsn-white);
+    padding: 40px;
+    border-radius: var(--fsn-radius-md);
+    box-shadow: var(--fsn-shadow-sm);
+    margin: 0 0 0;
+  }
+  @media (max-width: 600px) { .ev-steps-wrap { padding: 28px 22px; } }
+  .ev-steps-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 28px;
+    text-align: center;
+  }
+  .ev-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 700px) {
+    .ev-steps { grid-template-columns: 1fr; }
+  }
+  .ev-step {
+    text-align: center;
+    padding: 20px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-md);
+    position: relative;
+  }
+  .ev-step__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border-radius: 50%;
+    font-family: var(--fsn-font-num);
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .ev-step__title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 8px;
+  }
+  .ev-step__text {
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--fsn-gray-700);
+    margin: 0;
+  }
+
+  /* Archive */
   .ev-archive {
     display: flex;
     flex-direction: column;
@@ -333,10 +621,10 @@ const archivedEvents = [
     margin-bottom: 8px;
   }
   .ev-archive-item__title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: var(--fsn-navy-deep);
-    margin: 0 0 8px;
+    margin: 0 0 10px;
   }
   .ev-archive-item__facts {
     list-style: none;
