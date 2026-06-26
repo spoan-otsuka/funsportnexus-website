@@ -1,32 +1,34 @@
 /**
  * POST /api/apply
- * 申込受付 (Phase 3 本実装・参加者情報対応)
+ * 申込受付 (Phase 3 本実装・参加者ごとプログラム選択対応)
  *
- * フロー:
- *   1. application/x-www-form-urlencoded で受信
- *   2. Honeypot (website) チェック
- *   3. バリデーション
- *   4. D1: 残席・同種目重複・時間重複・1日3件制限チェック
- *   5. entries + entry_slots + entry_attendees INSERT
+ * 受信形式 (application/x-www-form-urlencoded):
+ *   name, furigana, email, tel, attendees, remarks
+ *   consent_rules, consent_photo, consent_allergy
+ *   attendee_${i}_name, attendee_${i}_furigana, attendee_${i}_birth
+ *   attendee_${i}_slot_ids[]  ← 参加者iが選んだスロットID
+ *
+ * 処理:
+ *   1. Honeypot / バリデーション
+ *   2. D1 で各スロットの残席を取得
+ *   3. per attendee：
+ *      - 同種目重複NG
+ *      - 1日3つまで
+ *      - 時間重複NG
+ *   4. 全スロットの reserved 増分を集計して、capacity 超過なら拒否
+ *   5. entries INSERT → entry_attendees INSERT → entry_slots INSERT(attendee_id付き)
  *   6. Resend / Slack 通知
- *   7. リダイレクト
  */
 
 export const prerender = false;
 
 const redirect = (url) => new Response(null, { status: 303, headers: { Location: url } });
 
-/**
- * 日本式 学年判定
- * baseDate: イベント開催年度の4/1（2026年度=2026-04-01）
- * 4/1基準で 6歳ちょうど = 小1（ただし 4/1生まれは前年度の早生まれ扱い）
- */
-function calcGrade(birthIso, baseDate = new Date('2026-04-01')) {
-  if (!birthIso) return '';
-  const b = new Date(birthIso);
+function calcGrade(iso, baseDate = new Date('2026-04-01')) {
+  if (!iso) return '';
+  const b = new Date(iso);
   if (isNaN(b.getTime())) return '';
-  // 4/2基準 年齢計算
-  const base = new Date(baseDate.getFullYear(), 3, 2); // 4/2
+  const base = new Date(baseDate.getFullYear(), 3, 2);
   let age = base.getFullYear() - b.getFullYear();
   const m = base.getMonth() - b.getMonth();
   if (m < 0 || (m === 0 && base.getDate() <= b.getDate())) age--;
@@ -64,27 +66,6 @@ export async function POST({ request, locals }) {
     consent_rules: form.get('consent_rules') ? 1 : 0,
   };
 
-  const slotIds = form.getAll('slot_ids').map(v => parseInt(v.toString(), 10)).filter(v => !isNaN(v) && v > 0);
-
-  // 参加者情報を収集
-  const attendeesInfo = [];
-  for (let i = 1; i <= data.attendees; i++) {
-    const name = (form.get(`attendee_${i}_name`) || '').toString().trim();
-    const furi = (form.get(`attendee_${i}_furigana`) || '').toString().trim();
-    const birth = (form.get(`attendee_${i}_birth`) || '').toString().trim();
-    if (name) {
-      attendeesInfo.push({
-        position: i,
-        name,
-        furigana: furi,
-        birth_date: birth || null,
-        grade: birth ? calcGrade(birth) : '',
-        is_representative: i === 1 ? 1 : 0,
-      });
-    }
-  }
-
-  // バリデーション
   if (!data.name || !data.furigana || !data.email || !data.tel) {
     return redirect('/202612orisen/apply/?error=missing_fields');
   }
@@ -97,20 +78,43 @@ export async function POST({ request, locals }) {
   if (data.attendees < 1 || data.attendees > 10) {
     return redirect('/202612orisen/apply/?error=invalid_attendees');
   }
-  if (attendeesInfo.length !== data.attendees) {
-    return redirect('/202612orisen/apply/?error=missing_attendee_info');
+
+  // 参加者情報・スロット選択を収集
+  const attendees = [];
+  for (let i = 1; i <= data.attendees; i++) {
+    const name = (form.get(`attendee_${i}_name`) || '').toString().trim();
+    const furi = (form.get(`attendee_${i}_furigana`) || '').toString().trim();
+    const birth = (form.get(`attendee_${i}_birth`) || '').toString().trim();
+    if (!name || !furi) {
+      return redirect('/202612orisen/apply/?error=missing_attendee_info');
+    }
+    const slotIds = form.getAll(`attendee_${i}_slot_ids`)
+      .map(v => parseInt(v.toString(), 10)).filter(v => !isNaN(v) && v > 0);
+    attendees.push({
+      position: i,
+      name,
+      furigana: furi,
+      birth_date: birth || null,
+      grade: birth ? calcGrade(birth) : '',
+      is_representative: i === 1 ? 1 : 0,
+      slot_ids: slotIds,
+    });
   }
-  if (slotIds.length === 0) {
+
+  const totalSlots = attendees.reduce((s, a) => s + a.slot_ids.length, 0);
+  if (totalSlots === 0) {
     return redirect('/202612orisen/apply/?error=no_slots');
   }
 
+  // 全ユニークスロットIDを取得
+  const allSlotIds = Array.from(new Set(attendees.flatMap(a => a.slot_ids)));
   const ipAddress = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || '';
   const userAgent = request.headers.get('user-agent') || '';
   const qrToken = crypto.randomUUID();
 
   try {
-    // 選択スロットの現状取得
-    const placeholders = slotIds.map(() => '?').join(',');
+    // スロット情報取得（残席含む）
+    const placeholders = allSlotIds.map(() => '?').join(',');
     const slotResult = await env.DB.prepare(`
       SELECT
         s.id, s.code, s.program_code, s.program_name, s.day, s.time_start, s.time_end, s.venue,
@@ -121,48 +125,55 @@ export async function POST({ request, locals }) {
       LEFT JOIN entries e ON es.entry_id = e.id AND e.status = 'confirmed'
       WHERE s.id IN (${placeholders}) AND s.is_active = 1
       GROUP BY s.id
-    `).bind(...slotIds).all();
+    `).bind(...allSlotIds).all();
 
-    const slots = slotResult?.results ?? [];
-    if (slots.length !== slotIds.length) {
+    const slotMap = new Map();
+    for (const s of (slotResult?.results ?? [])) slotMap.set(s.id, s);
+    if (slotMap.size !== allSlotIds.length) {
       return redirect('/202612orisen/apply/?error=invalid_slot');
     }
 
-    // 残席チェック
-    for (const s of slots) {
-      const remaining = s.capacity - s.reserved;
-      if (remaining < data.attendees) {
-        return redirect(`/202612orisen/apply/?error=full&slot=${encodeURIComponent(s.program_name)}`);
+    // per attendee バリデーション
+    for (const a of attendees) {
+      const slots = a.slot_ids.map(id => slotMap.get(id));
+      const codes = slots.map(s => s.program_code);
+      if (codes.length !== new Set(codes).size) {
+        return redirect('/202612orisen/apply/?error=duplicate_program');
       }
-    }
-
-    // 同種目重複チェック
-    const programCodes = slots.map(s => s.program_code);
-    if (programCodes.length !== new Set(programCodes).size) {
-      return redirect('/202612orisen/apply/?error=duplicate_program');
-    }
-
-    // 1日あたり3件まで
-    const dayCounts = {};
-    for (const s of slots) { dayCounts[s.day] = (dayCounts[s.day] || 0) + 1; }
-    for (const day of Object.keys(dayCounts)) {
-      if (dayCounts[day] > 3) {
-        return redirect('/202612orisen/apply/?error=daily_limit');
-      }
-    }
-
-    // 時間重複チェック（同日内）
-    const byDay = {};
-    for (const s of slots) {
-      if (!byDay[s.day]) byDay[s.day] = [];
-      byDay[s.day].push(s);
-    }
-    for (const day of Object.keys(byDay)) {
-      const list = byDay[day].sort((a, b) => a.time_start.localeCompare(b.time_start));
-      for (let i = 0; i < list.length - 1; i++) {
-        if (list[i].time_end > list[i+1].time_start) {
-          return redirect('/202612orisen/apply/?error=time_conflict');
+      const dayCounts = {};
+      for (const s of slots) { dayCounts[s.day] = (dayCounts[s.day] || 0) + 1; }
+      for (const day of Object.keys(dayCounts)) {
+        if (dayCounts[day] > 3) {
+          return redirect('/202612orisen/apply/?error=daily_limit');
         }
+      }
+      // 時間重複
+      const byDay = {};
+      for (const s of slots) {
+        if (!byDay[s.day]) byDay[s.day] = [];
+        byDay[s.day].push(s);
+      }
+      for (const day of Object.keys(byDay)) {
+        const list = byDay[day].sort((a, b) => a.time_start.localeCompare(b.time_start));
+        for (let i = 0; i < list.length - 1; i++) {
+          if (list[i].time_end > list[i+1].time_start) {
+            return redirect('/202612orisen/apply/?error=time_conflict');
+          }
+        }
+      }
+    }
+
+    // 残席チェック（スロットごとの増分）
+    const slotIncrement = {};
+    for (const a of attendees) {
+      for (const sid of a.slot_ids) {
+        slotIncrement[sid] = (slotIncrement[sid] || 0) + 1;
+      }
+    }
+    for (const sid of Object.keys(slotIncrement)) {
+      const s = slotMap.get(parseInt(sid, 10));
+      if (s.capacity - s.reserved < slotIncrement[sid]) {
+        return redirect(`/202612orisen/apply/?error=full&slot=${encodeURIComponent(s.program_name)}`);
       }
     }
 
@@ -180,29 +191,36 @@ export async function POST({ request, locals }) {
       data.consent_photo, data.consent_allergy, data.consent_rules,
       ipAddress, userAgent
     ).run();
-
     const entryId = insertEntry?.meta?.last_row_id;
     if (!entryId) throw new Error('Failed to get entry id');
 
-    // entry_slots + entry_attendees BATCH INSERT
-    const batchStmts = [
-      ...slotIds.map(slotId =>
-        env.DB.prepare('INSERT INTO entry_slots (entry_id, slot_id, attendees) VALUES (?, ?, ?)')
-          .bind(entryId, slotId, data.attendees)
-      ),
-      ...attendeesInfo.map(a =>
-        env.DB.prepare(`
-          INSERT INTO entry_attendees
-            (entry_id, position, name, furigana, birth_date, grade, is_representative)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
-        `).bind(entryId, a.position, a.name, a.furigana, a.birth_date, a.grade, a.is_representative)
-      ),
-    ];
-    await env.DB.batch(batchStmts);
+    // entry_attendees INSERT（1人ずつ）→ attendee_id 取得
+    for (const a of attendees) {
+      const res = await env.DB.prepare(`
+        INSERT INTO entry_attendees
+          (entry_id, position, name, furigana, birth_date, grade, is_representative)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind(entryId, a.position, a.name, a.furigana, a.birth_date, a.grade, a.is_representative).run();
+      a.id = res?.meta?.last_row_id;
+    }
+
+    // entry_slots INSERT（attendee_id付き）
+    const slotInserts = [];
+    for (const a of attendees) {
+      for (const sid of a.slot_ids) {
+        slotInserts.push(
+          env.DB.prepare('INSERT INTO entry_slots (entry_id, slot_id, attendees, attendee_id) VALUES (?, ?, 1, ?)')
+            .bind(entryId, sid, a.id)
+        );
+      }
+    }
+    if (slotInserts.length > 0) {
+      await env.DB.batch(slotInserts);
+    }
 
     // 通知
-    const summary = buildSummary(data, slots, attendeesInfo);
-    await sendEmailsAndSlack(env, data, slots, attendeesInfo, entryId, qrToken, summary);
+    const summary = buildSummary(data, slotMap, attendees);
+    await sendEmailsAndSlack(env, data, attendees, slotMap, entryId, qrToken, summary);
 
     return redirect(`/202612orisen/apply/?success=1&id=${entryId}`);
   } catch (err) {
@@ -215,7 +233,7 @@ export async function GET() {
   return redirect('/202612orisen/apply/');
 }
 
-function buildSummary(data, slots, attendees) {
+function buildSummary(data, slotMap, attendees) {
   const lines = [
     '▼お申込み者（代表者）',
     `  ${data.name}（${data.furigana}）`,
@@ -223,20 +241,26 @@ function buildSummary(data, slots, attendees) {
     `  電話：${data.tel}`,
     '',
     `▼ご参加者（${data.attendees}名）`,
-    ...attendees.map(a =>
-      `  ${a.position}. ${a.name}（${a.furigana}）${a.birth_date ? ` ／ ${a.birth_date}` : ''}${a.grade ? `（${a.grade}）` : ''}`
-    ),
-    '',
-    '▼参加プログラム',
-    ...slots.map(s => `  ・[${s.day} ${s.time_start}-${s.time_end}] ${s.program_name}（${s.venue}）`),
-    '',
-    data.remarks ? `▼ご要望・特記事項\n  ${data.remarks}` : null,
-    `▼同意：プライバシーポリシー${data.consent_rules ? '◯' : '×'}／写真利用${data.consent_photo ? '◯' : '×'}／アレルギー確認${data.consent_allergy ? '◯' : '×'}`,
-  ].filter(Boolean);
+  ];
+  for (const a of attendees) {
+    lines.push(`  ${a.position}. ${a.name}（${a.furigana}）${a.birth_date ? ` ／ ${a.birth_date}` : ''}${a.grade ? `（${a.grade}）` : ''}`);
+    if (a.slot_ids.length === 0) {
+      lines.push('     （参加プログラムの選択なし）');
+    } else {
+      for (const sid of a.slot_ids) {
+        const s = slotMap.get(sid);
+        lines.push(`     ・[${s.day} ${s.time_start}-${s.time_end}] ${s.program_name}（${s.venue}）`);
+      }
+    }
+  }
+  if (data.remarks) {
+    lines.push('', `▼ご要望・特記事項\n  ${data.remarks}`);
+  }
+  lines.push(`▼同意：プライバシーポリシー${data.consent_rules ? '◯' : '×'}／写真利用${data.consent_photo ? '◯' : '×'}／アレルギー${data.consent_allergy ? '◯' : '×'}`);
   return lines.join('\n');
 }
 
-async function sendEmailsAndSlack(env, data, slots, attendees, entryId, qrToken, summary) {
+async function sendEmailsAndSlack(env, data, attendees, slotMap, entryId, qrToken, summary) {
   const fromEmail = env.FROM_EMAIL || 'info@funsportnexus.org';
   const fromName = env.FROM_NAME || 'fun sport nexus 運営事務局';
   const adminEmail = env.ADMIN_EMAIL_FALLBACK || 'funsportnexus@spoan.or.jp';
@@ -279,7 +303,7 @@ async function sendEmailsAndSlack(env, data, slots, attendees, entryId, qrToken,
       '・開催日：2026年12月19日（土）- 20日（日）',
       '・会場：国立オリンピック記念青少年総合センター（東京都渋谷区）',
       '・受付：会場 中央広場 にて、お名前を、お伝えください。',
-      '・キャンセル・変更：お手数ですが、本メールに、ご返信ください。',
+      '・キャンセル・変更：本メールに、ご返信ください。',
       '',
       'お会いできますことを、運営一同、楽しみに、しております。',
       '',
@@ -298,7 +322,7 @@ async function sendEmailsAndSlack(env, data, slots, attendees, entryId, qrToken,
 
   if (env.SLACK_WEBHOOK_URL) {
     try {
-      const slackText = `🎟️ *申込受信* (ID: ${entryId})\n*${data.name}* 様（${data.attendees}名）\n${slots.map(s => `・[${s.day} ${s.time_start}] ${s.program_name}`).join('\n')}`;
+      const slackText = `🎟️ *申込受信* (ID: ${entryId})\n*${data.name}* 様（${data.attendees}名）`;
       await fetch(env.SLACK_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

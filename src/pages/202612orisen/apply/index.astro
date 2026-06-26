@@ -16,19 +16,17 @@ const errorMessages = {
   invalid_email: 'メールアドレスの形式が正しくありません。',
   no_consent: '同意事項にチェックが入っていません。',
   invalid_attendees: '参加人数は1〜10名で入力してください。',
-  no_slots: '参加プログラムを1つ以上、選択してください。',
-  too_many_slots: '選択できるプログラムは、最大10件までです。',
+  missing_attendee_info: '参加者全員のお名前・ふりがな・生年月日を、ご入力ください。',
+  no_slots: 'いずれかの参加者で、1つ以上のプログラムを、選択してください。',
   invalid_slot: '選択されたプログラムが、無効です。',
   full: `満席のプログラムが含まれます${fullSlot ? `：${fullSlot}` : ''}。`,
-  duplicate_program: '同じ種目を、複数選択することは、できません。',
-  daily_limit: '1日に申し込めるのは、最大3つまでです。',
+  duplicate_program: '同じ参加者で、同じ種目を、複数選ばれています。マルチスポーツ体験のため、種目はおひとり1回までです。',
+  daily_limit: 'おひとり1日に申し込めるのは、最大3つまでです。',
   time_conflict: '時間帯が重複するプログラムが、選択されています。',
-  missing_attendee_info: '参加者全員のお名前・ふりがな・生年月日を、ご入力ください。',
   db_unavailable: 'システム一時障害です。しばらく後にお試しください。',
   server_error: 'サーバーエラーが発生しました。お手数ですが、再度お試しください。',
 };
 
-// スロット一覧を取得
 let slots = [];
 let slotsError = null;
 if (!success && env.DB) {
@@ -52,9 +50,6 @@ if (!success && env.DB) {
     slotsError = e.message;
   }
 }
-
-const day1Slots = slots.filter(s => s.day === 'Day1');
-const day2Slots = slots.filter(s => s.day === 'Day2');
 ---
 <BaseLayout
   title="参加申込 ｜ fun sport nexus 2026.12"
@@ -72,8 +67,8 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
       <p class="dec-sub-hero__label">APPLY</p>
       <h1 class="dec-sub-hero__title">参加申込</h1>
       <p class="dec-sub-hero__lead">
-        参加されるプログラムを、選択して、お申し込みください。<br>
-        事前のお申し込みで、当日スムーズに、ご参加いただけます。
+        ご参加者ごとに、参加プログラムを、選択してください。<br>
+        マルチスポーツ体験のため、同じ種目は、おひとり1回まで・1日3つまでです。
       </p>
     </div>
   </section>
@@ -86,8 +81,7 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
           <h2>お申し込み完了</h2>
           <p>
             お申し込み、ありがとうございます。<br>
-            ご登録のメールアドレス宛てに、受付完了メールを、お送りいたしました。<br>
-            （迷惑メールフォルダも、ご確認ください。）
+            ご登録のメールアドレス宛てに、受付完了メールを、お送りいたしました。
           </p>
           {entryId && entryId !== 'ok' && (
             <p class="ap-thanks__id">受付番号：<strong>{entryId}</strong></p>
@@ -107,101 +101,19 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
               {errorMessages[errorParam] || '送信に失敗しました。お手数ですが、再度お試しください。'}
             </div>
           )}
+          {slotsError && (
+            <div class="ap-error-banner">プログラム一覧の取得に失敗しました：{slotsError}</div>
+          )}
 
-          <!-- Step 1: プログラム選択 -->
-          <div class="ap-step">
-            <h2 class="ap-step__title">
-              <span class="ap-step__num">3</span>
-              参加プログラムを選ぶ
-            </h2>
-            <p class="ap-step__desc">
-              ご希望のプログラムを、選択してください（複数選択可）。<br>
-              同じ時間帯のプログラムは、選択できません。
-            </p>
-
-            {slotsError ? (
-              <div class="ap-error-banner">プログラム一覧の取得に失敗しました：{slotsError}</div>
-            ) : (
-              <>
-                {day1Slots.length > 0 && (
-                  <div class="ap-day">
-                    <h3 class="ap-day__head ap-day__head--navy">
-                      <span class="ap-day__num">DAY 1</span>
-                      <span class="ap-day__date">12月19日（土）</span>
-                    </h3>
-                    <div class="ap-slots">
-                      {day1Slots.map(s => (
-                        <label class:list={['ap-slot', s.remaining <= 0 ? 'ap-slot--full' : '']}>
-                          <input
-                            type="checkbox"
-                            name="slot_ids"
-                            value={s.id}
-                            disabled={s.remaining <= 0}
-                          />
-                          <span class="ap-slot__inner">
-                            <span class="ap-slot__time">{s.time_start} - {s.time_end}</span>
-                            <span class="ap-slot__name">{s.program_name}</span>
-                            <span class="ap-slot__meta">
-                              <span class="ap-slot__venue">
-                                <i class="fa-solid fa-location-dot"></i>
-                                {s.venue}
-                              </span>
-                              <span class:list={['ap-slot__remaining', s.remaining <= 5 && s.remaining > 0 ? 'ap-slot__remaining--low' : '']}>
-                                {s.remaining <= 0 ? '満席' : '残' + s.remaining + '席'}
-                              </span>
-                            </span>
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {day2Slots.length > 0 && (
-                  <div class="ap-day">
-                    <h3 class="ap-day__head ap-day__head--orange">
-                      <span class="ap-day__num">DAY 2</span>
-                      <span class="ap-day__date">12月20日（日）</span>
-                    </h3>
-                    <div class="ap-slots">
-                      {day2Slots.map(s => (
-                        <label class:list={['ap-slot', s.remaining <= 0 ? 'ap-slot--full' : '']}>
-                          <input
-                            type="checkbox"
-                            name="slot_ids"
-                            value={s.id}
-                            disabled={s.remaining <= 0}
-                          />
-                          <span class="ap-slot__inner">
-                            <span class="ap-slot__time">{s.time_start} - {s.time_end}</span>
-                            <span class="ap-slot__name">{s.program_name}</span>
-                            <span class="ap-slot__meta">
-                              <span class="ap-slot__venue">
-                                <i class="fa-solid fa-location-dot"></i>
-                                {s.venue}
-                              </span>
-                              <span class:list={['ap-slot__remaining', s.remaining <= 5 && s.remaining > 0 ? 'ap-slot__remaining--low' : '']}>
-                                {s.remaining <= 0 ? '満席' : '残' + s.remaining + '席'}
-                              </span>
-                            </span>
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          <!-- Step 2: 申込者（代表者）情報 -->
+          <!-- Step 1: 申込者（代表者）情報 -->
           <div class="ap-step">
             <h2 class="ap-step__title">
               <span class="ap-step__num">1</span>
               お申込み者（代表者）情報
             </h2>
             <p class="ap-step__desc">
-              ご連絡先として、代表となる方の情報を、ご入力ください。
+              ご連絡先として、代表となる方の情報を、ご入力ください。<br>
+              参加されない場合も、ご記入をお願いいたします。
             </p>
 
             <div class="ap-grid">
@@ -212,7 +124,6 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
                 <input id="name" name="name" type="text" required autocomplete="name"
                   placeholder="例：山田 太郎" class="ap-input" />
               </div>
-
               <div class="ap-field">
                 <label for="furigana" class="ap-label">
                   ふりがな <span class="ap-required">必須</span>
@@ -220,7 +131,6 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
                 <input id="furigana" name="furigana" type="text" required
                   placeholder="例：やまだ たろう" class="ap-input" />
               </div>
-
               <div class="ap-field">
                 <label for="email" class="ap-label">
                   メールアドレス <span class="ap-required">必須</span>
@@ -228,7 +138,6 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
                 <input id="email" name="email" type="email" required autocomplete="email"
                   placeholder="例：example@example.com" class="ap-input" />
               </div>
-
               <div class="ap-field">
                 <label for="tel" class="ap-label">
                   お電話番号 <span class="ap-required">必須</span>
@@ -236,10 +145,9 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
                 <input id="tel" name="tel" type="tel" required autocomplete="tel"
                   placeholder="例：090-1234-5678" class="ap-input" />
               </div>
-
               <div class="ap-field">
                 <label for="attendees" class="ap-label">
-                  参加人数（ご自身含む） <span class="ap-required">必須</span>
+                  ご参加人数 <span class="ap-required">必須</span>
                 </label>
                 <select id="attendees" name="attendees" required class="ap-input" data-attendees>
                   {[1,2,3,4,5,6,7,8,9,10].map(n => (
@@ -247,7 +155,6 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
                   ))}
                 </select>
               </div>
-
               <div class="ap-field ap-field--full">
                 <label for="remarks" class="ap-label">ご要望・特記事項（任意）</label>
                 <textarea id="remarks" name="remarks" rows="3"
@@ -256,29 +163,26 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
             </div>
           </div>
 
-          <!-- Step 3: 参加者情報 -->
+          <!-- Step 2: 参加者情報＋プログラム選択 -->
           <div class="ap-step">
             <h2 class="ap-step__title">
               <span class="ap-step__num">2</span>
-              ご参加者情報
+              ご参加者情報・参加プログラム
             </h2>
             <p class="ap-step__desc">
-              実際にご参加される方の、お名前と、生年月日を、ご入力ください。<br>
-              生年月日から、学年を、自動表示いたします（学年は2026年度を基準）。
+              実際にご参加される方ごとに、お名前・生年月日と、参加プログラムを、ご選択ください。<br>
+              生年月日から、学年を、自動表示いたします（2026年度を基準）。
             </p>
 
-            <div class="ap-attendees" data-attendees-list>
-              <!-- 動的に生成される -->
-            </div>
+            <div class="ap-attendees" data-attendees-list></div>
           </div>
 
-          <!-- Step 4: 同意 -->
+          <!-- Step 3: 同意 -->
           <div class="ap-step">
             <h2 class="ap-step__title">
-              <span class="ap-step__num">4</span>
+              <span class="ap-step__num">3</span>
               ご確認・同意事項
             </h2>
-
             <div class="ap-consents">
               <label class="ap-consent">
                 <input type="checkbox" name="consent_rules" required />
@@ -288,15 +192,11 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
               </label>
               <label class="ap-consent">
                 <input type="checkbox" name="consent_photo" />
-                <span>
-                  当日の写真・映像が、広報目的で、Webサイト・SNS等に、掲載されることに、同意します（任意）
-                </span>
+                <span>当日の写真・映像が、広報目的で、Webサイト・SNS等に、掲載されることに、同意します（任意）</span>
               </label>
               <label class="ap-consent">
                 <input type="checkbox" name="consent_allergy" />
-                <span>
-                  ぱん食い競走に、参加される場合：食物アレルギーの確認に、同意します（該当者のみ）
-                </span>
+                <span>ぱん食い競走に、参加される場合：食物アレルギーの確認に、同意します（該当者のみ）</span>
               </label>
             </div>
           </div>
@@ -314,29 +214,40 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
     </div>
   </section>
 
+  <!-- スロットデータをJSに渡す -->
+  <script type="application/json" id="slots-data" set:html={JSON.stringify(slots)}></script>
+
 </BaseLayout>
 
 <script>
-  // 学年判定（2026年度4/2基準）
   function calcGrade(iso) {
     if (!iso) return '';
     const b = new Date(iso);
     if (isNaN(b.getTime())) return '';
-    const base = new Date(2026, 3, 2); // 4/2
+    const base = new Date(2026, 3, 2);
     let age = base.getFullYear() - b.getFullYear();
     const m = base.getMonth() - b.getMonth();
     if (m < 0 || (m === 0 && base.getDate() <= b.getDate())) age--;
     if (age < 0) return '';
-    if (age < 6) return `未就学（${age}歳）`;
-    if (age <= 12) return `小学${age - 5}年生`;
-    if (age <= 15) return `中学${age - 12}年生`;
-    if (age <= 18) return `高校${age - 15}年生`;
-    if (age <= 22) return `大学生（${age}歳）`;
-    if (age <= 64) return `成人（${age}歳）`;
-    return `${age}歳`;
+    if (age < 6) return '未就学（' + age + '歳）';
+    if (age <= 12) return '小学' + (age - 5) + '年生';
+    if (age <= 15) return '中学' + (age - 12) + '年生';
+    if (age <= 18) return '高校' + (age - 15) + '年生';
+    if (age <= 22) return '大学生（' + age + '歳）';
+    if (age <= 64) return '成人（' + age + '歳）';
+    return age + '歳';
+  }
+
+  function escHtml(s) {
+    return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    const dataEl = document.getElementById('slots-data');
+    const allSlots = dataEl ? JSON.parse(dataEl.textContent || '[]') : [];
+    const day1 = allSlots.filter(s => s.day === 'Day1');
+    const day2 = allSlots.filter(s => s.day === 'Day2');
+
     const attendeesSelect = document.querySelector('[data-attendees]');
     const list = document.querySelector('[data-attendees-list]');
     const nameInput = document.getElementById('name');
@@ -344,172 +255,168 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
 
     if (!attendeesSelect || !list) return;
 
-    function buildAttendeeRow(i) {
+    function slotHtml(i, s) {
+      const full = s.remaining <= 0;
+      return '<label class="ap-slot' + (full ? ' ap-slot--full' : '') + '" data-program-code="' + s.program_code + '" data-day="' + s.day + '" data-time-start="' + s.time_start + '" data-time-end="' + s.time_end + '">' +
+        '<input type="checkbox" name="attendee_' + i + '_slot_ids" value="' + s.id + '" data-attendee-pos="' + i + '"' + (full ? ' disabled' : '') + ' />' +
+        '<span class="ap-slot__inner">' +
+          '<span class="ap-slot__time">' + s.time_start + ' - ' + s.time_end + '</span>' +
+          '<span class="ap-slot__name">' + escHtml(s.program_name) + '</span>' +
+          '<span class="ap-slot__meta">' +
+            '<span class="ap-slot__venue"><i class="fa-solid fa-location-dot"></i>' + escHtml(s.venue) + '</span>' +
+            '<span class="ap-slot__remaining' + (s.remaining <= 5 && s.remaining > 0 ? ' ap-slot__remaining--low' : '') + '">' + (full ? '満席' : '残' + s.remaining + '席') + '</span>' +
+          '</span>' +
+        '</span>' +
+      '</label>';
+    }
+
+    function buildAttendee(i) {
       const isFirst = i === 1;
-      const div = document.createElement('div');
-      div.className = 'ap-attendee';
-      div.innerHTML = `
-        <p class="ap-attendee__head">
-          <span class="ap-attendee__num">${i}人目</span>
-          ${isFirst ? '<span class="ap-attendee__tag">代表者</span>' : ''}
-        </p>
-        <div class="ap-grid">
-          <div class="ap-field">
-            <label class="ap-label">お名前 <span class="ap-required">必須</span></label>
-            <input name="attendee_${i}_name" type="text" required class="ap-input"
-              data-attendee-name="${i}" placeholder="例：山田 太郎" />
-          </div>
-          <div class="ap-field">
-            <label class="ap-label">ふりがな <span class="ap-required">必須</span></label>
-            <input name="attendee_${i}_furigana" type="text" required class="ap-input"
-              data-attendee-furi="${i}" placeholder="例：やまだ たろう" />
-          </div>
-          <div class="ap-field ap-field--full">
-            <label class="ap-label">
-              生年月日 <span class="ap-required">必須</span>
-              <span class="ap-grade-display" data-attendee-grade="${i}"></span>
-            </label>
-            <input name="attendee_${i}_birth" type="date" required class="ap-input"
-              data-attendee-birth="${i}" min="1920-01-01" max="2026-12-31" />
-          </div>
-        </div>
-      `;
-      return div;
+      const wrap = document.createElement('div');
+      wrap.className = 'ap-attendee';
+      wrap.dataset.position = i;
+      wrap.innerHTML =
+        '<p class="ap-attendee__head">' +
+          '<span class="ap-attendee__num">' + i + '人目</span>' +
+          (isFirst ? '<span class="ap-attendee__tag">代表者と同じ</span>' : '') +
+        '</p>' +
+        '<div class="ap-grid">' +
+          '<div class="ap-field"><label class="ap-label">お名前 <span class="ap-required">必須</span></label>' +
+            '<input name="attendee_' + i + '_name" type="text" required class="ap-input" data-name placeholder="例：山田 太郎" /></div>' +
+          '<div class="ap-field"><label class="ap-label">ふりがな <span class="ap-required">必須</span></label>' +
+            '<input name="attendee_' + i + '_furigana" type="text" required class="ap-input" data-furi placeholder="例：やまだ たろう" /></div>' +
+          '<div class="ap-field ap-field--full">' +
+            '<label class="ap-label">生年月日 <span class="ap-required">必須</span> <span class="ap-grade-display" data-grade></span></label>' +
+            '<input name="attendee_' + i + '_birth" type="date" required class="ap-input" data-birth min="1920-01-01" max="2026-12-31" />' +
+          '</div>' +
+        '</div>' +
+        '<div class="ap-attendee__programs">' +
+          '<p class="ap-attendee__progs-label">この方の参加プログラム <span style="font-weight:600;font-size:0.78rem;color:var(--fsn-gray-500);">（同じ種目は1回まで・1日3つまで）</span></p>' +
+          (day1.length > 0 ?
+            '<div class="ap-day"><h4 class="ap-day__head ap-day__head--navy"><span class="ap-day__num">DAY 1</span><span class="ap-day__date">12月19日（土）</span></h4>' +
+            '<div class="ap-slots">' + day1.map(s => slotHtml(i, s)).join('') + '</div></div>'
+            : '') +
+          (day2.length > 0 ?
+            '<div class="ap-day"><h4 class="ap-day__head ap-day__head--orange"><span class="ap-day__num">DAY 2</span><span class="ap-day__date">12月20日（日）</span></h4>' +
+            '<div class="ap-slots">' + day2.map(s => slotHtml(i, s)).join('') + '</div></div>'
+            : '') +
+        '</div>';
+      return wrap;
+    }
+
+    function updateGrades(card) {
+      const birth = card.querySelector('[data-birth]');
+      const grade = card.querySelector('[data-grade]');
+      const update = () => { if (grade) grade.textContent = birth.value ? '→ ' + calcGrade(birth.value) : ''; };
+      birth?.addEventListener('change', update);
+      birth?.addEventListener('input', update);
+      update();
+    }
+
+    function attachSlotControls(card) {
+      const checkboxes = card.querySelectorAll('input[type=checkbox][data-attendee-pos]');
+      const updateLimits = () => {
+        const checkedCodes = new Set();
+        const byDay = {};
+        checkboxes.forEach(s => {
+          if (s.checked) {
+            checkedCodes.add(s.closest('label')?.dataset?.programCode);
+            const d = s.closest('label')?.dataset?.day;
+            byDay[d] = (byDay[d] || 0) + 1;
+          }
+        });
+        checkboxes.forEach(s => {
+          const label = s.closest('label');
+          if (label?.classList.contains('ap-slot--full')) return;
+          if (s.checked) {
+            label?.classList.remove('ap-slot--limit', 'ap-slot--dup');
+            return;
+          }
+          const code = label?.dataset?.programCode;
+          const d = label?.dataset?.day;
+          const isDup = checkedCodes.has(code);
+          const overLimit = (byDay[d] || 0) >= 3;
+          label?.classList.toggle('ap-slot--dup', isDup);
+          label?.classList.toggle('ap-slot--limit', !isDup && overLimit);
+        });
+      };
+      checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          const label = cb.closest('label');
+          const code = label?.dataset?.programCode;
+          const d = label?.dataset?.day;
+          if (cb.checked) {
+            const sameCode = Array.from(checkboxes).filter(x => x !== cb && x.checked && x.closest('label')?.dataset?.programCode === code);
+            if (sameCode.length > 0) {
+              alert('同じ種目（' + (label?.querySelector('.ap-slot__name')?.textContent?.trim() || '同一種目') + '）は、おひとり1回までです。\nさまざまなスポーツを、ぜひ、ご体験ください。');
+              cb.checked = false;
+              return;
+            }
+            const checkedInDay = Array.from(checkboxes).filter(x => x.checked && x.closest('label')?.dataset?.day === d).length;
+            if (checkedInDay > 3) {
+              alert(d + ' は、おひとり1日3つまで、お選びいただけます。');
+              cb.checked = false;
+              return;
+            }
+          }
+          updateLimits();
+        });
+      });
+      updateLimits();
     }
 
     function rebuild() {
       const n = parseInt(attendeesSelect.value, 10) || 1;
       // 既存の値を退避
       const cache = {};
-      list.querySelectorAll('input').forEach(inp => { cache[inp.name] = inp.value; });
+      list.querySelectorAll('input').forEach(inp => {
+        if (inp.type === 'checkbox') {
+          if (inp.checked) cache[inp.name + ':' + inp.value] = '1';
+        } else {
+          cache[inp.name] = inp.value;
+        }
+      });
 
       list.innerHTML = '';
       for (let i = 1; i <= n; i++) {
-        list.appendChild(buildAttendeeRow(i));
+        const card = buildAttendee(i);
+        list.appendChild(card);
+        updateGrades(card);
+        attachSlotControls(card);
       }
 
       // 値復元
       list.querySelectorAll('input').forEach(inp => {
-        if (cache[inp.name]) inp.value = cache[inp.name];
+        if (inp.type === 'checkbox') {
+          if (cache[inp.name + ':' + inp.value]) inp.checked = true;
+        } else {
+          if (cache[inp.name]) inp.value = cache[inp.name];
+        }
       });
+      // 復元後にlimits再評価
+      list.querySelectorAll('.ap-attendee').forEach(c => attachSlotControls(c));
+      // 生年月日 grade再描画
+      list.querySelectorAll('.ap-attendee').forEach(c => {
+        const birth = c.querySelector('[data-birth]');
+        const grade = c.querySelector('[data-grade]');
+        if (birth && grade) grade.textContent = birth.value ? '→ ' + calcGrade(birth.value) : '';
+      });
+    }
 
-      // 代表者欄と申込者情報の連動
-      const a1Name = list.querySelector('[data-attendee-name="1"]');
-      const a1Furi = list.querySelector('[data-attendee-furi="1"]');
+    // 申込者 → 1人目に自動コピー
+    function copyToFirst() {
+      const a1Name = list.querySelector('[data-position="1"] [data-name]');
+      const a1Furi = list.querySelector('[data-position="1"] [data-furi]');
       if (a1Name && nameInput && !a1Name.value && nameInput.value) a1Name.value = nameInput.value;
       if (a1Furi && furiInput && !a1Furi.value && furiInput.value) a1Furi.value = furiInput.value;
-
-      // 生年月日change → 学年表示
-      list.querySelectorAll('[data-attendee-birth]').forEach(inp => {
-        const i = inp.dataset.attendeeBirth;
-        const disp = list.querySelector(`[data-attendee-grade="${i}"]`);
-        const update = () => { if (disp) disp.textContent = inp.value ? `→ ${calcGrade(inp.value)}` : ''; };
-        inp.addEventListener('change', update);
-        inp.addEventListener('input', update);
-        update();
-      });
     }
-
-    // 申込者の name/furigana → 代表者(1人目)に自動コピー
-    if (nameInput) {
-      nameInput.addEventListener('change', () => {
-        const a1 = list.querySelector('[data-attendee-name="1"]');
-        if (a1 && !a1.value) a1.value = nameInput.value;
-      });
-    }
-    if (furiInput) {
-      furiInput.addEventListener('change', () => {
-        const a1 = list.querySelector('[data-attendee-furi="1"]');
-        if (a1 && !a1.value) a1.value = furiInput.value;
-      });
-    }
+    nameInput?.addEventListener('change', copyToFirst);
+    furiInput?.addEventListener('change', copyToFirst);
 
     attendeesSelect.addEventListener('change', rebuild);
     rebuild();
-
-    // 1日3件まで制限（チェックボックス）
-    const slots = document.querySelectorAll('input[name="slot_ids"]');
-    function getDayOf(input) {
-      const day = input.closest('.ap-day')?.querySelector('.ap-day__num')?.textContent?.trim();
-      return day || '';
-    }
-    function updateLimits() {
-      const byDay = {};
-      slots.forEach(s => {
-        if (s.checked) {
-          const d = getDayOf(s);
-          byDay[d] = (byDay[d] || 0) + 1;
-        }
-      });
-      slots.forEach(s => {
-        if (s.disabled) return;
-        const d = getDayOf(s);
-        if (!s.checked && byDay[d] >= 3) {
-          s.closest('label')?.classList.add('ap-slot--limit');
-          s.disabled = false;
-        } else {
-          s.closest('label')?.classList.remove('ap-slot--limit');
-        }
-      });
-    }
-    slots.forEach(s => s.addEventListener('change', () => {
-      const d = getDayOf(s);
-      const checkedInDay = Array.from(slots).filter(x => x.checked && getDayOf(x) === d).length;
-      if (s.checked && checkedInDay > 3) {
-        alert(`${d} は、1日3つまで、お選びいただけます。`);
-        s.checked = false;
-      }
-      updateLimits();
-    }));
-    updateLimits();
   });
 </script>
-
-<style is:global>
-  /* 参加者情報セクション */
-  .ap-attendees { display: flex; flex-direction: column; gap: 20px; }
-  .ap-attendee {
-    padding: 20px;
-    background: var(--fsn-gray-50);
-    border-radius: var(--fsn-radius-sm);
-    border-left: 3px solid var(--fsn-orange);
-  }
-  .ap-attendee__head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0 0 14px;
-  }
-  .ap-attendee__num {
-    display: inline-block;
-    padding: 4px 12px;
-    background: var(--fsn-navy-deep);
-    color: var(--fsn-white);
-    border-radius: var(--fsn-radius-pill);
-    font-size: 0.8rem;
-    font-weight: 800;
-  }
-  .ap-attendee__tag {
-    display: inline-block;
-    padding: 4px 12px;
-    background: var(--fsn-orange);
-    color: var(--fsn-white);
-    border-radius: var(--fsn-radius-pill);
-    font-size: 0.78rem;
-    font-weight: 700;
-  }
-  .ap-grade-display {
-    margin-left: auto;
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: var(--fsn-orange-dark);
-  }
-
-  /* 1日3件 警告 */
-  .ap-slot--limit .ap-slot__inner {
-    opacity: 0.45;
-  }
-</style>
 
 <style is:global>
   .ap-section {
@@ -517,24 +424,11 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
     background: var(--fsn-gray-50);
   }
   .ap-section__inner {
-    max-width: 960px;
+    max-width: 1080px;
     margin: 0 auto;
   }
 
-  .ap-form {
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-  }
-
-  /* 表示順序: 申込者 → 参加者 → プログラム → 同意 */
-  .ap-form > .ap-honeypot { order: -1; }
-  .ap-form > .ap-error-banner { order: 0; }
-  .ap-form > .ap-step:nth-of-type(1) { order: 3; } /* プログラム選択 (Step3) */
-  .ap-form > .ap-step:nth-of-type(2) { order: 1; } /* 申込者 (Step1) */
-  .ap-form > .ap-step:nth-of-type(3) { order: 2; } /* 参加者 (Step2) */
-  .ap-form > .ap-step:nth-of-type(4) { order: 4; } /* 同意 (Step4) */
-  .ap-form > .ap-submit { order: 5; }
+  .ap-form { display: flex; flex-direction: column; gap: 40px; }
 
   .ap-error-banner {
     padding: 14px 18px;
@@ -589,31 +483,80 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
     margin: 0 0 24px;
   }
 
-  /* Day */
-  .ap-day {
-    margin-bottom: 24px;
+  /* 参加者カード */
+  .ap-attendees { display: flex; flex-direction: column; gap: 28px; }
+  .ap-attendee {
+    padding: 24px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-md);
+    border-left: 4px solid var(--fsn-orange);
   }
+  .ap-attendee__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 14px;
+  }
+  .ap-attendee__num {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+  .ap-attendee__tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .ap-grade-display {
+    margin-left: auto;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--fsn-orange-dark);
+  }
+
+  .ap-attendee__programs {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--fsn-gray-200);
+  }
+  .ap-attendee__progs-label {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 14px;
+  }
+
+  /* Day */
+  .ap-day { margin-bottom: 18px; }
   .ap-day:last-child { margin-bottom: 0; }
   .ap-day__head {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 14px 20px;
+    gap: 12px;
+    padding: 10px 16px;
     border-radius: var(--fsn-radius-sm);
     color: var(--fsn-white);
-    margin: 0 0 14px;
+    margin: 0 0 12px;
   }
   .ap-day__head--navy { background: linear-gradient(135deg, var(--fsn-navy), var(--fsn-navy-deep)); }
   .ap-day__head--orange { background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark)); }
   .ap-day__num {
     background: rgba(255,255,255,0.18);
-    padding: 4px 12px;
+    padding: 3px 10px;
     border-radius: var(--fsn-radius-sm);
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     font-weight: 800;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.12em;
   }
-  .ap-day__date { font-size: 1.05rem; font-weight: 700; }
+  .ap-day__date { font-size: 0.95rem; font-weight: 700; }
 
   /* Slots */
   .ap-slots {
@@ -623,27 +566,21 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
   }
   @media (max-width: 600px) { .ap-slots { grid-template-columns: 1fr; } }
 
-  .ap-slot {
-    position: relative;
-    cursor: pointer;
-  }
+  .ap-slot { position: relative; cursor: pointer; }
   .ap-slot input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
+    position: absolute; opacity: 0; width: 0; height: 0;
   }
   .ap-slot__inner {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 14px 18px;
+    padding: 12px 14px;
     background: var(--fsn-white);
     border: 2px solid var(--fsn-gray-200);
     border-radius: var(--fsn-radius-sm);
-    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    transition: border-color 0.15s, background 0.15s;
   }
-  .ap-slot:not(.ap-slot--full):hover .ap-slot__inner {
+  .ap-slot:not(.ap-slot--full):not(.ap-slot--dup):not(.ap-slot--limit):hover .ap-slot__inner {
     border-color: var(--fsn-orange);
     background: #FFF7ED;
   }
@@ -655,68 +592,54 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
   .ap-slot input:checked ~ .ap-slot__inner::after {
     content: "✓";
     position: absolute;
-    top: 8px;
-    right: 12px;
+    top: 4px;
+    right: 10px;
     color: var(--fsn-orange);
     font-weight: 900;
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
-  .ap-slot--full { cursor: not-allowed; }
-  .ap-slot--full .ap-slot__inner {
-    background: var(--fsn-gray-100);
-    color: var(--fsn-gray-500);
-    border-color: var(--fsn-gray-200);
-  }
+  .ap-slot--full,
+  .ap-slot--dup,
+  .ap-slot--limit { cursor: not-allowed; }
+  .ap-slot--full .ap-slot__inner { background: var(--fsn-gray-100); color: var(--fsn-gray-500); }
+  .ap-slot--dup .ap-slot__inner { opacity: 0.4; background: var(--fsn-gray-50); }
+  .ap-slot--limit .ap-slot__inner { opacity: 0.5; }
 
   .ap-slot__time {
     font-family: var(--fsn-font-num);
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     font-weight: 700;
     color: var(--fsn-orange-dark);
   }
-  .ap-slot--full .ap-slot__time { color: var(--fsn-gray-500); }
   .ap-slot__name {
-    font-size: 0.95rem;
+    font-size: 0.88rem;
     font-weight: 800;
     color: var(--fsn-navy-deep);
   }
-  .ap-slot--full .ap-slot__name { color: var(--fsn-gray-500); }
   .ap-slot__meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     color: var(--fsn-gray-700);
-    margin-top: 4px;
+    margin-top: 2px;
   }
-  .ap-slot__venue {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-  }
+  .ap-slot__venue { display: inline-flex; align-items: center; gap: 4px; }
   .ap-slot__venue i { color: var(--fsn-orange); font-size: 0.85em; }
-  .ap-slot--full .ap-slot__venue i { color: var(--fsn-gray-400); }
-  .ap-slot__remaining {
-    font-weight: 700;
-    color: var(--fsn-gray-700);
-  }
+  .ap-slot__remaining { font-weight: 700; }
   .ap-slot__remaining--low { color: #DC2626; }
-  .ap-slot--full .ap-slot__remaining {
-    color: var(--fsn-gray-400);
-    font-weight: 800;
-  }
 
   /* Form fields */
   .ap-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 16px;
   }
   @media (max-width: 600px) { .ap-grid { grid-template-columns: 1fr; } }
-  .ap-field { display: flex; flex-direction: column; gap: 8px; }
+  .ap-field { display: flex; flex-direction: column; gap: 6px; }
   .ap-field--full { grid-column: 1 / -1; }
   .ap-label {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: var(--fsn-navy-deep);
     display: flex;
@@ -729,14 +652,14 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
     background: var(--fsn-orange);
     color: var(--fsn-white);
     border-radius: var(--fsn-radius-sm);
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
   }
   .ap-input {
-    padding: 12px 16px;
+    padding: 10px 14px;
     border: 1.5px solid var(--fsn-gray-200);
     border-radius: var(--fsn-radius-sm);
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     font-family: inherit;
     background: var(--fsn-white);
     color: var(--fsn-gray-900);
@@ -770,10 +693,7 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
     accent-color: var(--fsn-orange);
     flex-shrink: 0;
   }
-  .ap-consent a {
-    color: var(--fsn-orange);
-    text-decoration: underline;
-  }
+  .ap-consent a { color: var(--fsn-orange); text-decoration: underline; }
 
   .ap-honeypot {
     position: absolute;
@@ -812,36 +732,14 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
     box-shadow: var(--fsn-shadow-sm);
     text-align: center;
   }
-  .ap-thanks i.fa-circle-check {
-    font-size: 4rem;
-    color: var(--fsn-orange);
-    margin-bottom: 20px;
-  }
-  .ap-thanks h2 {
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: var(--fsn-navy-deep);
-    margin: 0 0 16px;
-  }
-  .ap-thanks p {
-    font-size: 0.95rem;
-    line-height: 1.95;
-    color: var(--fsn-gray-700);
-    margin: 0 0 16px;
-  }
+  .ap-thanks i.fa-circle-check { font-size: 4rem; color: var(--fsn-orange); margin-bottom: 20px; }
+  .ap-thanks h2 { font-size: 1.6rem; font-weight: 800; color: var(--fsn-navy-deep); margin: 0 0 16px; }
+  .ap-thanks p { font-size: 0.95rem; line-height: 1.95; color: var(--fsn-gray-700); margin: 0 0 16px; }
   .ap-thanks__id {
-    background: var(--fsn-gray-50);
-    padding: 12px 24px;
-    border-radius: var(--fsn-radius-sm);
-    display: inline-block;
-    margin: 16px 0 24px;
-    font-size: 1rem;
+    background: var(--fsn-gray-50); padding: 12px 24px; border-radius: var(--fsn-radius-sm);
+    display: inline-block; margin: 16px 0 24px; font-size: 1rem;
   }
-  .ap-thanks__id strong {
-    font-family: var(--fsn-font-num);
-    color: var(--fsn-orange-dark);
-    font-size: 1.3rem;
-  }
+  .ap-thanks__id strong { font-family: var(--fsn-font-num); color: var(--fsn-orange-dark); font-size: 1.3rem; }
   .ap-thanks__notes {
     margin: 24px 0 32px;
     padding: 16px;
@@ -850,15 +748,9 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
   }
   .ap-thanks__notes p { margin: 0; font-size: 0.9rem; color: var(--fsn-navy-deep); }
   .ap-thanks__back {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 28px;
-    background: var(--fsn-navy-deep);
-    color: var(--fsn-white);
-    border-radius: var(--fsn-radius-pill);
-    text-decoration: none;
-    font-weight: 700;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 28px; background: var(--fsn-navy-deep); color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill); text-decoration: none; font-weight: 700;
     transition: background 0.2s;
   }
   .ap-thanks__back:hover { background: #050d2e; color: var(--fsn-white); }
