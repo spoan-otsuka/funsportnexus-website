@@ -32,7 +32,12 @@ if (env.DB) {
   <div class="admin-wrap">
     <header class="admin-head">
       <h1>管理画面 ／ fun sport nexus 2026.12</h1>
-      <a href="/" class="admin-btn admin-btn--ghost">サイトTOP</a>
+      <div style="display:flex;gap:8px;">
+        <a href="/" class="admin-btn admin-btn--ghost">サイトTOP</a>
+        <a href="/api/admin-logout" class="admin-btn admin-btn--ghost">
+          <i class="fa-solid fa-right-from-bracket"></i> ログアウト
+        </a>
+      </div>
     </header>
 
     {errorMsg && <p style="color:#b00;">エラー：{errorMsg}</p>}

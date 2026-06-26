@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/apply-form.css';
+
+export const prerender = false;
+
+const errorParam = Astro.url.searchParams.get('error');
+const next = Astro.url.searchParams.get('next') || '/admin/';
+---
+<BaseLayout
+  title="管理ログイン ｜ fun sport nexus"
+  description="管理画面ログイン"
+  noindex={true}
+  hideHeader={true}
+  hideFooter={true}
+>
+
+  <section style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--fsn-gray-50);">
+    <div style="max-width: 420px; width: 100%;">
+      <h1 style="text-align: center; margin: 0 0 24px; color: var(--fsn-navy-deep); font-size: 1.4rem;">
+        <i class="fa-solid fa-lock" style="color: var(--fsn-orange); margin-right: 8px;"></i>
+        管理画面ログイン
+      </h1>
+
+      <form action="/api/admin-login" method="POST" class="ap-form" style="gap: 16px;">
+        <input type="hidden" name="next" value={next} />
+
+        {errorParam === 'invalid' && (
+          <div class="ap-error-banner">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            パスワードが正しくありません。
+          </div>
+        )}
+
+        <div class="ap-step" style="padding: 28px 24px;">
+          <div class="ap-field">
+            <label for="password" class="ap-label">
+              管理パスワード <span class="ap-required">必須</span>
+            </label>
+            <input id="password" name="password" type="password" required autofocus
+              class="ap-input" placeholder="パスワードを入力" />
+          </div>
+
+          <div class="ap-submit" style="margin-top: 24px;">
+            <button type="submit" class="ap-submit__btn">
+              <i class="fa-solid fa-right-to-bracket"></i> ログイン
+            </button>
+          </div>
+        </div>
+
+        <p style="text-align: center; font-size: 0.8rem; color: var(--fsn-gray-500); margin: 0;">
+          ※運営事務局のみ利用可能です
+        </p>
+      </form>
+    </div>
+  </section>
+
+</BaseLayout>
