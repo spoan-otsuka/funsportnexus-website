@@ -147,7 +147,7 @@ if (!success && env.DB) {
                 <input id="tel" name="tel" type="tel" required autocomplete="tel"
                   placeholder="例：090-1234-5678" class="ap-input" />
               </div>
-              <div class="ap-field">
+              <div class="ap-field ap-field--full">
                 <label for="attendees" class="ap-label">
                   ご参加人数 <span class="ap-required">必須</span>
                 </label>
@@ -1230,6 +1230,10 @@ if (!success && env.DB) {
     font-weight: 700;
     color: var(--fsn-navy-deep);
     transition: border-color 0.15s, background 0.15s;
+    white-space: nowrap;
+  }
+  @media (max-width: 600px) {
+    .ap-self-join { white-space: normal; }
   }
   .ap-self-join:has(input:checked) {
     border-color: var(--fsn-orange);
