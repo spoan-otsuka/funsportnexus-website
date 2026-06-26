@@ -159,10 +159,10 @@ if (!success && env.DB) {
                   </select>
                   <label class="ap-self-join">
                     <input type="checkbox" name="self_join" value="1" data-self-join />
-                    <span>ご本人も参加する</span>
+                    <span>お申込み者ご自身も、参加されますか？</span>
                   </label>
                 </div>
-                <p class="ap-field-note">代表者ご自身が、プログラムに、参加される場合は、ご本人もチェックを、入れてください。</p>
+                <p class="ap-field-note">チェックを入れると、ご参加者の1人目に、代表者の情報を、自動でお入れいたします。</p>
               </div>
               <div class="ap-field ap-field--full">
                 <label for="remarks" class="ap-label">ご要望・特記事項（任意）</label>
@@ -176,7 +176,7 @@ if (!success && env.DB) {
                 </label>
                 <div class="ap-day-choice">
                   <label class="ap-day-pill ap-day-pill--navy">
-                    <input type="checkbox" name="participation_days" value="Day1" data-pday checked />
+                    <input type="checkbox" name="participation_days" value="Day1" data-pday />
                     <span class="ap-day-pill__inner">
                       <span class="ap-day-pill__num">DAY 1</span>
                       <span class="ap-day-pill__date">12月19日（土）</span>
@@ -184,7 +184,7 @@ if (!success && env.DB) {
                     </span>
                   </label>
                   <label class="ap-day-pill ap-day-pill--orange">
-                    <input type="checkbox" name="participation_days" value="Day2" data-pday checked />
+                    <input type="checkbox" name="participation_days" value="Day2" data-pday />
                     <span class="ap-day-pill__inner">
                       <span class="ap-day-pill__num">DAY 2</span>
                       <span class="ap-day-pill__date">12月20日（日）</span>
@@ -192,7 +192,7 @@ if (!success && env.DB) {
                     </span>
                   </label>
                 </div>
-                <p class="ap-field-note">両日参加・片日参加、いずれも可能です。チェックを外すと、その日のプログラムは、選択肢から外れます。</p>
+                <p class="ap-field-note">ご参加される日に、チェックを入れてください（両日参加・片日参加、いずれも可能）。</p>
               </div>
             </div>
           </div>
@@ -375,37 +375,11 @@ if (!success && env.DB) {
           '</div>' +
         '</div>' +
         '<div class="ap-attendee__programs">' +
-          '<p class="ap-attendee__progs-label">この方の参加希望 <span style="font-weight:600;font-size:0.78rem;color:var(--fsn-gray-500);">（体験プログラム・特別セミナー、いずれか、または、両方を、お選びください）</span></p>' +
-          '<div class="ap-prog-section">' +
-            '<p class="ap-prog-section__title"><span class="ap-prog-section__badge">A</span> 体験プログラム <span class="ap-prog-section__note">（おひとり1日3種目まで）</span></p>' +
-            '<div class="ap-progslots" data-progslots></div>' +
-            '<button type="button" class="ap-add-btn" data-add-slot>' +
-              '<i class="fa-solid fa-plus"></i> プログラムを追加' +
-            '</button>' +
-          '</div>' +
-          (seminarSlots.length > 0 ?
-            '<div class="ap-prog-section ap-prog-section--seminar">' +
-              '<p class="ap-prog-section__title"><span class="ap-prog-section__badge ap-prog-section__badge--orange">B</span> 特別セミナー <span class="ap-prog-section__note">（参加希望の方のみチェック）</span></p>' +
-              seminarSlots.map(s => {
-                const full = s.remaining <= 0;
-                return '<label class="ap-seminar-opt' + (full ? ' ap-seminar-opt--full' : '') + '">' +
-                  '<input type="checkbox" name="attendee_' + i + '_slot_ids" value="' + s.id + '"' + (full ? ' disabled' : '') + ' data-seminar />' +
-                  '<span class="ap-seminar-opt__check">' +
-                    '<span class="ap-seminar-opt__check-box"></span>' +
-                    '<span class="ap-seminar-opt__check-label">このセミナーに参加を希望する</span>' +
-                  '</span>' +
-                  '<span class="ap-seminar-opt__inner">' +
-                    '<span class="ap-seminar-opt__name">' + escHtml(s.program_name) + '</span>' +
-                    '<span class="ap-seminar-opt__meta">' +
-                      '<span><i class="fa-regular fa-clock"></i> ' + s.day + ' ' + s.time_start + '〜' + s.time_end + '</span>' +
-                      '<span><i class="fa-solid fa-location-dot"></i> ' + escHtml(s.venue) + '</span>' +
-                      '<span class="ap-seminar-opt__remaining">' + (full ? '満席' : '残' + s.remaining + '席') + '</span>' +
-                    '</span>' +
-                  '</span>' +
-                '</label>';
-              }).join('') +
-            '</div>'
-            : '') +
+          '<p class="ap-attendee__progs-label">この方の参加プログラム <span style="font-weight:600;font-size:0.78rem;color:var(--fsn-gray-500);">（おひとり1日3種目までお選びいただけます）</span></p>' +
+          '<div class="ap-progslots" data-progslots></div>' +
+          '<button type="button" class="ap-add-btn" data-add-slot>' +
+            '<i class="fa-solid fa-plus"></i> プログラムを追加' +
+          '</button>' +
         '</div>';
       return wrap;
     }
@@ -761,7 +735,6 @@ if (!success && env.DB) {
     padding: 24px;
     background: var(--fsn-gray-50);
     border-radius: var(--fsn-radius-md);
-    border-left: 4px solid var(--fsn-orange);
   }
   .ap-attendee__head {
     display: flex;
