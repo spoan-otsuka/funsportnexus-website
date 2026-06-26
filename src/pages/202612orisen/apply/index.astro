@@ -149,11 +149,18 @@ if (!success && env.DB) {
                 <label for="attendees" class="ap-label">
                   ご参加人数 <span class="ap-required">必須</span>
                 </label>
-                <select id="attendees" name="attendees" required class="ap-input" data-attendees>
-                  {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                    <option value={n}>{n}名</option>
-                  ))}
-                </select>
+                <div class="ap-attendees-row">
+                  <select id="attendees" name="attendees" required class="ap-input ap-input--inline" data-attendees>
+                    {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                      <option value={n}>{n}名</option>
+                    ))}
+                  </select>
+                  <label class="ap-self-join">
+                    <input type="checkbox" name="self_join" value="1" data-self-join />
+                    <span>ご本人も参加する</span>
+                  </label>
+                </div>
+                <p class="ap-field-note">代表者ご自身が、プログラムに、参加される場合は、ご本人もチェックを、入れてください。</p>
               </div>
               <div class="ap-field ap-field--full">
                 <label for="remarks" class="ap-label">ご要望・特記事項（任意）</label>
@@ -271,14 +278,12 @@ if (!success && env.DB) {
     }
 
     function buildAttendee(i) {
-      const isFirst = i === 1;
       const wrap = document.createElement('div');
       wrap.className = 'ap-attendee';
       wrap.dataset.position = i;
       wrap.innerHTML =
         '<p class="ap-attendee__head">' +
           '<span class="ap-attendee__num">' + i + '人目</span>' +
-          (isFirst ? '<span class="ap-attendee__tag">代表者と同じ</span>' : '') +
         '</p>' +
         '<div class="ap-grid">' +
           '<div class="ap-field"><label class="ap-label">お名前 <span class="ap-required">必須</span></label>' +
@@ -403,18 +408,39 @@ if (!success && env.DB) {
       });
     }
 
-    // 申込者 → 1人目に自動コピー
-    function copyToFirst() {
-      const a1Name = list.querySelector('[data-position="1"] [data-name]');
-      const a1Furi = list.querySelector('[data-position="1"] [data-furi]');
-      if (a1Name && nameInput && !a1Name.value && nameInput.value) a1Name.value = nameInput.value;
-      if (a1Furi && furiInput && !a1Furi.value && furiInput.value) a1Furi.value = furiInput.value;
-    }
-    nameInput?.addEventListener('change', copyToFirst);
-    furiInput?.addEventListener('change', copyToFirst);
+    // 「ご本人も参加する」チェック時のみ、代表者情報を1人目にコピー
+    const selfJoinCb = document.querySelector('[data-self-join]');
 
-    attendeesSelect.addEventListener('change', rebuild);
+    function getFirstAttendeeFields() {
+      return {
+        name: list.querySelector('[data-position="1"] [data-name]'),
+        furi: list.querySelector('[data-position="1"] [data-furi]'),
+      };
+    }
+    function applySelfJoin() {
+      const { name: a1Name, furi: a1Furi } = getFirstAttendeeFields();
+      if (!a1Name || !a1Furi) return;
+      if (selfJoinCb?.checked) {
+        a1Name.value = nameInput?.value || '';
+        a1Furi.value = furiInput?.value || '';
+        a1Name.readOnly = true;
+        a1Furi.readOnly = true;
+        a1Name.classList.add('ap-input--locked');
+        a1Furi.classList.add('ap-input--locked');
+      } else {
+        a1Name.readOnly = false;
+        a1Furi.readOnly = false;
+        a1Name.classList.remove('ap-input--locked');
+        a1Furi.classList.remove('ap-input--locked');
+      }
+    }
+    selfJoinCb?.addEventListener('change', applySelfJoin);
+    nameInput?.addEventListener('input', () => { if (selfJoinCb?.checked) applySelfJoin(); });
+    furiInput?.addEventListener('input', () => { if (selfJoinCb?.checked) applySelfJoin(); });
+
+    attendeesSelect.addEventListener('change', () => { rebuild(); applySelfJoin(); });
     rebuild();
+    applySelfJoin();
   });
 </script>
 
@@ -671,6 +697,47 @@ if (!success && env.DB) {
     box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
   }
   textarea.ap-input { resize: vertical; line-height: 1.7; }
+
+  .ap-attendees-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .ap-input--inline { flex: 0 0 auto; min-width: 100px; }
+  .ap-self-join {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--fsn-gray-50);
+    border: 1.5px solid var(--fsn-gray-200);
+    border-radius: var(--fsn-radius-sm);
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--fsn-navy-deep);
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .ap-self-join:has(input:checked) {
+    border-color: var(--fsn-orange);
+    background: #FFF7ED;
+  }
+  .ap-self-join input[type="checkbox"] {
+    width: 16px; height: 16px;
+    accent-color: var(--fsn-orange);
+  }
+  .ap-field-note {
+    font-size: 0.78rem;
+    color: var(--fsn-gray-500);
+    line-height: 1.6;
+    margin: 6px 0 0;
+  }
+  .ap-input--locked {
+    background: var(--fsn-gray-100);
+    color: var(--fsn-gray-700);
+    cursor: not-allowed;
+  }
 
   /* Consents */
   .ap-consents { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
