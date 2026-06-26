@@ -263,19 +263,46 @@ if (!success && env.DB) {
 
     if (!attendeesSelect || !list) return;
 
-    function slotHtml(i, s) {
-      const full = s.remaining <= 0;
-      return '<label class="ap-slot' + (full ? ' ap-slot--full' : '') + '" data-program-code="' + s.program_code + '" data-day="' + s.day + '" data-time-start="' + s.time_start + '" data-time-end="' + s.time_end + '">' +
-        '<input type="checkbox" name="attendee_' + i + '_slot_ids" value="' + s.id + '" data-attendee-pos="' + i + '"' + (full ? ' disabled' : '') + ' />' +
-        '<span class="ap-slot__inner">' +
-          '<span class="ap-slot__time">' + s.time_start + ' - ' + s.time_end + '</span>' +
-          '<span class="ap-slot__name">' + escHtml(s.program_name) + '</span>' +
-          '<span class="ap-slot__meta">' +
-            '<span class="ap-slot__venue"><i class="fa-solid fa-location-dot"></i>' + escHtml(s.venue) + '</span>' +
-            '<span class="ap-slot__remaining' + (s.remaining <= 5 && s.remaining > 0 ? ' ap-slot__remaining--low' : '') + '">' + (full ? '満席' : '残' + s.remaining + '席') + '</span>' +
-          '</span>' +
-        '</span>' +
-      '</label>';
+    function programBaseName(name) {
+      // 「Legit ダンス ①」→「Legit ダンス」
+      return name.replace(/\s*[①②③④⑤⑥⑦⑧⑨⑩]\s*$/, '').trim();
+    }
+
+    function groupSlots(slots) {
+      // program_code でグループ化（順序維持）
+      const map = new Map();
+      for (const s of slots) {
+        if (!map.has(s.program_code)) map.set(s.program_code, []);
+        map.get(s.program_code).push(s);
+      }
+      return Array.from(map.entries()).map(([code, list]) => ({
+        program_code: code,
+        program_name: programBaseName(list[0].program_name),
+        venue: list[0].venue,
+        slots: list.sort((a, b) => a.time_start.localeCompare(b.time_start)),
+      }));
+    }
+
+    function programGroupHtml(i, group) {
+      const allFull = group.slots.every(s => s.remaining <= 0);
+      return '<div class="ap-pgroup' + (allFull ? ' ap-pgroup--full' : '') + '" data-program-code="' + group.program_code + '">' +
+        '<div class="ap-pgroup__head">' +
+          '<p class="ap-pgroup__name">' + escHtml(group.program_name) + '</p>' +
+          '<p class="ap-pgroup__venue"><i class="fa-solid fa-location-dot"></i>' + escHtml(group.venue) + '</p>' +
+        '</div>' +
+        '<div class="ap-pgroup__times">' +
+          group.slots.map(s => {
+            const full = s.remaining <= 0;
+            return '<label class="ap-time-btn' + (full ? ' ap-time-btn--full' : '') + '" data-program-code="' + s.program_code + '" data-day="' + s.day + '">' +
+              '<input type="checkbox" name="attendee_' + i + '_slot_ids" value="' + s.id + '" data-attendee-pos="' + i + '"' + (full ? ' disabled' : '') + ' />' +
+              '<span class="ap-time-btn__inner">' +
+                '<span class="ap-time-btn__time">' + s.time_start + '〜' + s.time_end + '</span>' +
+                '<span class="ap-time-btn__remaining' + (s.remaining <= 5 && s.remaining > 0 ? ' ap-time-btn__remaining--low' : '') + '">' + (full ? '満席' : '残' + s.remaining) + '</span>' +
+              '</span>' +
+            '</label>';
+          }).join('') +
+        '</div>' +
+      '</div>';
     }
 
     function buildAttendee(i) {
@@ -297,14 +324,14 @@ if (!success && env.DB) {
           '</div>' +
         '</div>' +
         '<div class="ap-attendee__programs">' +
-          '<p class="ap-attendee__progs-label">この方の参加プログラム <span style="font-weight:600;font-size:0.78rem;color:var(--fsn-gray-500);">（同じ種目は1回まで・1日3つまで）</span></p>' +
+          '<p class="ap-attendee__progs-label">この方の参加プログラム <span style="font-weight:600;font-size:0.78rem;color:var(--fsn-gray-500);">（種目を選んで時間を1つ・1日3種目まで）</span></p>' +
           (day1.length > 0 ?
             '<div class="ap-day"><h4 class="ap-day__head ap-day__head--navy"><span class="ap-day__num">DAY 1</span><span class="ap-day__date">12月19日（土）</span></h4>' +
-            '<div class="ap-slots">' + day1.map(s => slotHtml(i, s)).join('') + '</div></div>'
+            '<div class="ap-pgroups">' + groupSlots(day1).map(g => programGroupHtml(i, g)).join('') + '</div></div>'
             : '') +
           (day2.length > 0 ?
             '<div class="ap-day"><h4 class="ap-day__head ap-day__head--orange"><span class="ap-day__num">DAY 2</span><span class="ap-day__date">12月20日（日）</span></h4>' +
-            '<div class="ap-slots">' + day2.map(s => slotHtml(i, s)).join('') + '</div></div>'
+            '<div class="ap-pgroups">' + groupSlots(day2).map(g => programGroupHtml(i, g)).join('') + '</div></div>'
             : '') +
         '</div>';
       return wrap;
@@ -321,54 +348,65 @@ if (!success && env.DB) {
 
     function attachSlotControls(card) {
       const checkboxes = card.querySelectorAll('input[type=checkbox][data-attendee-pos]');
-      const updateLimits = () => {
-        const checkedCodes = new Set();
-        const byDay = {};
+
+      const updateState = () => {
+        // 各 program_code（種目）ごとの選択状況・各日のチェック種目数
+        const codesByDay = {}; // day -> Set(program_code)
         checkboxes.forEach(s => {
           if (s.checked) {
-            checkedCodes.add(s.closest('label')?.dataset?.programCode);
+            const code = s.closest('label')?.dataset?.programCode;
             const d = s.closest('label')?.dataset?.day;
-            byDay[d] = (byDay[d] || 0) + 1;
+            if (!codesByDay[d]) codesByDay[d] = new Set();
+            codesByDay[d].add(code);
           }
         });
+
         checkboxes.forEach(s => {
           const label = s.closest('label');
-          if (label?.classList.contains('ap-slot--full')) return;
+          if (label?.classList.contains('ap-time-btn--full')) return;
           if (s.checked) {
-            label?.classList.remove('ap-slot--limit', 'ap-slot--dup');
+            label?.classList.remove('ap-time-btn--limit');
             return;
           }
           const code = label?.dataset?.programCode;
           const d = label?.dataset?.day;
-          const isDup = checkedCodes.has(code);
-          const overLimit = (byDay[d] || 0) >= 3;
-          label?.classList.toggle('ap-slot--dup', isDup);
-          label?.classList.toggle('ap-slot--limit', !isDup && overLimit);
+          // この種目が既に他コマで選択済みなら、このボタン自体は同じグループの代替なのでlimitなし
+          const sameProgChecked = (codesByDay[d] || new Set()).has(code);
+          // 1日3種目を超えるなら limit
+          const dayCount = codesByDay[d]?.size || 0;
+          const overLimit = !sameProgChecked && dayCount >= 3;
+          label?.classList.toggle('ap-time-btn--limit', overLimit);
         });
       };
+
       checkboxes.forEach(cb => {
         cb.addEventListener('change', () => {
           const label = cb.closest('label');
           const code = label?.dataset?.programCode;
           const d = label?.dataset?.day;
           if (cb.checked) {
-            const sameCode = Array.from(checkboxes).filter(x => x !== cb && x.checked && x.closest('label')?.dataset?.programCode === code);
-            if (sameCode.length > 0) {
-              alert('同じ種目（' + (label?.querySelector('.ap-slot__name')?.textContent?.trim() || '同一種目') + '）は、おひとり1回までです。\nさまざまなスポーツを、ぜひ、ご体験ください。');
-              cb.checked = false;
-              return;
-            }
-            const checkedInDay = Array.from(checkboxes).filter(x => x.checked && x.closest('label')?.dataset?.day === d).length;
-            if (checkedInDay > 3) {
-              alert(d + ' は、おひとり1日3つまで、お選びいただけます。');
+            // 同種目内で他がチェック済みなら、自動で他を解除（時間切替）
+            const sameProg = Array.from(checkboxes).filter(x =>
+              x !== cb && x.checked && x.closest('label')?.dataset?.programCode === code
+            );
+            sameProg.forEach(x => { x.checked = false; });
+            // 1日3種目超チェック
+            const codesInDay = new Set();
+            checkboxes.forEach(x => {
+              if (x.checked) {
+                codesInDay.add(x.closest('label')?.dataset?.programCode);
+              }
+            });
+            if (codesInDay.size > 3) {
+              alert(d + ' は、おひとり1日3種目まで、お選びいただけます。');
               cb.checked = false;
               return;
             }
           }
-          updateLimits();
+          updateState();
         });
       });
-      updateLimits();
+      updateState();
     }
 
     function rebuild() {
@@ -585,7 +623,87 @@ if (!success && env.DB) {
   }
   .ap-day__date { font-size: 0.95rem; font-weight: 700; }
 
-  /* Slots */
+  /* Program groups (種目別カード) */
+  .ap-pgroups {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 600px) { .ap-pgroups { grid-template-columns: 1fr; } }
+
+  .ap-pgroup {
+    background: var(--fsn-white);
+    border: 2px solid var(--fsn-gray-200);
+    border-radius: var(--fsn-radius-sm);
+    padding: 12px 14px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .ap-pgroup:has(input:checked) {
+    border-color: var(--fsn-orange);
+    background: #FFF7ED;
+  }
+  .ap-pgroup--full { opacity: 0.55; background: var(--fsn-gray-100); }
+  .ap-pgroup__head { margin-bottom: 8px; }
+  .ap-pgroup__name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 2px;
+  }
+  .ap-pgroup__venue {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.76rem;
+    color: var(--fsn-gray-700);
+    margin: 0;
+  }
+  .ap-pgroup__venue i { color: var(--fsn-orange); font-size: 0.85em; }
+  .ap-pgroup__times { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .ap-time-btn { position: relative; cursor: pointer; }
+  .ap-time-btn input[type="checkbox"] {
+    position: absolute; opacity: 0; width: 0; height: 0;
+  }
+  .ap-time-btn__inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--fsn-white);
+    border: 1.5px solid var(--fsn-gray-300);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--fsn-navy-deep);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .ap-time-btn:not(.ap-time-btn--full):not(.ap-time-btn--limit):hover .ap-time-btn__inner {
+    border-color: var(--fsn-orange);
+    background: #FFF7ED;
+  }
+  .ap-time-btn input:checked ~ .ap-time-btn__inner {
+    background: var(--fsn-orange);
+    border-color: var(--fsn-orange);
+    color: var(--fsn-white);
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+  }
+  .ap-time-btn__time { font-family: var(--fsn-font-num); }
+  .ap-time-btn__remaining { font-size: 0.7rem; font-weight: 700; opacity: 0.7; }
+  .ap-time-btn__remaining--low { color: #DC2626; opacity: 1; }
+  .ap-time-btn input:checked ~ .ap-time-btn__inner .ap-time-btn__remaining {
+    opacity: 0.85; color: var(--fsn-white);
+  }
+  .ap-time-btn--full { cursor: not-allowed; }
+  .ap-time-btn--full .ap-time-btn__inner {
+    background: var(--fsn-gray-100);
+    color: var(--fsn-gray-500);
+    border-color: var(--fsn-gray-200);
+  }
+  .ap-time-btn--limit { cursor: not-allowed; }
+  .ap-time-btn--limit .ap-time-btn__inner { opacity: 0.4; }
+
+  /* Legacy slots (旧スタイル・残置) */
   .ap-slots {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
