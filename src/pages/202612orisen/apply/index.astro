@@ -496,6 +496,7 @@ if (!success && env.DB) {
       function rowHtml(idx) {
         return '<div class="ap-progrow" data-progrow data-row-idx="' + idx + '" data-selected-key="">' +
           '<div class="ap-progrow__head">' +
+            '<span class="ap-progrow__day" data-day-tag></span>' +
             '<span class="ap-progrow__num">プログラム' + ['①','②','③','④','⑤','⑥'][idx] + '</span>' +
             '<button type="button" class="ap-progrow__del" data-del>' +
               '<i class="fa-solid fa-xmark"></i> 削除' +
@@ -522,15 +523,22 @@ if (!success && env.DB) {
         const venueEl = row.querySelector('[data-venue]');
         const delBtn = row.querySelector('[data-del]');
 
+        const dayTag = row.querySelector('[data-day-tag]');
         progSel.addEventListener('change', () => {
           row.dataset.selectedKey = progSel.value;
           if (progSel.value) {
             const g = programGroups.find(x => x.key === progSel.value);
-            if (g && venueEl) {
-              const dayLabel = g.day === 'Day1' ? '<span class="ap-day-tag ap-day-tag--navy">DAY 1 (12/19)</span>' : '<span class="ap-day-tag ap-day-tag--orange">DAY 2 (12/20)</span>';
-              venueEl.innerHTML = dayLabel + ' <i class="fa-solid fa-location-dot"></i> ' + escHtml(g.venue);
+            if (g) {
+              if (dayTag) {
+                dayTag.textContent = g.day === 'Day1' ? 'DAY 1' : 'DAY 2';
+                dayTag.className = 'ap-progrow__day ' + (g.day === 'Day1' ? 'ap-progrow__day--navy' : 'ap-progrow__day--orange');
+              }
+              if (venueEl) {
+                venueEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + escHtml(g.venue);
+              }
             }
           } else {
+            if (dayTag) { dayTag.textContent = ''; dayTag.className = 'ap-progrow__day'; }
             if (venueEl) venueEl.innerHTML = '';
           }
           updateTimeSelect(row);
@@ -813,8 +821,9 @@ if (!success && env.DB) {
   }
   .ap-progrow__head {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-bottom: 12px;
   }
   .ap-progrow__num {
@@ -826,6 +835,20 @@ if (!success && env.DB) {
     font-size: 0.8rem;
     font-weight: 800;
   }
+  .ap-progrow__day {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--fsn-white);
+    margin-right: 8px;
+  }
+  .ap-progrow__day:empty { display: none; }
+  .ap-progrow__day--navy { background: var(--fsn-navy-deep); }
+  .ap-progrow__day--orange { background: var(--fsn-orange); }
+  .ap-progrow__del { margin-left: auto; }
   .ap-progrow__del {
     background: transparent;
     border: 0;
