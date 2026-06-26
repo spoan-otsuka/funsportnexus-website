@@ -3,6 +3,13 @@ main = "./dist/_worker.js/index.js"
 compatibility_date = "2026-06-25"
 compatibility_flags = ["nodejs_compat"]
 
+# カスタムドメイン（検証用サブドメイン）
+# Cloudflare DNS で funsportnexus.org が管理されている場合、
+# このデプロイで自動で DNS レコード + SSL証明書 + ルーティング が設定されます
+routes = [
+  { pattern = "next.funsportnexus.org", custom_domain = true },
+]
+
 # ============================================
 # 静的アセット（Astro ビルド成果物）
 # ============================================
