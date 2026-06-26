@@ -230,7 +230,7 @@ export async function POST({ request, locals }) {
     const summary = buildSummary(data, slotMap, attendees);
     await sendEmailsAndSlack(env, data, attendees, slotMap, entryId, qrToken, summary);
 
-    return redirect(`/202612orisen/apply/?success=1&id=${entryId}`);
+    return redirect(`/202612orisen/apply/?success=1&id=${entryId}&qr=${qrToken}`);
   } catch (err) {
     console.error('Application failed:', err);
     return redirect('/202612orisen/apply/?error=server_error');

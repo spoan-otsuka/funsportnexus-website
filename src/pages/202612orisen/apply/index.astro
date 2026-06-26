@@ -9,6 +9,7 @@ const success = Astro.url.searchParams.get('success') === '1';
 const errorParam = Astro.url.searchParams.get('error') || '';
 const fullSlot = Astro.url.searchParams.get('slot') || '';
 const conflictInfo = Astro.url.searchParams.get('conflict') || '';
+const qrToken = Astro.url.searchParams.get('qr') || '';
 const entryId = Astro.url.searchParams.get('id') || '';
 
 const errorMessages = {
@@ -88,8 +89,26 @@ if (!success && env.DB) {
           {entryId && entryId !== 'ok' && (
             <p class="ap-thanks__id">受付番号：<strong>{entryId}</strong></p>
           )}
+          {qrToken && qrToken !== 'ok' && (
+            <div class="ap-thanks__qr">
+              <p class="ap-thanks__qr-label">
+                <i class="fa-solid fa-qrcode"></i>
+                当日受付用 QRコード
+              </p>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent('https://funsportnexus.org/202612orisen/qr/?t=' + qrToken)}`}
+                alt="当日受付QRコード"
+                width="240"
+                height="240"
+              />
+              <p class="ap-thanks__qr-note">
+                スマートフォンに、保存してください。<br>
+                当日、受付で、お見せください。
+              </p>
+            </div>
+          )}
           <div class="ap-thanks__notes">
-            <p>当日は、会場の <strong>中央広場</strong> にて、お名前を、お伝えください。</p>
+            <p>当日は、会場の <strong>中央広場</strong> にて、QRコードまたはお名前を、お伝えください。</p>
           </div>
           <a href="/202612orisen/" class="ap-thanks__back">
             <i class="fa-solid fa-arrow-left"></i> 特設サイトに戻る
@@ -225,10 +244,6 @@ if (!success && env.DB) {
               <label class="ap-consent">
                 <input type="checkbox" name="consent_photo" />
                 <span>当日の写真・映像が、広報目的で、Webサイト・SNS等に、掲載されることに、同意します（任意）</span>
-              </label>
-              <label class="ap-consent">
-                <input type="checkbox" name="consent_allergy" />
-                <span>ぱん食い競走に、参加される場合：食物アレルギーの確認に、同意します（該当者のみ）</span>
               </label>
             </div>
           </div>
@@ -373,11 +388,9 @@ if (!success && env.DB) {
           '</div>' +
         '</div>' +
         '<div class="ap-attendee__programs">' +
-          '<p class="ap-attendee__progs-label">この方の参加プログラム <span style="font-weight:600;font-size:0.78rem;color:var(--fsn-gray-500);">（おひとり1日3種目までお選びいただけます）</span></p>' +
-          '<div class="ap-progslots" data-progslots></div>' +
-          '<button type="button" class="ap-add-btn" data-add-slot>' +
-            '<i class="fa-solid fa-plus"></i> プログラムを追加' +
-          '</button>' +
+          '<p class="ap-attendee__progs-label">この方の参加プログラム <span style="font-weight:600;font-size:0.78rem;color:var(--fsn-gray-500);">（おひとり1日3種目まで）</span></p>' +
+          '<div class="ap-day-blocks" data-day-blocks></div>' +
+          '<p class="ap-day-blocks__note" data-no-day-note>※申込者情報の「ご参加希望日」を、お選びください。</p>' +
         '</div>';
       return wrap;
     }
@@ -391,20 +404,25 @@ if (!success && env.DB) {
       update();
     }
 
+    const MAX_SLOTS_PER_DAY = 3;
+
     function attachSlotControls(card) {
       const i = card.dataset.position;
-      const container = card.querySelector('[data-progslots]');
-      const addBtn = card.querySelector('[data-add-slot]');
-      if (!container || !addBtn) return;
+      const dayBlocksContainer = card.querySelector('[data-day-blocks]');
+      const noDayNote = card.querySelector('[data-no-day-note]');
+      if (!dayBlocksContainer) return;
 
-      function getSelectedProgramKeys() {
-        return Array.from(container.querySelectorAll('[data-progrow]')).map(row =>
+      function getAllowedDays() {
+        return Array.from(document.querySelectorAll('[data-pday]:checked')).map(x => x.value);
+      }
+      function getAllSelectedKeysInCard() {
+        return Array.from(dayBlocksContainer.querySelectorAll('[data-progrow]')).map(row =>
           row.dataset.selectedKey || ''
         );
       }
-      function countByDay() {
+      function countByDayInCard() {
         const c = {};
-        container.querySelectorAll('[data-progrow]').forEach(row => {
+        dayBlocksContainer.querySelectorAll('[data-progrow]').forEach(row => {
           const key = row.dataset.selectedKey;
           if (!key) return;
           const day = key.split('::')[0];
@@ -412,63 +430,25 @@ if (!success && env.DB) {
         });
         return c;
       }
-      function getSelectedDays() {
-        return Array.from(document.querySelectorAll('[data-pday]:checked')).map(x => x.value);
-      }
-      function updateRowOptions() {
-        const selectedKeys = getSelectedProgramKeys();
-        const dayCounts = countByDay();
-        const allowedDays = getSelectedDays();
-        container.querySelectorAll('[data-progrow]').forEach(row => {
+      function updateAllRowOptions() {
+        const selectedKeys = getAllSelectedKeysInCard();
+        const dayCounts = countByDayInCard();
+        dayBlocksContainer.querySelectorAll('[data-progrow]').forEach(row => {
+          const block = row.closest('[data-day-block]');
+          const day = block?.dataset?.day;
           const progSel = row.querySelector('[data-prog-select]');
           const ownKey = row.dataset.selectedKey || '';
           const current = progSel.value;
           let html = '<option value="">種目を選択してください</option>';
-          const groupedByDay = { Day1: [], Day2: [] };
           for (const g of programGroups) {
-            if (!allowedDays.includes(g.day)) continue;
-            groupedByDay[g.day]?.push(g);
-          }
-          for (const day of ['Day1','Day2']) {
-            const gs = groupedByDay[day] || [];
-            if (!gs.length) continue;
-            const label = day === 'Day1' ? 'DAY 1 - 12月19日（土）' : 'DAY 2 - 12月20日（日）';
-            html += '<optgroup label="' + label + '">';
-            for (const g of gs) {
-              const usedByOther = selectedKeys.includes(g.key) && g.key !== ownKey;
-              const dayOver = (dayCounts[g.day] || 0) >= 3 && g.key !== ownKey;
-              const allFull = g.slots.every(s => s.remaining <= 0);
-              const disabled = usedByOther || dayOver || allFull;
-              const note = allFull ? '（満席）' : (usedByOther ? '（選択済み）' : (dayOver ? '（同日3種目超過）' : ''));
-              const dayPrefix = day === 'Day1' ? '[DAY 1] ' : '[DAY 2] ';
-              html += '<option value="' + g.key + '"' + (disabled ? ' disabled' : '') + (current === g.key ? ' selected' : '') + '>' + dayPrefix + escHtml(g.program_name) + note + '</option>';
-            }
-            html += '</optgroup>';
+            if (g.day !== day) continue;
+            const usedByOther = selectedKeys.includes(g.key) && g.key !== ownKey;
+            const allFull = g.slots.every(s => s.remaining <= 0);
+            const disabled = usedByOther || allFull;
+            const note = allFull ? '（満席）' : (usedByOther ? '（選択済み）' : '');
+            html += '<option value="' + g.key + '"' + (disabled ? ' disabled' : '') + (current === g.key ? ' selected' : '') + '>' + escHtml(g.program_name) + note + '</option>';
           }
           progSel.innerHTML = html;
-          // 希望日から外れた場合、選択をクリア
-          if (row.dataset.selectedKey) {
-            const g = programGroups.find(x => x.key === row.dataset.selectedKey);
-            if (g && !allowedDays.includes(g.day)) {
-              row.dataset.selectedKey = '';
-              progSel.value = '';
-              const timeSel = row.querySelector('[data-time-select]');
-              const venueEl = row.querySelector('[data-venue]');
-              if (timeSel) {
-                timeSel.innerHTML = '<option value="">先に種目を選択してください</option>';
-                timeSel.disabled = true;
-              }
-              if (venueEl) venueEl.innerHTML = '';
-            }
-          }
-        });
-        // セミナーの表示制御（Day1選択時のみ有効）
-        document.querySelectorAll('.ap-prog-section--seminar').forEach(sec => {
-          const seminarVisible = allowedDays.includes('Day1');
-          sec.style.display = seminarVisible ? '' : 'none';
-          if (!seminarVisible) {
-            sec.querySelectorAll('input[data-seminar]').forEach(cb => { cb.checked = false; });
-          }
         });
       }
       function updateTimeSelect(row) {
@@ -485,16 +465,17 @@ if (!success && env.DB) {
         let html = '<option value="">時間を選択してください</option>';
         for (const s of g.slots) {
           const full = s.remaining <= 0;
-          const dayPrefix = s.day === 'Day1' ? '[DAY 1] ' : '[DAY 2] ';
-          html += '<option value="' + s.id + '"' + (full ? ' disabled' : '') + (String(s.id) === currentSlotId ? ' selected' : '') + '>' + dayPrefix + s.time_start + ' 〜 ' + s.time_end + (full ? '（満席）' : '（残' + s.remaining + '）') + '</option>';
+          html += '<option value="' + s.id + '"' + (full ? ' disabled' : '') + (String(s.id) === currentSlotId ? ' selected' : '') + '>' + s.time_start + ' 〜 ' + s.time_end + (full ? '（満席）' : '（残' + s.remaining + '）') + '</option>';
         }
         timeSel.innerHTML = html;
         timeSel.disabled = false;
       }
-      function rowHtml(idx) {
+      function rowHtml(day, idx) {
+        const dayLabel = day === 'Day1' ? 'DAY 1' : 'DAY 2';
+        const dayClass = day === 'Day1' ? 'ap-progrow__day--navy' : 'ap-progrow__day--orange';
         return '<div class="ap-progrow" data-progrow data-row-idx="' + idx + '" data-selected-key="">' +
           '<div class="ap-progrow__head">' +
-            '<span class="ap-progrow__day" data-day-tag></span>' +
+            '<span class="ap-progrow__day ' + dayClass + '">' + dayLabel + '</span>' +
             '<span class="ap-progrow__num">プログラム' + ['①','②','③','④','⑤','⑥'][idx] + '</span>' +
             '<button type="button" class="ap-progrow__del" data-del>' +
               '<i class="fa-solid fa-xmark"></i> 削除' +
@@ -515,44 +496,34 @@ if (!success && env.DB) {
           '</div>' +
         '</div>';
       }
-      function attachRowHandlers(row) {
+      function attachRowHandlers(block, row) {
         const progSel = row.querySelector('[data-prog-select]');
-        const timeSel = row.querySelector('[data-time-select]');
         const venueEl = row.querySelector('[data-venue]');
         const delBtn = row.querySelector('[data-del]');
 
-        const dayTag = row.querySelector('[data-day-tag]');
         progSel.addEventListener('change', () => {
           row.dataset.selectedKey = progSel.value;
           if (progSel.value) {
             const g = programGroups.find(x => x.key === progSel.value);
-            if (g) {
-              if (dayTag) {
-                dayTag.textContent = g.day === 'Day1' ? 'DAY 1' : 'DAY 2';
-                dayTag.className = 'ap-progrow__day ' + (g.day === 'Day1' ? 'ap-progrow__day--navy' : 'ap-progrow__day--orange');
-              }
-              if (venueEl) {
-                venueEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + escHtml(g.venue);
-              }
+            if (g && venueEl) {
+              venueEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + escHtml(g.venue);
             }
-          } else {
-            if (dayTag) { dayTag.textContent = ''; dayTag.className = 'ap-progrow__day'; }
-            if (venueEl) venueEl.innerHTML = '';
+          } else if (venueEl) {
+            venueEl.innerHTML = '';
           }
           updateTimeSelect(row);
-          updateRowOptions();
-          updateAddBtn();
+          updateAllRowOptions();
+          updateAddBtnsInCard();
         });
-        timeSel.addEventListener('change', () => { /* slot_id 確定。何もしない */ });
         delBtn.addEventListener('click', () => {
           row.remove();
-          renumberRows();
-          updateRowOptions();
-          updateAddBtn();
+          renumberBlock(block);
+          updateAllRowOptions();
+          updateAddBtnsInCard();
         });
       }
-      function renumberRows() {
-        const rows = container.querySelectorAll('[data-progrow]');
+      function renumberBlock(block) {
+        const rows = block.querySelectorAll('[data-progrow]');
         const nums = ['①','②','③','④','⑤','⑥'];
         rows.forEach((row, idx) => {
           row.dataset.rowIdx = idx;
@@ -560,31 +531,75 @@ if (!success && env.DB) {
           if (numEl) numEl.textContent = 'プログラム' + (nums[idx] || ('#' + (idx+1)));
         });
       }
-      function updateAddBtn() {
-        const rows = container.querySelectorAll('[data-progrow]');
-        if (rows.length >= MAX_SLOTS_PER_ATTENDEE) {
-          addBtn.disabled = true;
-          addBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> 上限（' + MAX_SLOTS_PER_ATTENDEE + '枠）に達しました';
-        } else {
-          addBtn.disabled = false;
-          addBtn.innerHTML = '<i class="fa-solid fa-plus"></i> プログラムを追加';
-        }
+      function updateAddBtnsInCard() {
+        dayBlocksContainer.querySelectorAll('[data-day-block]').forEach(block => {
+          const addBtn = block.querySelector('[data-add-slot]');
+          const rows = block.querySelectorAll('[data-progrow]');
+          if (!addBtn) return;
+          if (rows.length >= MAX_SLOTS_PER_DAY) {
+            addBtn.disabled = true;
+            addBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> 1日3種目まで（追加できません）';
+          } else {
+            addBtn.disabled = false;
+            const day = block.dataset.day;
+            const label = day === 'Day1' ? 'DAY 1' : 'DAY 2';
+            addBtn.innerHTML = '<i class="fa-solid fa-plus"></i> ' + label + ' のプログラムを追加';
+          }
+        });
       }
-      function addRow() {
+      function addRowToBlock(block) {
+        const container = block.querySelector('[data-progrows]');
+        const day = block.dataset.day;
         const idx = container.children.length;
         const tpl = document.createElement('div');
-        tpl.innerHTML = rowHtml(idx);
+        tpl.innerHTML = rowHtml(day, idx);
         const row = tpl.firstElementChild;
         container.appendChild(row);
-        attachRowHandlers(row);
-        updateRowOptions();
-        updateAddBtn();
+        attachRowHandlers(block, row);
+        updateAllRowOptions();
+        updateAddBtnsInCard();
+      }
+      function buildDayBlockEl(day) {
+        const dayLabel = day === 'Day1' ? 'DAY 1' : 'DAY 2';
+        const dateLabel = day === 'Day1' ? '12月19日（土）' : '12月20日（日）';
+        const colorClass = day === 'Day1' ? 'ap-day-block__tag--navy' : 'ap-day-block__tag--orange';
+        const el = document.createElement('div');
+        el.className = 'ap-day-block';
+        el.dataset.dayBlock = 'true';
+        el.dataset.day = day;
+        el.innerHTML =
+          '<h4 class="ap-day-block__title">' +
+            '<span class="ap-day-block__tag ' + colorClass + '">' + dayLabel + '</span>' +
+            '<span class="ap-day-block__date">' + dateLabel + ' のプログラム</span>' +
+          '</h4>' +
+          '<div class="ap-progslots" data-progrows></div>' +
+          '<button type="button" class="ap-add-btn" data-add-slot>' +
+            '<i class="fa-solid fa-plus"></i> ' + dayLabel + ' のプログラムを追加' +
+          '</button>';
+        const addBtn = el.querySelector('[data-add-slot]');
+        addBtn.addEventListener('click', () => addRowToBlock(el));
+        return el;
       }
 
-      addBtn.addEventListener('click', addRow);
+      // 参加希望日に応じて day block を生成（外部から呼ばれる）
+      card.refreshDayBlocks = function refreshDayBlocks() {
+        const allowed = getAllowedDays();
+        // 既存の選択（slot_id）はリセット
+        dayBlocksContainer.innerHTML = '';
+        if (allowed.length === 0) {
+          if (noDayNote) noDayNote.style.display = '';
+          return;
+        }
+        if (noDayNote) noDayNote.style.display = 'none';
+        ['Day1', 'Day2'].forEach(day => {
+          if (!allowed.includes(day)) return;
+          const block = buildDayBlockEl(day);
+          dayBlocksContainer.appendChild(block);
+          addRowToBlock(block); // 初期1枠
+        });
+      };
 
-      // 初期1枠
-      addRow();
+      card.refreshDayBlocks();
     }
 
     function rebuild() {
@@ -654,17 +669,12 @@ if (!success && env.DB) {
     rebuild();
     applySelfJoin();
 
-    // 参加希望日チェックボックス変更で全カード再構築（スロット選択はリセット）
+    // 参加希望日チェックボックス変更 → 各カードのday blockをリビルド
     document.querySelectorAll('[data-pday]').forEach(cb => {
       cb.addEventListener('change', () => {
-        const anyChecked = Array.from(document.querySelectorAll('[data-pday]')).some(x => x.checked);
-        if (!anyChecked) {
-          alert('Day1 または Day2 のいずれか、もしくは両方を、お選びください。');
-          cb.checked = true;
-          return;
-        }
-        rebuild();
-        applySelfJoin();
+        list.querySelectorAll('.ap-attendee').forEach(card => {
+          if (typeof card.refreshDayBlocks === 'function') card.refreshDayBlocks();
+        });
       });
     });
   });
@@ -1415,6 +1425,37 @@ if (!success && env.DB) {
     border-radius: var(--fsn-radius-sm);
   }
   .ap-thanks__notes p { margin: 0; font-size: 0.9rem; color: var(--fsn-navy-deep); }
+
+  .ap-thanks__qr {
+    margin: 24px auto 32px;
+    padding: 20px;
+    background: var(--fsn-white);
+    border: 2px dashed var(--fsn-orange);
+    border-radius: var(--fsn-radius-md);
+    max-width: 320px;
+  }
+  .ap-thanks__qr-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--fsn-orange-dark);
+    margin: 0 0 12px;
+  }
+  .ap-thanks__qr img {
+    display: block;
+    margin: 0 auto;
+    width: 240px;
+    height: 240px;
+  }
+  .ap-thanks__qr-note {
+    font-size: 0.82rem;
+    color: var(--fsn-gray-700);
+    margin: 12px 0 0;
+    line-height: 1.7;
+  }
   .ap-thanks__back {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 14px 28px; background: var(--fsn-navy-deep); color: var(--fsn-white);

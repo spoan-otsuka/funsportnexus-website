@@ -1,0 +1,197 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/202612orisen.css';
+
+export const prerender = false;
+
+const env = Astro.locals?.runtime?.env ?? {};
+const token = Astro.url.searchParams.get('t') || '';
+
+let entry = null;
+let attendees = [];
+let entrySlots = [];
+let lookupError = null;
+
+if (token && env.DB) {
+  try {
+    const e = await env.DB.prepare('SELECT * FROM entries WHERE qr_token = ?').bind(token).first();
+    if (e) {
+      entry = e;
+      const a = await env.DB.prepare(`
+        SELECT * FROM entry_attendees WHERE entry_id = ? ORDER BY position
+      `).bind(e.id).all();
+      attendees = a?.results ?? [];
+      const s = await env.DB.prepare(`
+        SELECT es.attendee_id, s.id AS slot_id, s.program_name, s.day, s.time_start, s.time_end, s.venue
+        FROM entry_slots es
+        INNER JOIN slots s ON es.slot_id = s.id
+        WHERE es.entry_id = ?
+        ORDER BY s.day, s.time_start
+      `).bind(e.id).all();
+      entrySlots = s?.results ?? [];
+    }
+  } catch (e) {
+    lookupError = e.message;
+  }
+}
+
+const slotsByAttendee = {};
+for (const s of entrySlots) {
+  const k = s.attendee_id || 0;
+  if (!slotsByAttendee[k]) slotsByAttendee[k] = [];
+  slotsByAttendee[k].push(s);
+}
+---
+<BaseLayout
+  title="当日受付 ｜ fun sport nexus 2026.12"
+  description="QRコードから 当日受付内容を、ご確認いただけます。"
+  noindex={true}
+>
+
+  <section class="dec-sub-hero">
+    <div class="dec-sub-hero__bg"></div>
+    <div class="dec-sub-hero__inner">
+      <p class="dec-sub-hero__label">CHECK-IN</p>
+      <h1 class="dec-sub-hero__title">当日受付</h1>
+    </div>
+  </section>
+
+  <section class="ap-section">
+    <div class="ap-section__inner" style="max-width: 760px;">
+      {!token ? (
+        <div class="ap-error-banner"><i class="fa-solid fa-circle-exclamation"></i> トークンが指定されていません。お申込み完了メールのQRコードから、お進みください。</div>
+      ) : !entry ? (
+        <div class="ap-error-banner"><i class="fa-solid fa-circle-exclamation"></i> 該当のお申込みが、見つかりませんでした。{lookupError && `（${lookupError}）`}</div>
+      ) : (
+        <div class="qr-confirm">
+          <div class="ap-step">
+            <h2 class="ap-step__title"><span class="ap-step__num">!</span> ご予約内容</h2>
+            <dl class="qr-meta">
+              <div><dt>受付番号</dt><dd><strong>{entry.id}</strong></dd></div>
+              <div><dt>お申込み者</dt><dd>{entry.applicant_name} 様（{entry.applicant_furigana}）</dd></div>
+              <div><dt>連絡先</dt><dd>{entry.email} ／ {entry.tel}</dd></div>
+              <div><dt>参加人数</dt><dd>{entry.attendees} 名</dd></div>
+            </dl>
+
+            <ul class="qr-attendees">
+              {attendees.map(a => (
+                <li class="qr-attendee">
+                  <p class="qr-attendee__head">
+                    <span class="ap-attendee__num">{a.position}人目</span>
+                    {a.is_representative ? <span class="ap-attendee__tag">代表者</span> : null}
+                    <span class="qr-attendee__name">{a.name}</span>
+                    {a.grade && <span class="qr-attendee__grade">{a.grade}</span>}
+                  </p>
+                  <ul class="qr-slots">
+                    {(slotsByAttendee[a.id] || []).map(s => (
+                      <li>
+                        <span class={`ap-progrow__day ${s.day === 'Day1' ? 'ap-progrow__day--navy' : 'ap-progrow__day--orange'}`}>{s.day === 'Day1' ? 'DAY 1' : 'DAY 2'}</span>
+                        <span>{s.time_start}〜{s.time_end}</span>
+                        <strong>{s.program_name}</strong>
+                        <span class="qr-slot__venue"><i class="fa-solid fa-location-dot"></i> {s.venue}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="ap-step">
+            <h2 class="ap-step__title"><span class="ap-step__num">?</span> ぱん食い競走への参加について</h2>
+            <p class="ap-step__desc">
+              「スポあんぱん食い競走」は、当日 自由参加でお楽しみいただけます。<br>
+              参加されるご予定の方は、以下から、お申し込みください。<br>
+              ※パンには、小麦・卵・乳成分等のアレルギー物質が含まれます。
+            </p>
+
+            <form class="qr-pan-form" action="/api/qr-panshoku" method="POST">
+              <input type="hidden" name="token" value={token} />
+              <div class="qr-pan-attendees">
+                {attendees.map(a => (
+                  <div class="qr-pan-attendee">
+                    <p class="qr-pan-attendee__name">
+                      <span class="ap-attendee__num">{a.position}人目</span>
+                      <span>{a.name}</span>
+                    </p>
+                    <label class="ap-consent" style="background:var(--fsn-white);border:1.5px solid var(--fsn-gray-200);">
+                      <input type="checkbox" name={`pan_${a.id}`} value="1" defaultChecked={!!a.panshoku_join} />
+                      <span>この方が、ぱん食い競走に、参加します</span>
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <div class="ap-consents" style="margin-top:16px;">
+                <label class="ap-consent">
+                  <input type="checkbox" name="allergy_ok" value="1" required defaultChecked={!!attendees.find(a => a.panshoku_allergy_ok)} />
+                  <span><strong>食物アレルギー</strong>について、確認いたしました。参加者本人およびご家族のアレルギー有無を確認し、安全な範囲でご参加いただくことに、同意します。（必須）</span>
+                </label>
+              </div>
+              <div class="ap-submit">
+                <button type="submit" class="ap-submit__btn">
+                  <i class="fa-solid fa-check"></i> ぱん食い競走の参加を、確定する
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style is:global>
+  .qr-meta {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 16px;
+    margin: 16px 0 24px;
+    font-size: 0.92rem;
+  }
+  .qr-meta > div { display: contents; }
+  .qr-meta dt { font-weight: 800; color: var(--fsn-orange-dark); font-size: 0.82rem; }
+  .qr-meta dd { margin: 0; color: var(--fsn-navy-deep); }
+
+  .qr-attendees { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+  .qr-attendee {
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-sm);
+    padding: 14px 16px;
+  }
+  .qr-attendee__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 10px;
+    flex-wrap: wrap;
+  }
+  .qr-attendee__name { font-weight: 800; color: var(--fsn-navy-deep); font-size: 1.05rem; }
+  .qr-attendee__grade { font-size: 0.82rem; color: var(--fsn-orange-dark); font-weight: 700; }
+  .qr-slots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .qr-slots li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.88rem;
+    flex-wrap: wrap;
+  }
+  .qr-slots li strong { color: var(--fsn-navy-deep); }
+  .qr-slot__venue { font-size: 0.78rem; color: var(--fsn-gray-700); }
+  .qr-slot__venue i { color: var(--fsn-orange); }
+
+  .qr-pan-attendees { display: flex; flex-direction: column; gap: 12px; }
+  .qr-pan-attendee {
+    padding: 12px 14px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-sm);
+  }
+  .qr-pan-attendee__name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-weight: 700;
+    color: var(--fsn-navy-deep);
+  }
+</style>
