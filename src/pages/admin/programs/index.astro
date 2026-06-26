@@ -1,0 +1,247 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export const prerender = false;
+
+const env = Astro.locals?.runtime?.env ?? {};
+
+let slots = [];
+let participantsBySlot = {};
+let lookupError = null;
+
+if (env.DB) {
+  try {
+    const slotResult = await env.DB.prepare(`
+      SELECT id, code, program_code, program_name, day, date, time_start, time_end, venue, capacity, sort_order
+      FROM slots
+      WHERE is_active = 1
+      ORDER BY day, sort_order, time_start
+    `).all();
+    slots = slotResult?.results ?? [];
+
+    const partsResult = await env.DB.prepare(`
+      SELECT
+        es.slot_id,
+        a.position,
+        a.name,
+        a.furigana,
+        a.grade,
+        a.birth_date,
+        a.is_representative,
+        a.panshoku_join,
+        a.panshoku_allergy_ok,
+        e.id AS entry_id,
+        e.tel,
+        e.email
+      FROM entry_slots es
+      INNER JOIN entries e ON es.entry_id = e.id AND e.status = 'confirmed'
+      LEFT JOIN entry_attendees a ON es.attendee_id = a.id
+      ORDER BY a.name
+    `).all();
+    for (const p of (partsResult?.results ?? [])) {
+      if (!participantsBySlot[p.slot_id]) participantsBySlot[p.slot_id] = [];
+      participantsBySlot[p.slot_id].push(p);
+    }
+  } catch (e) {
+    lookupError = e.message;
+  }
+}
+
+const dayInfo = (day) => day === 'Day1' ? '12月19日（土）' : '12月20日（日）';
+---
+<BaseLayout
+  title="管理 ｜ プログラム別 参加者リスト"
+  description="運営用：プログラム別の参加者リスト"
+  noindex={true}
+  hideHeader={true}
+  hideFooter={true}
+>
+
+  <div class="admin-wrap">
+    <header class="admin-head no-print">
+      <h1>fun sport nexus 2026.12 ／ プログラム別 参加者リスト</h1>
+      <div class="admin-actions">
+        <button onclick="window.print()" class="admin-btn">
+          <i class="fa-solid fa-print"></i> 印刷
+        </button>
+        <a href="/admin/" class="admin-btn admin-btn--ghost">管理トップへ</a>
+      </div>
+    </header>
+
+    {lookupError && <div style="color:#b00;">エラー：{lookupError}</div>}
+
+    {slots.map(s => {
+      const list = participantsBySlot[s.id] || [];
+      return (
+        <section class="prog-sheet">
+          <div class="prog-sheet__head">
+            <div>
+              <span class={`day-tag day-tag--${s.day === 'Day1' ? 'navy' : 'orange'}`}>{s.day === 'Day1' ? 'DAY 1' : 'DAY 2'}</span>
+              <h2 class="prog-sheet__title">{s.program_name}</h2>
+              <p class="prog-sheet__sub">
+                {dayInfo(s.day)} {s.time_start}〜{s.time_end} ／ {s.venue} ／ 定員 {s.capacity}名
+              </p>
+            </div>
+            <div class="prog-sheet__count">
+              参加者 {list.length} / {s.capacity} 名
+            </div>
+          </div>
+
+          {list.length === 0 ? (
+            <p class="prog-sheet__empty">参加者なし</p>
+          ) : (
+            <table class="prog-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>お名前（ふりがな）</th>
+                  <th>学年</th>
+                  <th>代表</th>
+                  <th>ぱん食い</th>
+                  <th>受付</th>
+                </tr>
+              </thead>
+              <tbody>
+                {list.map((p, i) => (
+                  <tr>
+                    <td>{i+1}</td>
+                    <td>
+                      <strong>{p.name}</strong><br>
+                      <small>{p.furigana}</small>
+                    </td>
+                    <td>{p.grade || '-'}</td>
+                    <td>{p.is_representative ? '◯' : ''}</td>
+                    <td>{p.panshoku_join ? '◯' : ''}</td>
+                    <td class="prog-table__check"></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+      );
+    })}
+  </div>
+
+</BaseLayout>
+
+<style is:global>
+  .admin-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px;
+    color: var(--fsn-gray-900);
+  }
+  .admin-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--fsn-orange);
+  }
+  .admin-head h1 { font-size: 1.2rem; margin: 0; color: var(--fsn-navy-deep); }
+  .admin-actions { display: flex; gap: 8px; }
+  .admin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border: 0;
+    border-radius: var(--fsn-radius-sm);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .admin-btn--ghost { background: var(--fsn-white); color: var(--fsn-navy-deep); border: 1px solid var(--fsn-gray-300); }
+
+  .prog-sheet {
+    margin: 32px 0;
+    page-break-after: always;
+  }
+  .prog-sheet:last-child { page-break-after: auto; }
+  .prog-sheet__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 16px;
+    background: var(--fsn-gray-50);
+    border-left: 4px solid var(--fsn-orange);
+    margin-bottom: 12px;
+  }
+  .prog-sheet__title { font-size: 1.4rem; margin: 6px 0 4px; color: var(--fsn-navy-deep); }
+  .prog-sheet__sub { font-size: 0.9rem; color: var(--fsn-gray-700); margin: 0; }
+  .prog-sheet__count {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--fsn-orange-dark);
+    padding: 8px 14px;
+    background: var(--fsn-white);
+    border-radius: var(--fsn-radius-sm);
+    white-space: nowrap;
+  }
+  .day-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    color: #fff;
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+  .day-tag--navy { background: var(--fsn-navy-deep); }
+  .day-tag--orange { background: var(--fsn-orange); }
+
+  .prog-sheet__empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--fsn-gray-500);
+    background: var(--fsn-gray-50);
+  }
+
+  .prog-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .prog-table th,
+  .prog-table td {
+    border: 1px solid var(--fsn-gray-300);
+    padding: 8px 12px;
+    text-align: left;
+  }
+  .prog-table th {
+    background: var(--fsn-gray-100);
+    font-weight: 800;
+    text-align: center;
+  }
+  .prog-table td:nth-child(1),
+  .prog-table td:nth-child(3),
+  .prog-table td:nth-child(4),
+  .prog-table td:nth-child(5),
+  .prog-table td:nth-child(6) { text-align: center; }
+  .prog-table small { color: var(--fsn-gray-700); font-size: 0.78rem; }
+  .prog-table__check {
+    width: 80px;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 4px,
+      var(--fsn-gray-100) 4px,
+      var(--fsn-gray-100) 5px
+    );
+  }
+
+  @media print {
+    .no-print { display: none !important; }
+    body { background: #fff; }
+    .admin-wrap { padding: 0; max-width: none; }
+    .prog-sheet { page-break-after: always; margin: 0 0 20px; }
+    .prog-table th { background: var(--fsn-gray-50) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .day-tag--navy { background: #0F1A4D !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .day-tag--orange { background: #F97316 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>

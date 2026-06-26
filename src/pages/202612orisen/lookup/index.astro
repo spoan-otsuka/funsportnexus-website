@@ -1,0 +1,157 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/202612orisen.css';
+
+export const prerender = false;
+
+const env = Astro.locals?.runtime?.env ?? {};
+const idParam = Astro.url.searchParams.get('id') || '';
+const emailParam = Astro.url.searchParams.get('email') || '';
+
+let entry = null;
+let attendees = [];
+let entrySlots = [];
+let lookupError = null;
+let notFound = false;
+
+if (idParam && emailParam && env.DB) {
+  try {
+    const e = await env.DB.prepare(
+      'SELECT * FROM entries WHERE id = ? AND LOWER(email) = LOWER(?)'
+    ).bind(parseInt(idParam, 10), emailParam.trim()).first();
+    if (e) {
+      entry = e;
+      const a = await env.DB.prepare(
+        'SELECT * FROM entry_attendees WHERE entry_id = ? ORDER BY position'
+      ).bind(e.id).all();
+      attendees = a?.results ?? [];
+      const s = await env.DB.prepare(`
+        SELECT es.attendee_id, s.id AS slot_id, s.program_name, s.day, s.time_start, s.time_end, s.venue
+        FROM entry_slots es
+        INNER JOIN slots s ON es.slot_id = s.id
+        WHERE es.entry_id = ?
+        ORDER BY s.day, s.time_start
+      `).bind(e.id).all();
+      entrySlots = s?.results ?? [];
+    } else {
+      notFound = true;
+    }
+  } catch (e) {
+    lookupError = e.message;
+  }
+}
+
+const slotsByAttendee = {};
+for (const s of entrySlots) {
+  const k = s.attendee_id || 0;
+  if (!slotsByAttendee[k]) slotsByAttendee[k] = [];
+  slotsByAttendee[k].push(s);
+}
+---
+<BaseLayout
+  title="申込内容の確認 ｜ fun sport nexus 2026.12"
+  description="管理IDとメールアドレスで、お申込み内容を、ご確認いただけます。"
+  noindex={true}
+>
+
+  <section class="dec-sub-hero">
+    <div class="dec-sub-hero__bg"></div>
+    <div class="dec-sub-hero__inner">
+      <p class="dec-sub-hero__label">LOOKUP</p>
+      <h1 class="dec-sub-hero__title">申込内容の確認</h1>
+      <p class="dec-sub-hero__lead">
+        お申込み完了メールに記載の<strong>管理ID</strong>と、<br>
+        ご登録のメールアドレスで、内容を、ご確認いただけます。
+      </p>
+    </div>
+  </section>
+
+  <section class="ap-section">
+    <div class="ap-section__inner" style="max-width: 760px;">
+      <form class="ap-form" method="GET">
+        <div class="ap-step">
+          <h2 class="ap-step__title"><span class="ap-step__num">!</span> 管理ID＋メールで照会</h2>
+          {notFound && (
+            <div class="ap-error-banner">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              該当のお申込みが、見つかりませんでした。<br>
+              管理IDとメールアドレスを、ご確認ください。
+            </div>
+          )}
+          {lookupError && (
+            <div class="ap-error-banner">エラー：{lookupError}</div>
+          )}
+
+          <div class="ap-grid">
+            <div class="ap-field">
+              <label for="id" class="ap-label">
+                管理ID <span class="ap-required">必須</span>
+              </label>
+              <input id="id" name="id" type="number" required value={idParam}
+                placeholder="例：12" class="ap-input" />
+            </div>
+            <div class="ap-field">
+              <label for="email" class="ap-label">
+                メールアドレス <span class="ap-required">必須</span>
+              </label>
+              <input id="email" name="email" type="email" required value={emailParam}
+                placeholder="お申込み時のメール" class="ap-input" />
+            </div>
+          </div>
+
+          <div class="ap-submit" style="margin-top:24px;">
+            <button type="submit" class="ap-submit__btn">
+              <i class="fa-solid fa-search"></i> 照会する
+            </button>
+          </div>
+        </div>
+
+        {entry && (
+          <div class="ap-step">
+            <h2 class="ap-step__title"><span class="ap-step__num">?</span> ご予約内容</h2>
+            <dl class="qr-meta">
+              <div><dt>管理ID</dt><dd><strong>{entry.id}</strong></dd></div>
+              <div><dt>お申込み者</dt><dd>{entry.applicant_name} 様（{entry.applicant_furigana}）</dd></div>
+              <div><dt>連絡先</dt><dd>{entry.email} ／ {entry.tel}</dd></div>
+              <div><dt>参加人数</dt><dd>{entry.attendees} 名</dd></div>
+              <div><dt>申込日時</dt><dd>{entry.created_at}</dd></div>
+            </dl>
+
+            <ul class="qr-attendees">
+              {attendees.map(a => (
+                <li class="qr-attendee">
+                  <p class="qr-attendee__head">
+                    <span class="ap-attendee__num">{a.position}人目</span>
+                    {a.is_representative ? <span class="ap-attendee__tag">代表者</span> : null}
+                    <span class="qr-attendee__name">{a.name}</span>
+                    {a.grade && <span class="qr-attendee__grade">{a.grade}</span>}
+                  </p>
+                  <ul class="qr-slots">
+                    {(slotsByAttendee[a.id] || []).map(s => (
+                      <li>
+                        <span class={`ap-progrow__day ${s.day === 'Day1' ? 'ap-progrow__day--navy' : 'ap-progrow__day--orange'}`}>{s.day === 'Day1' ? 'DAY 1' : 'DAY 2'}</span>
+                        <span>{s.time_start}〜{s.time_end}</span>
+                        <strong>{s.program_name}</strong>
+                        <span class="qr-slot__venue"><i class="fa-solid fa-location-dot"></i> {s.venue}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+
+            <p style="text-align:center;margin-top:24px;">
+              <a href={`/202612orisen/qr/?t=${entry.qr_token}`} class="ap-submit__btn" style="display:inline-flex;text-decoration:none;">
+                <i class="fa-solid fa-qrcode"></i> 当日受付ページへ
+              </a>
+            </p>
+            <p style="text-align:center;margin-top:8px;font-size:0.82rem;color:var(--fsn-gray-500);">
+              変更・キャンセルは、お申込みメールにご返信ください。
+            </p>
+          </div>
+        )}
+      </form>
+    </div>
+  </section>
+
+</BaseLayout>
