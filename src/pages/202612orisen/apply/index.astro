@@ -465,7 +465,7 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
   });
 </script>
 
-<style>
+<style is:global>
   /* 参加者情報セクション */
   .ap-attendees { display: flex; flex-direction: column; gap: 20px; }
   .ap-attendee {
@@ -511,7 +511,7 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
   }
 </style>
 
-<style>
+<style is:global>
   .ap-section {
     padding: 64px 24px 96px;
     background: var(--fsn-gray-50);
