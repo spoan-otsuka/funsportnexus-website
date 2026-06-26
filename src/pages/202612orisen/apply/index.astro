@@ -111,7 +111,7 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
           <!-- Step 1: プログラム選択 -->
           <div class="ap-step">
             <h2 class="ap-step__title">
-              <span class="ap-step__num">1</span>
+              <span class="ap-step__num">3</span>
               参加プログラムを選ぶ
             </h2>
             <p class="ap-step__desc">
@@ -197,7 +197,7 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
           <!-- Step 2: 申込者（代表者）情報 -->
           <div class="ap-step">
             <h2 class="ap-step__title">
-              <span class="ap-step__num">2</span>
+              <span class="ap-step__num">1</span>
               お申込み者（代表者）情報
             </h2>
             <p class="ap-step__desc">
@@ -259,7 +259,7 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
           <!-- Step 3: 参加者情報 -->
           <div class="ap-step">
             <h2 class="ap-step__title">
-              <span class="ap-step__num">3</span>
+              <span class="ap-step__num">2</span>
               ご参加者情報
             </h2>
             <p class="ap-step__desc">
@@ -526,6 +526,15 @@ const day2Slots = slots.filter(s => s.day === 'Day2');
     flex-direction: column;
     gap: 40px;
   }
+
+  /* 表示順序: 申込者 → 参加者 → プログラム → 同意 */
+  .ap-form > .ap-honeypot { order: -1; }
+  .ap-form > .ap-error-banner { order: 0; }
+  .ap-form > .ap-step:nth-of-type(1) { order: 3; } /* プログラム選択 (Step3) */
+  .ap-form > .ap-step:nth-of-type(2) { order: 1; } /* 申込者 (Step1) */
+  .ap-form > .ap-step:nth-of-type(3) { order: 2; } /* 参加者 (Step2) */
+  .ap-form > .ap-step:nth-of-type(4) { order: 4; } /* 同意 (Step4) */
+  .ap-form > .ap-submit { order: 5; }
 
   .ap-error-banner {
     padding: 14px 18px;
