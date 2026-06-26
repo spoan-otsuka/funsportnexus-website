@@ -307,24 +307,23 @@ if (!success && env.DB) {
 
     const MAX_SLOTS_PER_ATTENDEE = 6; // Day1×3 + Day2×3
 
-    // 種目グループ（day + program_code）一覧を作る
+    // 通常プログラム（特別セミナー除く）と特別セミナーを分離
+    const regularSlots = allSlots.filter(s => s.program_code !== 'seminar-special');
+    const seminarSlots = allSlots.filter(s => s.program_code === 'seminar-special');
+
     const programGroups = (() => {
       const map = new Map();
-      for (const s of allSlots) {
+      for (const s of regularSlots) {
         const key = s.day + '::' + s.program_code;
         if (!map.has(key)) {
           map.set(key, {
-            key,
-            day: s.day,
-            program_code: s.program_code,
+            key, day: s.day, program_code: s.program_code,
             program_name: programBaseName(s.program_name),
-            venue: s.venue,
-            slots: [],
+            venue: s.venue, slots: [],
           });
         }
         map.get(key).slots.push(s);
       }
-      // 同日内で時間順
       for (const g of map.values()) {
         g.slots.sort((a, b) => a.time_start.localeCompare(b.time_start));
       }
@@ -355,6 +354,25 @@ if (!success && env.DB) {
           '<button type="button" class="ap-add-btn" data-add-slot>' +
             '<i class="fa-solid fa-plus"></i> プログラムを追加' +
           '</button>' +
+          (seminarSlots.length > 0 ?
+            '<div class="ap-seminar-block">' +
+              '<p class="ap-seminar-block__label"><i class="fa-solid fa-microphone-lines"></i> 特別セミナー（別枠）</p>' +
+              seminarSlots.map(s => {
+                const full = s.remaining <= 0;
+                return '<label class="ap-seminar-opt' + (full ? ' ap-seminar-opt--full' : '') + '">' +
+                  '<input type="checkbox" name="attendee_' + i + '_slot_ids" value="' + s.id + '"' + (full ? ' disabled' : '') + ' data-seminar />' +
+                  '<span class="ap-seminar-opt__inner">' +
+                    '<span class="ap-seminar-opt__name">' + escHtml(s.program_name) + '</span>' +
+                    '<span class="ap-seminar-opt__meta">' +
+                      '<span>' + s.day + ' ' + s.time_start + '〜' + s.time_end + '</span>' +
+                      '<span><i class="fa-solid fa-location-dot"></i> ' + escHtml(s.venue) + '</span>' +
+                      '<span class="ap-seminar-opt__remaining">' + (full ? '満席' : '残' + s.remaining + '席') + '</span>' +
+                    '</span>' +
+                  '</span>' +
+                '</label>';
+              }).join('') +
+            '</div>'
+            : '') +
         '</div>';
       return wrap;
     }
@@ -828,6 +846,77 @@ if (!success && env.DB) {
     background: var(--fsn-gray-50);
   }
   .ap-add-btn i { font-size: 0.85em; }
+
+  /* 特別セミナー別枠 */
+  .ap-seminar-block {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--fsn-gray-300);
+  }
+  .ap-seminar-block__label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--fsn-orange-dark);
+    margin: 0 0 10px;
+  }
+  .ap-seminar-block__label i { color: var(--fsn-orange); }
+  .ap-seminar-opt {
+    display: block;
+    position: relative;
+    cursor: pointer;
+  }
+  .ap-seminar-opt input[type="checkbox"] {
+    position: absolute; opacity: 0; width: 0; height: 0;
+  }
+  .ap-seminar-opt__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #FFF7ED, var(--fsn-white));
+    border: 2px solid var(--fsn-orange);
+    border-radius: var(--fsn-radius-sm);
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .ap-seminar-opt input:checked ~ .ap-seminar-opt__inner {
+    background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+    color: var(--fsn-white);
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.35);
+  }
+  .ap-seminar-opt input:checked ~ .ap-seminar-opt__inner::after {
+    content: "✓";
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    font-weight: 900;
+    font-size: 1.1rem;
+  }
+  .ap-seminar-opt__name {
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+  }
+  .ap-seminar-opt input:checked ~ .ap-seminar-opt__inner .ap-seminar-opt__name { color: var(--fsn-white); }
+  .ap-seminar-opt__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 0.78rem;
+    color: var(--fsn-gray-700);
+  }
+  .ap-seminar-opt input:checked ~ .ap-seminar-opt__inner .ap-seminar-opt__meta { color: rgba(255,255,255,0.92); }
+  .ap-seminar-opt__meta i { color: var(--fsn-orange); }
+  .ap-seminar-opt input:checked ~ .ap-seminar-opt__inner .ap-seminar-opt__meta i { color: var(--fsn-white); }
+  .ap-seminar-opt__remaining { font-weight: 700; }
+  .ap-seminar-opt--full { cursor: not-allowed; }
+  .ap-seminar-opt--full .ap-seminar-opt__inner {
+    background: var(--fsn-gray-100);
+    border-color: var(--fsn-gray-300);
+    color: var(--fsn-gray-500);
+  }
 
   /* Program groups (種目別カード) */
   .ap-pgroups {

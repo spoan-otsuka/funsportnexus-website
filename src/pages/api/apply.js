@@ -141,7 +141,10 @@ export async function POST({ request, locals }) {
         return redirect('/202612orisen/apply/?error=duplicate_program');
       }
       const dayCounts = {};
-      for (const s of slots) { dayCounts[s.day] = (dayCounts[s.day] || 0) + 1; }
+      for (const s of slots) {
+        if (s.program_code === 'seminar-special') continue; // 特別セミナーは別枠
+        dayCounts[s.day] = (dayCounts[s.day] || 0) + 1;
+      }
       for (const day of Object.keys(dayCounts)) {
         if (dayCounts[day] > 3) {
           return redirect('/202612orisen/apply/?error=daily_limit');
