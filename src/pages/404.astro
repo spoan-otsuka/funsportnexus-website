@@ -1,0 +1,128 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+export const prerender = false;
+---
+<BaseLayout
+  title="ページが見つかりません"
+  description="お探しのページは、見つかりませんでした。トップページから、お探しください。"
+  noindex={true}
+>
+
+  <section class="nf-section">
+    <div class="nf-section__inner">
+      <p class="nf-number">404</p>
+      <h1 class="nf-title">お探しのページは、見つかりませんでした。</h1>
+      <p class="nf-text">
+        ページが、移動した、または、削除された可能性が、ございます。<br>
+        お手数ですが、トップページから、お探しいただくか、<br>
+        以下のリンクから、目的のページへ、お進みください。
+      </p>
+
+      <div class="nf-links">
+        <a href="/" class="nf-link nf-link--primary">
+          <i class="fa-solid fa-house"></i>
+          トップへ戻る
+        </a>
+        <a href="/news/" class="nf-link">
+          <i class="fa-regular fa-newspaper"></i>
+          お知らせ
+        </a>
+        <a href="/columns/" class="nf-link">
+          <i class="fa-regular fa-pen-to-square"></i>
+          コラム
+        </a>
+        <a href="/results/" class="nf-link">
+          <i class="fa-regular fa-flag"></i>
+          開催実績
+        </a>
+        <a href="/dec2026/" class="nf-link">
+          <i class="fa-regular fa-calendar"></i>
+          2026.12 特設サイト
+        </a>
+        <a href="/contact/" class="nf-link">
+          <i class="fa-regular fa-paper-plane"></i>
+          お問い合わせ
+        </a>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  .nf-section {
+    padding: 96px 24px;
+    background: linear-gradient(180deg, var(--fsn-gray-50), var(--fsn-white));
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+  }
+  .nf-section__inner {
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .nf-number {
+    font-family: var(--fsn-font-num);
+    font-size: clamp(5rem, 14vw, 9rem);
+    font-weight: 900;
+    color: var(--fsn-orange);
+    line-height: 1;
+    margin: 0 0 16px;
+    letter-spacing: -0.04em;
+    text-shadow: 0 6px 20px rgba(249, 115, 22, 0.18);
+  }
+  .nf-title {
+    font-size: clamp(1.4rem, 3.2vw, 1.8rem);
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 24px;
+    line-height: 1.5;
+  }
+  .nf-text {
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--fsn-gray-700);
+    margin: 0 0 48px;
+  }
+  .nf-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+  .nf-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: var(--fsn-white);
+    color: var(--fsn-navy-deep);
+    border: 1.5px solid var(--fsn-gray-200);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  }
+  .nf-link:hover {
+    background: var(--fsn-gray-50);
+    border-color: var(--fsn-orange);
+    color: var(--fsn-navy-deep);
+    transform: translateY(-2px);
+  }
+  .nf-link i { color: var(--fsn-orange); }
+  .nf-link--primary {
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border-color: var(--fsn-orange);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+  }
+  .nf-link--primary i { color: var(--fsn-white); }
+  .nf-link--primary:hover {
+    background: var(--fsn-orange-dark);
+    border-color: var(--fsn-orange-dark);
+    color: var(--fsn-white);
+  }
+</style>

@@ -30,26 +30,40 @@ const year = 2026;
         <div class="fsn-footer__col">
           <p class="fsn-footer__label">サイトメニュー</p>
           <ul class="fsn-footer__links">
-            <li><a href="/news">お知らせ</a></li>
-            <li><a href="/events">募集イベント</a></li>
-            <li><a href="/results">実績</a></li>
-            <li><a href="/columns">コラム</a></li>
-            <li><a href="/business">事業紹介</a></li>
+            <li><a href="/news/">お知らせ</a></li>
+            <li><a href="/events/">募集イベント</a></li>
+            <li><a href="/results/">開催実績</a></li>
+            <li><a href="/columns/">コラム</a></li>
+            <li><a href="/business/">事業紹介</a></li>
+            <li><a href="/dec2026/">2026.12 特設</a></li>
+            <li><a href="/contact/">お問い合わせ</a></li>
           </ul>
         </div>
 
         <div class="fsn-footer__col">
           <p class="fsn-footer__label">主催・運営</p>
-          <p class="fsn-footer__body">公益財団法人<br>スポーツ安全協会</p>
+          <p class="fsn-footer__body">
+            公益財団法人<br>
+            スポーツ安全協会
+          </p>
+          <p class="fsn-footer__body" style="margin-top: 10px;">
+            <a href="https://www.sportsanzen.org/" target="_blank" rel="noopener noreferrer" class="fsn-footer__extlink">
+              公式サイト
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </p>
         </div>
 
         <div class="fsn-footer__col">
           <p class="fsn-footer__label">お問い合わせ</p>
           <p class="fsn-footer__body">
-            <a href="mailto:funsportnexus@spoan.or.jp" class="fsn-footer__email">
-              <i class="fa-solid fa-envelope"></i>
-              funsportnexus@spoan.or.jp
+            <a href="/contact/" class="fsn-footer__email">
+              <i class="fa-regular fa-paper-plane"></i>
+              お問い合わせフォーム
             </a>
+          </p>
+          <p class="fsn-footer__body" style="margin-top: 8px; font-size: 0.85rem; color: rgba(255,255,255,0.6);">
+            ご返信は3営業日以内に
           </p>
         </div>
       </div>
@@ -169,6 +183,23 @@ const year = 2026;
     border-bottom-color: var(--fsn-orange);
   }
   .fsn-footer__email i { color: var(--fsn-orange); }
+
+  .fsn-footer__extlink {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.88rem;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+    padding-bottom: 1px;
+    transition: color .15s, border-color .15s;
+  }
+  .fsn-footer__extlink:hover {
+    color: var(--fsn-orange);
+    border-bottom-color: var(--fsn-orange);
+  }
+  .fsn-footer__extlink i { color: var(--fsn-orange); font-size: 0.78em; }
 
   .fsn-footer__bottom {
     display: flex;

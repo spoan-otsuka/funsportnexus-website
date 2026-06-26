@@ -26,6 +26,9 @@ const {
   hideFooter = false,
 } = Astro.props;
 
+const env = Astro.locals?.runtime?.env ?? {};
+const gaId = env.PUBLIC_GA4_ID || '';
+
 const fullTitle = title === 'fun sport nexus'
   ? title
   : `${title} ｜ fun sport nexus`;
@@ -57,6 +60,18 @@ const fullTitle = title === 'fun sport nexus'
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  {gaId && (
+    <>
+      <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+      <script is:inline define:vars={{ gaId }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', gaId, { anonymize_ip: true });
+      </script>
+    </>
+  )}
 </head>
 <body>
   {!hideHeader && <Header />}
