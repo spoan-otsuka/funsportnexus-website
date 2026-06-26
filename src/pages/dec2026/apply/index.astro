@@ -1,6 +1,58 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import '../../../styles/dec2026.css';
+
+export const prerender = false;
+
+const env = Astro.locals?.runtime?.env ?? {};
+const success = Astro.url.searchParams.get('success') === '1';
+const errorParam = Astro.url.searchParams.get('error') || '';
+const fullSlot = Astro.url.searchParams.get('slot') || '';
+const entryId = Astro.url.searchParams.get('id') || '';
+
+const errorMessages = {
+  invalid_form: 'フォームの読み取りに失敗しました。',
+  missing_fields: '必須項目が未入力です。',
+  invalid_email: 'メールアドレスの形式が正しくありません。',
+  no_consent: '同意事項にチェックが入っていません。',
+  invalid_attendees: '参加人数は1〜10名で入力してください。',
+  no_slots: '参加プログラムを1つ以上、選択してください。',
+  too_many_slots: '選択できるプログラムは、最大10件までです。',
+  invalid_slot: '選択されたプログラムが、無効です。',
+  full: `満席のプログラムが含まれます${fullSlot ? `：${fullSlot}` : ''}。`,
+  duplicate_program: '同じ種目を、複数選択することは、できません。',
+  time_conflict: '時間帯が重複するプログラムが、選択されています。',
+  db_unavailable: 'システム一時障害です。しばらく後にお試しください。',
+  server_error: 'サーバーエラーが発生しました。お手数ですが、再度お試しください。',
+};
+
+// スロット一覧を取得
+let slots = [];
+let slotsError = null;
+if (!success && env.DB) {
+  try {
+    const result = await env.DB.prepare(`
+      SELECT
+        s.id, s.code, s.program_code, s.program_name,
+        s.day, s.date, s.time_start, s.time_end, s.venue,
+        s.capacity, s.description,
+        COALESCE(SUM(es.attendees), 0) AS reserved,
+        (s.capacity - COALESCE(SUM(es.attendees), 0)) AS remaining
+      FROM slots s
+      LEFT JOIN entry_slots es ON s.id = es.slot_id
+      LEFT JOIN entries e ON es.entry_id = e.id AND e.status = 'confirmed'
+      WHERE s.is_active = 1
+      GROUP BY s.id
+      ORDER BY s.day, s.sort_order, s.time_start
+    `).all();
+    slots = result?.results ?? [];
+  } catch (e) {
+    slotsError = e.message;
+  }
+}
+
+const day1Slots = slots.filter(s => s.day === 'Day1');
+const day2Slots = slots.filter(s => s.day === 'Day2');
 ---
 <BaseLayout
   title="参加申込 ｜ fun sport nexus 2026.12"
@@ -18,188 +70,577 @@ import '../../../styles/dec2026.css';
       <p class="dec-sub-hero__label">APPLY</p>
       <h1 class="dec-sub-hero__title">参加申込</h1>
       <p class="dec-sub-hero__lead">
-        お申し込みは、3分ほどで完了いたします。<br>
+        参加されるプログラムを、選択して、お申し込みください。<br>
         事前のお申し込みで、当日スムーズに、ご参加いただけます。
       </p>
     </div>
   </section>
 
-  <!-- ステップ -->
-  <section class="dec-section">
-    <div class="dec-section__inner">
-      <p class="dec-section__label">HOW TO APPLY</p>
-      <h2 class="dec-section__title">お申し込みの流れ</h2>
-
-      <div class="step-grid">
-        <article class="step-card">
-          <span class="step-card__num">STEP 01</span>
-          <div class="step-card__icon"><i class="fa-solid fa-pen-to-square"></i></div>
-          <h3 class="step-card__title">フォーム入力</h3>
-          <p class="step-card__text">
-            下記の申込フォームに、必要事項を、ご入力ください。<br>
-            参加プログラムは、複数選択が、可能です。
+  <section class="ap-section">
+    <div class="ap-section__inner">
+      {success ? (
+        <div class="ap-thanks">
+          <i class="fa-solid fa-circle-check"></i>
+          <h2>お申し込み完了</h2>
+          <p>
+            お申し込み、ありがとうございます。<br>
+            ご登録のメールアドレス宛てに、受付完了メールを、お送りいたしました。<br>
+            （迷惑メールフォルダも、ご確認ください。）
           </p>
-        </article>
-
-        <article class="step-card">
-          <span class="step-card__num">STEP 02</span>
-          <div class="step-card__icon"><i class="fa-solid fa-envelope-open-text"></i></div>
-          <h3 class="step-card__title">受付完了メール</h3>
-          <p class="step-card__text">
-            お申込みの内容を、ご入力のメールアドレス宛てに、自動でお送りいたします。<br>
-            内容を、ご確認ください。
-          </p>
-        </article>
-
-        <article class="step-card">
-          <span class="step-card__num">STEP 03</span>
-          <div class="step-card__icon"><i class="fa-solid fa-calendar-check"></i></div>
-          <h3 class="step-card__title">当日ご来場</h3>
-          <p class="step-card__text">
-            受付完了メールを、当日の受付で、ご提示ください。<br>
-            紙でも、スマートフォン画面でも、構いません。
-          </p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- フォーム本体（Phase 3 で本格化） -->
-  <section class="dec-section dec-section--tint">
-    <div class="dec-section__inner">
-      <p class="dec-section__label dec-section__label--orange">ENTRY</p>
-      <h2 class="dec-section__title">申込フォーム</h2>
-      <p class="dec-section__lead">
-        ※フォームは現在、準備中です。10月の募集開始までに、本フォームを公開いたします。
-      </p>
-
-      <div class="form-placeholder">
-        <i class="fa-solid fa-clock" style="font-size: 3rem; color: var(--fsn-orange); margin: 0 0 16px;"></i>
-        <h3 style="font-size: 1.3rem; color: var(--fsn-navy); margin: 0 0 16px;">
-          申込フォームを、ただいま準備中です
-        </h3>
-        <p style="font-size: 0.95rem; color: var(--fsn-gray-700); line-height: 1.9; margin: 0 0 24px;">
-          2026年10月の募集開始までに、こちらに、申込フォームを公開いたします。<br>
-          各プログラム枠を、選択していただける、本格的なフォームを、ご用意します。
-        </p>
-        <p style="font-size: 0.88rem; color: var(--fsn-gray-500);">
-          お問い合わせ：
-          <a href="mailto:funsportnexus@spoan.or.jp" style="color: var(--fsn-navy); text-decoration: underline;">
-            funsportnexus@spoan.or.jp
+          {entryId && entryId !== 'ok' && (
+            <p class="ap-thanks__id">受付番号：<strong>{entryId}</strong></p>
+          )}
+          <div class="ap-thanks__notes">
+            <p>当日は、会場の <strong>中央広場</strong> にて、お名前を、お伝えください。</p>
+          </div>
+          <a href="/dec2026/" class="ap-thanks__back">
+            <i class="fa-solid fa-arrow-left"></i> 特設サイトに戻る
           </a>
-        </p>
-      </div>
-    </div>
-  </section>
+        </div>
+      ) : (
+        <form class="ap-form" action="/api/apply" method="POST">
+          {errorParam && (
+            <div class="ap-error-banner">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              {errorMessages[errorParam] || '送信に失敗しました。お手数ですが、再度お試しください。'}
+            </div>
+          )}
 
-  <!-- プライバシー -->
-  <section class="dec-section">
-    <div class="dec-section__inner">
-      <div class="dec-notice__box" style="border-left-color: var(--fsn-navy); background: var(--fsn-cyan);">
-        <p class="dec-notice__label">
-          <i class="fa-solid fa-shield-halved" style="color: var(--fsn-navy);"></i>
-          個人情報のお取り扱いについて
-        </p>
-        <p style="font-size: 0.92rem; line-height: 1.9; color: var(--fsn-gray-700); margin: 6px 0;">
-          お申込み時にいただく個人情報は、本イベントの運営目的にのみ、使用いたします。<br>
-          ご本人の同意なく、第三者に提供することは、ございません。
-        </p>
-      </div>
-    </div>
-  </section>
+          <!-- Step 1: プログラム選択 -->
+          <div class="ap-step">
+            <h2 class="ap-step__title">
+              <span class="ap-step__num">1</span>
+              参加プログラムを選ぶ
+            </h2>
+            <p class="ap-step__desc">
+              ご希望のプログラムを、選択してください（複数選択可）。<br>
+              同じ時間帯のプログラムは、選択できません。
+            </p>
 
-  <!-- お問い合わせ -->
-  <section class="dec-section dec-section--tint">
-    <div class="dec-section__inner">
-      <p class="dec-section__label">CONTACT</p>
-      <h2 class="dec-section__title">お問い合わせ</h2>
-      <div style="max-width: 600px; margin: 32px auto 0; background: var(--fsn-white); border: 1.5px solid var(--fsn-gray-200); border-radius: 14px; padding: 32px 36px; text-align: center;">
-        <p style="font-size: 1.2rem; font-weight: 800; color: var(--fsn-navy); margin: 0 0 18px;">
-          funsportnexus 運営事務局
-        </p>
-        <p style="font-size: 1rem; color: var(--fsn-gray-700); margin: 8px 0;">
-          <i class="fa-solid fa-envelope" style="color: var(--fsn-orange); margin-right: 10px;"></i>
-          <a href="mailto:funsportnexus@spoan.or.jp" style="color: var(--fsn-navy); font-weight: 700; text-decoration: none; border-bottom: 2px solid transparent;">
-            funsportnexus@spoan.or.jp
-          </a>
-        </p>
-        <p style="font-size: 1rem; color: var(--fsn-gray-700); margin: 8px 0;">
-          <i class="fa-solid fa-building" style="color: var(--fsn-orange); margin-right: 10px;"></i>
-          公益財団法人 スポーツ安全協会
-        </p>
-        <p style="font-size: 0.85rem; color: var(--fsn-gray-500); margin: 18px 0 0; line-height: 1.7;">
-          お申込みに関するご質問は、上記のメールアドレスまで、お気軽にお問い合わせください。
-        </p>
-      </div>
+            {slotsError ? (
+              <div class="ap-error-banner">プログラム一覧の取得に失敗しました：{slotsError}</div>
+            ) : (
+              <>
+                {day1Slots.length > 0 && (
+                  <div class="ap-day">
+                    <h3 class="ap-day__head ap-day__head--navy">
+                      <span class="ap-day__num">DAY 1</span>
+                      <span class="ap-day__date">12月19日（土）</span>
+                    </h3>
+                    <div class="ap-slots">
+                      {day1Slots.map(s => (
+                        <label class:list={['ap-slot', s.remaining <= 0 ? 'ap-slot--full' : '']}>
+                          <input
+                            type="checkbox"
+                            name="slot_ids"
+                            value={s.id}
+                            disabled={s.remaining <= 0}
+                          />
+                          <span class="ap-slot__inner">
+                            <span class="ap-slot__time">{s.time_start} - {s.time_end}</span>
+                            <span class="ap-slot__name">{s.program_name}</span>
+                            <span class="ap-slot__meta">
+                              <span class="ap-slot__venue">
+                                <i class="fa-solid fa-location-dot"></i>
+                                {s.venue}
+                              </span>
+                              <span class:list={['ap-slot__remaining', s.remaining <= 5 && s.remaining > 0 ? 'ap-slot__remaining--low' : '']}>
+                                {s.remaining <= 0 ? '満席' : '残' + s.remaining + '席'}
+                              </span>
+                            </span>
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {day2Slots.length > 0 && (
+                  <div class="ap-day">
+                    <h3 class="ap-day__head ap-day__head--orange">
+                      <span class="ap-day__num">DAY 2</span>
+                      <span class="ap-day__date">12月20日（日）</span>
+                    </h3>
+                    <div class="ap-slots">
+                      {day2Slots.map(s => (
+                        <label class:list={['ap-slot', s.remaining <= 0 ? 'ap-slot--full' : '']}>
+                          <input
+                            type="checkbox"
+                            name="slot_ids"
+                            value={s.id}
+                            disabled={s.remaining <= 0}
+                          />
+                          <span class="ap-slot__inner">
+                            <span class="ap-slot__time">{s.time_start} - {s.time_end}</span>
+                            <span class="ap-slot__name">{s.program_name}</span>
+                            <span class="ap-slot__meta">
+                              <span class="ap-slot__venue">
+                                <i class="fa-solid fa-location-dot"></i>
+                                {s.venue}
+                              </span>
+                              <span class:list={['ap-slot__remaining', s.remaining <= 5 && s.remaining > 0 ? 'ap-slot__remaining--low' : '']}>
+                                {s.remaining <= 0 ? '満席' : '残' + s.remaining + '席'}
+                              </span>
+                            </span>
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          <!-- Step 2: 申込者情報 -->
+          <div class="ap-step">
+            <h2 class="ap-step__title">
+              <span class="ap-step__num">2</span>
+              お申込み者情報
+            </h2>
+
+            <div class="ap-grid">
+              <div class="ap-field">
+                <label for="name" class="ap-label">
+                  お名前 <span class="ap-required">必須</span>
+                </label>
+                <input id="name" name="name" type="text" required autocomplete="name"
+                  placeholder="例：山田 太郎" class="ap-input" />
+              </div>
+
+              <div class="ap-field">
+                <label for="furigana" class="ap-label">
+                  ふりがな <span class="ap-required">必須</span>
+                </label>
+                <input id="furigana" name="furigana" type="text" required
+                  placeholder="例：やまだ たろう" class="ap-input" />
+              </div>
+
+              <div class="ap-field">
+                <label for="email" class="ap-label">
+                  メールアドレス <span class="ap-required">必須</span>
+                </label>
+                <input id="email" name="email" type="email" required autocomplete="email"
+                  placeholder="例：example@example.com" class="ap-input" />
+              </div>
+
+              <div class="ap-field">
+                <label for="tel" class="ap-label">
+                  お電話番号 <span class="ap-required">必須</span>
+                </label>
+                <input id="tel" name="tel" type="tel" required autocomplete="tel"
+                  placeholder="例：090-1234-5678" class="ap-input" />
+              </div>
+
+              <div class="ap-field">
+                <label for="attendees" class="ap-label">
+                  参加人数（ご自身含む） <span class="ap-required">必須</span>
+                </label>
+                <select id="attendees" name="attendees" required class="ap-input">
+                  {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                    <option value={n}>{n}名</option>
+                  ))}
+                </select>
+              </div>
+
+              <div class="ap-field">
+                <label for="attendee_attr" class="ap-label">参加者の属性（任意）</label>
+                <input id="attendee_attr" name="attendee_attr" type="text"
+                  placeholder="例：小学生1名、保護者1名" class="ap-input" />
+              </div>
+
+              <div class="ap-field ap-field--full">
+                <label for="remarks" class="ap-label">ご要望・特記事項（任意）</label>
+                <textarea id="remarks" name="remarks" rows="4"
+                  placeholder="アレルギー、車椅子のご利用、その他ご質問など" class="ap-input"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: 同意 -->
+          <div class="ap-step">
+            <h2 class="ap-step__title">
+              <span class="ap-step__num">3</span>
+              ご確認・同意事項
+            </h2>
+
+            <div class="ap-consents">
+              <label class="ap-consent">
+                <input type="checkbox" name="consent_rules" required />
+                <span>
+                  <strong>大会規約・<a href="https://www.sportsanzen.org/privacy/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>に同意します</strong>（必須）
+                </span>
+              </label>
+              <label class="ap-consent">
+                <input type="checkbox" name="consent_photo" />
+                <span>
+                  当日の写真・映像が、広報目的で、Webサイト・SNS等に、掲載されることに、同意します（任意）
+                </span>
+              </label>
+              <label class="ap-consent">
+                <input type="checkbox" name="consent_allergy" />
+                <span>
+                  ぱん食い競走に、参加される場合：食物アレルギーの確認に、同意します（該当者のみ）
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <input type="text" name="website" class="ap-honeypot" tabindex="-1" autocomplete="off" />
+
+          <div class="ap-submit">
+            <button type="submit" class="ap-submit__btn">
+              <i class="fa-solid fa-paper-plane"></i>
+              この内容で申し込む
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   </section>
 
 </BaseLayout>
 
 <style>
-  .step-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin: 48px 0 0;
+  .ap-section {
+    padding: 64px 24px 96px;
+    background: var(--fsn-gray-50);
   }
-  .step-card {
+  .ap-section__inner {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .ap-form {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .ap-error-banner {
+    padding: 14px 18px;
+    background: #FEE2E2;
+    color: #991B1B;
+    border-radius: var(--fsn-radius-sm);
+    font-size: 0.92rem;
+    font-weight: 600;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+  }
+  .ap-error-banner i { font-size: 1.1em; margin-top: 2px; }
+
+  .ap-step {
     background: var(--fsn-white);
-    border: 1px solid var(--fsn-gray-200);
+    padding: 36px 40px;
     border-radius: var(--fsn-radius-md);
-    padding: 32px 24px;
-    text-align: center;
-    position: relative;
+    box-shadow: var(--fsn-shadow-sm);
   }
-  .step-card__num {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 4px 14px;
-    background: var(--fsn-navy);
-    color: var(--fsn-white);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    border-radius: var(--fsn-radius-pill);
+  @media (max-width: 600px) { .ap-step { padding: 24px 20px; } }
+
+  .ap-step__title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 12px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--fsn-orange);
   }
-  .step-card__icon {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
-    color: var(--fsn-white);
+  .ap-step__num {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8rem;
-    margin: 14px 0 18px;
+    width: 36px;
+    height: 36px;
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border-radius: 50%;
+    font-family: var(--fsn-font-num);
+    font-size: 1.1rem;
+    font-weight: 900;
   }
-  .step-card__title {
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--fsn-navy);
-    margin: 0 0 12px;
-  }
-  .step-card__text {
+  .ap-step__desc {
     font-size: 0.9rem;
-    line-height: 1.9;
     color: var(--fsn-gray-700);
-    margin: 0;
+    line-height: 1.7;
+    margin: 0 0 24px;
   }
 
-  .form-placeholder {
+  /* Day */
+  .ap-day {
+    margin-bottom: 24px;
+  }
+  .ap-day:last-child { margin-bottom: 0; }
+  .ap-day__head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    border-radius: var(--fsn-radius-sm);
+    color: var(--fsn-white);
+    margin: 0 0 14px;
+  }
+  .ap-day__head--navy { background: linear-gradient(135deg, var(--fsn-navy), var(--fsn-navy-deep)); }
+  .ap-day__head--orange { background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark)); }
+  .ap-day__num {
+    background: rgba(255,255,255,0.18);
+    padding: 4px 12px;
+    border-radius: var(--fsn-radius-sm);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+  }
+  .ap-day__date { font-size: 1.05rem; font-weight: 700; }
+
+  /* Slots */
+  .ap-slots {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 600px) { .ap-slots { grid-template-columns: 1fr; } }
+
+  .ap-slot {
+    position: relative;
+    cursor: pointer;
+  }
+  .ap-slot input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .ap-slot__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 18px;
     background: var(--fsn-white);
-    border: 2px dashed var(--fsn-orange);
-    border-radius: var(--fsn-radius-lg);
+    border: 2px solid var(--fsn-gray-200);
+    border-radius: var(--fsn-radius-sm);
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  }
+  .ap-slot:not(.ap-slot--full):hover .ap-slot__inner {
+    border-color: var(--fsn-orange);
+    background: #FFF7ED;
+  }
+  .ap-slot input:checked ~ .ap-slot__inner {
+    border-color: var(--fsn-orange);
+    background: #FFF7ED;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
+  }
+  .ap-slot input:checked ~ .ap-slot__inner::after {
+    content: "✓";
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    color: var(--fsn-orange);
+    font-weight: 900;
+    font-size: 1.1rem;
+  }
+  .ap-slot--full { cursor: not-allowed; }
+  .ap-slot--full .ap-slot__inner {
+    background: var(--fsn-gray-100);
+    color: var(--fsn-gray-500);
+    border-color: var(--fsn-gray-200);
+  }
+
+  .ap-slot__time {
+    font-family: var(--fsn-font-num);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--fsn-orange-dark);
+  }
+  .ap-slot--full .ap-slot__time { color: var(--fsn-gray-500); }
+  .ap-slot__name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+  }
+  .ap-slot--full .ap-slot__name { color: var(--fsn-gray-500); }
+  .ap-slot__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--fsn-gray-700);
+    margin-top: 4px;
+  }
+  .ap-slot__venue {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .ap-slot__venue i { color: var(--fsn-orange); font-size: 0.85em; }
+  .ap-slot--full .ap-slot__venue i { color: var(--fsn-gray-400); }
+  .ap-slot__remaining {
+    font-weight: 700;
+    color: var(--fsn-gray-700);
+  }
+  .ap-slot__remaining--low { color: #DC2626; }
+  .ap-slot--full .ap-slot__remaining {
+    color: var(--fsn-gray-400);
+    font-weight: 800;
+  }
+
+  /* Form fields */
+  .ap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 600px) { .ap-grid { grid-template-columns: 1fr; } }
+  .ap-field { display: flex; flex-direction: column; gap: 8px; }
+  .ap-field--full { grid-column: 1 / -1; }
+  .ap-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--fsn-navy-deep);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ap-required {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-sm);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .ap-input {
+    padding: 12px 16px;
+    border: 1.5px solid var(--fsn-gray-200);
+    border-radius: var(--fsn-radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: var(--fsn-white);
+    color: var(--fsn-gray-900);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .ap-input:focus {
+    outline: 0;
+    border-color: var(--fsn-orange);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
+  }
+  textarea.ap-input { resize: vertical; line-height: 1.7; }
+
+  /* Consents */
+  .ap-consents { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+  .ap-consent {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px 16px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-sm);
+    cursor: pointer;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--fsn-gray-900);
+  }
+  .ap-consent input[type="checkbox"] {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--fsn-orange);
+    flex-shrink: 0;
+  }
+  .ap-consent a {
+    color: var(--fsn-orange);
+    text-decoration: underline;
+  }
+
+  .ap-honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .ap-submit { text-align: center; margin-top: 8px; }
+  .ap-submit__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 64px;
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border: 0;
+    border-radius: var(--fsn-radius-pill);
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.35);
+    transition: background 0.2s, transform 0.2s;
+  }
+  .ap-submit__btn:hover {
+    background: var(--fsn-orange-dark);
+    transform: translateY(-2px);
+  }
+
+  /* Thanks */
+  .ap-thanks {
+    background: var(--fsn-white);
     padding: 56px 32px;
-    margin: 32px auto 0;
-    max-width: 720px;
+    border-radius: var(--fsn-radius-md);
+    box-shadow: var(--fsn-shadow-sm);
     text-align: center;
   }
-
-  @media (max-width: 900px) {
-    .step-grid { grid-template-columns: 1fr; max-width: 480px; margin-left: auto; margin-right: auto; }
+  .ap-thanks i.fa-circle-check {
+    font-size: 4rem;
+    color: var(--fsn-orange);
+    margin-bottom: 20px;
   }
+  .ap-thanks h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 16px;
+  }
+  .ap-thanks p {
+    font-size: 0.95rem;
+    line-height: 1.95;
+    color: var(--fsn-gray-700);
+    margin: 0 0 16px;
+  }
+  .ap-thanks__id {
+    background: var(--fsn-gray-50);
+    padding: 12px 24px;
+    border-radius: var(--fsn-radius-sm);
+    display: inline-block;
+    margin: 16px 0 24px;
+    font-size: 1rem;
+  }
+  .ap-thanks__id strong {
+    font-family: var(--fsn-font-num);
+    color: var(--fsn-orange-dark);
+    font-size: 1.3rem;
+  }
+  .ap-thanks__notes {
+    margin: 24px 0 32px;
+    padding: 16px;
+    background: var(--fsn-cyan);
+    border-radius: var(--fsn-radius-sm);
+  }
+  .ap-thanks__notes p { margin: 0; font-size: 0.9rem; color: var(--fsn-navy-deep); }
+  .ap-thanks__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    text-decoration: none;
+    font-weight: 700;
+    transition: background 0.2s;
+  }
+  .ap-thanks__back:hover { background: #050d2e; color: var(--fsn-white); }
 </style>
