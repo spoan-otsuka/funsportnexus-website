@@ -1,0 +1,330 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export const prerender = false;
+---
+<BaseLayout
+  title="QRチェックイン ｜ fun sport nexus 管理"
+  description="運営用 QR読み取りチェックイン画面"
+  noindex={true}
+  hideHeader={true}
+  hideFooter={true}
+>
+
+  <div class="ckin-wrap">
+    <header class="ckin-head">
+      <div>
+        <a href="/admin/" style="color:var(--fsn-gray-700);text-decoration:none;font-size:0.85rem;">← 管理TOP</a>
+        <h1 style="font-size:1.3rem;margin:8px 0 0;color:var(--fsn-navy-deep);">QRチェックイン</h1>
+      </div>
+      <button type="button" id="toggle-camera" class="admin-btn">
+        <i class="fa-solid fa-camera"></i> <span data-camera-label>カメラ起動</span>
+      </button>
+    </header>
+
+    <div class="ckin-scanner">
+      <video id="video" playsinline muted></video>
+      <canvas id="canvas" style="display:none;"></canvas>
+      <div class="ckin-scanner__overlay">
+        <div class="ckin-scanner__frame"></div>
+        <p class="ckin-scanner__hint">QRコードを枠内に映してください</p>
+      </div>
+    </div>
+
+    <div id="status" class="ckin-status">カメラ起動を押してください</div>
+
+    <div id="result" class="ckin-result" style="display:none;"></div>
+
+    <div class="ckin-manual">
+      <h3 style="margin:0 0 10px;font-size:1rem;">手動入力（QRが読めない場合）</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="text" id="manual-token" placeholder="QRトークン または 受付番号(数字)" style="flex:1;min-width:200px;padding:10px 12px;border:1px solid var(--fsn-gray-300);border-radius:6px;font-size:0.95rem;" />
+        <button type="button" id="manual-go" class="admin-btn">確認</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script is:inline>
+    (function() {
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const toggleBtn = document.getElementById('toggle-camera');
+      const cameraLabel = toggleBtn.querySelector('[data-camera-label]');
+      const statusEl = document.getElementById('status');
+      const resultEl = document.getElementById('result');
+      const manualToken = document.getElementById('manual-token');
+      const manualGo = document.getElementById('manual-go');
+
+      let stream = null;
+      let scanning = false;
+      let lastToken = '';
+      let lastTokenAt = 0;
+
+      function setStatus(msg, type) {
+        statusEl.textContent = msg;
+        statusEl.className = 'ckin-status ' + (type ? 'ckin-status--' + type : '');
+      }
+
+      async function startCamera() {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' },
+            audio: false,
+          });
+          video.srcObject = stream;
+          await video.play();
+          scanning = true;
+          cameraLabel.textContent = 'カメラ停止';
+          setStatus('スキャン中…', 'scanning');
+          tick();
+        } catch (e) {
+          setStatus('カメラを起動できません: ' + e.message, 'error');
+        }
+      }
+
+      function stopCamera() {
+        scanning = false;
+        if (stream) {
+          stream.getTracks().forEach(t => t.stop());
+          stream = null;
+        }
+        video.srcObject = null;
+        cameraLabel.textContent = 'カメラ起動';
+        setStatus('カメラ停止中');
+      }
+
+      toggleBtn.addEventListener('click', () => {
+        if (scanning) stopCamera();
+        else startCamera();
+      });
+
+      manualGo.addEventListener('click', () => {
+        const v = (manualToken.value || '').trim();
+        if (v) handleToken(v, 'manual');
+      });
+      manualToken.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); manualGo.click(); }
+      });
+
+      function tick() {
+        if (!scanning) return;
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+          if (code && code.data) {
+            // URLから token を抽出
+            let token = code.data;
+            const m = token.match(/[?&]t=([^&]+)/);
+            if (m) token = decodeURIComponent(m[1]);
+            const now = Date.now();
+            if (token !== lastToken || now - lastTokenAt > 5000) {
+              lastToken = token;
+              lastTokenAt = now;
+              handleToken(token, 'qr');
+            }
+          }
+        }
+        requestAnimationFrame(tick);
+      }
+
+      async function handleToken(token, source) {
+        setStatus('照会中… (' + source + ')', 'scanning');
+        resultEl.style.display = 'none';
+        try {
+          const res = await fetch('/api/checkin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token }),
+          });
+          const data = await res.json();
+          if (!res.ok || data.error) {
+            setStatus('エラー: ' + (data.error || res.status), 'error');
+            return;
+          }
+          showResult(data);
+          setStatus('✓ チェックイン完了', 'success');
+          if (navigator.vibrate) navigator.vibrate(200);
+        } catch (e) {
+          setStatus('通信エラー: ' + e.message, 'error');
+        }
+      }
+
+      function showResult(data) {
+        const e = data.entry;
+        const slotsByAtt = data.slotsByAttendee || {};
+        let html = '<div class="ckin-result__head">';
+        html += '<span class="ckin-result__badge">受付番号 <strong>' + e.id + '</strong></span>';
+        if (e.checked_in_at) html += '<span class="ckin-result__re">※既にチェックイン済</span>';
+        html += '</div>';
+        html += '<h2 class="ckin-result__name">' + escHtml(e.applicant_name) + ' 様（' + e.attendees + '名）</h2>';
+        html += '<p class="ckin-result__mini">' + escHtml(e.email) + ' ／ ' + escHtml(e.tel) + '</p>';
+        html += '<ul class="ckin-result__attendees">';
+        for (const a of data.attendees) {
+          html += '<li><strong>' + escHtml(a.name) + '</strong>' + (a.grade ? ' <small>(' + escHtml(a.grade) + ')</small>' : '');
+          const slots = slotsByAtt[a.id] || [];
+          if (slots.length) {
+            html += '<ul style="margin:4px 0 0;padding-left:16px;font-size:0.82rem;color:var(--fsn-gray-700);">';
+            for (const s of slots) {
+              html += '<li>' + (s.day === 'Day1' ? '[D1]' : '[D2]') + ' ' + s.time_start + ' ' + escHtml(s.program_name) + '</li>';
+            }
+            html += '</ul>';
+          }
+          html += '</li>';
+        }
+        html += '</ul>';
+        resultEl.innerHTML = html;
+        resultEl.style.display = '';
+      }
+
+      function escHtml(s) {
+        return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+    })();
+  </script>
+
+</BaseLayout>
+
+<style is:global>
+  .ckin-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 16px 12px 80px;
+    color: var(--fsn-gray-900);
+  }
+  .ckin-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .admin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border: 0;
+    border-radius: var(--fsn-radius-sm);
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .ckin-scanner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-width: 600px;
+    margin: 0 auto 16px;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .ckin-scanner video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .ckin-scanner__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .ckin-scanner__frame {
+    width: 70%;
+    aspect-ratio: 1 / 1;
+    border: 3px solid var(--fsn-orange);
+    border-radius: 12px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.35);
+  }
+  .ckin-scanner__hint {
+    position: absolute;
+    bottom: 20px;
+    color: #fff;
+    font-size: 0.85rem;
+    background: rgba(0,0,0,0.5);
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin: 0;
+  }
+
+  .ckin-status {
+    padding: 12px 16px;
+    background: var(--fsn-gray-100);
+    color: var(--fsn-gray-700);
+    border-radius: var(--fsn-radius-sm);
+    font-size: 0.92rem;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .ckin-status--scanning { background: #DBEAFE; color: #1E40AF; }
+  .ckin-status--success { background: #DCFCE7; color: #166534; font-weight: 700; }
+  .ckin-status--error { background: #FEE2E2; color: #991B1B; font-weight: 700; }
+
+  .ckin-result {
+    padding: 16px;
+    background: var(--fsn-white);
+    border: 2px solid var(--fsn-orange);
+    border-radius: var(--fsn-radius-sm);
+    margin-bottom: 16px;
+  }
+  .ckin-result__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .ckin-result__badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border-radius: 999px;
+    font-size: 0.78rem;
+  }
+  .ckin-result__re {
+    color: #DC2626;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .ckin-result__name {
+    font-size: 1.2rem;
+    color: var(--fsn-navy-deep);
+    margin: 4px 0;
+  }
+  .ckin-result__mini {
+    font-size: 0.78rem;
+    color: var(--fsn-gray-700);
+    margin: 0 0 10px;
+  }
+  .ckin-result__attendees {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ckin-result__attendees > li {
+    padding: 8px 0;
+    border-top: 1px solid var(--fsn-gray-200);
+    font-size: 0.95rem;
+  }
+  .ckin-result__attendees > li:first-child { border-top: 0; }
+
+  .ckin-manual {
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-sm);
+  }
+</style>
