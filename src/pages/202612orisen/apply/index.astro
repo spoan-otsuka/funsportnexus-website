@@ -118,9 +118,15 @@ if (!success && env.DB) {
       ) : (
         <form class="ap-form" action="/api/apply" method="POST">
           {errorParam && (
-            <div class="ap-error-banner">
+            <div class="ap-error-banner" data-error-banner>
               <i class="fa-solid fa-circle-exclamation"></i>
-              {errorMessages[errorParam] || '送信に失敗しました。お手数ですが、再度お試しください。'}
+              <div>
+                <strong style="display:block;margin-bottom:4px;">送信に失敗しました</strong>
+                {errorMessages[errorParam] || 'お手数ですが、再度お試しください。'}
+                <p style="margin:6px 0 0;font-size:0.78rem;color:#7f1d1d;opacity:0.85;">
+                  ※入力内容は自動で復元しました。ご確認のうえ、再度ご送信ください。
+                </p>
+              </div>
             </div>
           )}
           {slotsError && (
@@ -290,6 +296,33 @@ if (!success && env.DB) {
     return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  // sessionStorage キー
+  const APPLY_FORM_KEY = 'fsn_apply_form_v1';
+
+  // 送信前にフォーム値を保存（エラーで戻った時に復元）
+  function saveFormState(formEl) {
+    try {
+      const fd = new FormData(formEl);
+      const obj = {};
+      for (const [k, v] of fd.entries()) {
+        if (!obj[k]) obj[k] = [];
+        obj[k].push(v);
+      }
+      sessionStorage.setItem(APPLY_FORM_KEY, JSON.stringify(obj));
+    } catch {}
+  }
+
+  function clearFormState() {
+    try { sessionStorage.removeItem(APPLY_FORM_KEY); } catch {}
+  }
+
+  function loadFormState() {
+    try {
+      const v = sessionStorage.getItem(APPLY_FORM_KEY);
+      return v ? JSON.parse(v) : null;
+    } catch { return null; }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const dataEl = document.getElementById('slots-data');
     const allSlots = dataEl ? JSON.parse(dataEl.textContent || '[]') : [];
@@ -452,6 +485,31 @@ if (!success && env.DB) {
           progSel.innerHTML = html;
         });
       }
+      // 他枠で既に選んだ時間帯（day/start/end）を取得
+      function getOccupiedTimes(currentRow) {
+        const occupied = [];
+        dayBlocksContainer.querySelectorAll('[data-progrow]').forEach(row => {
+          if (row === currentRow) return;
+          const timeSel = row.querySelector('[data-time-select]');
+          const sidStr = timeSel?.value || '';
+          const sid = parseInt(sidStr, 10);
+          if (!sid) return;
+          for (const g of programGroups) {
+            const s = g.slots.find(x => x.id === sid);
+            if (s) {
+              occupied.push({ day: s.day, start: s.time_start, end: s.time_end });
+              break;
+            }
+          }
+        });
+        return occupied;
+      }
+
+      function isOverlap(a, b) {
+        if (a.day !== b.day) return false;
+        return a.start < b.end && b.start < a.end;
+      }
+
       function updateTimeSelect(row) {
         const timeSel = row.querySelector('[data-time-select]');
         const key = row.dataset.selectedKey;
@@ -462,14 +520,25 @@ if (!success && env.DB) {
         }
         const g = programGroups.find(x => x.key === key);
         if (!g) return;
+        const occupied = getOccupiedTimes(row);
         const currentSlotId = timeSel.value;
         let html = '<option value="">時間を選択してください</option>';
         for (const s of g.slots) {
           const full = s.remaining <= 0;
-          html += '<option value="' + s.id + '"' + (full ? ' disabled' : '') + (String(s.id) === currentSlotId ? ' selected' : '') + '>' + s.time_start + ' 〜 ' + s.time_end + (full ? '（満席）' : '（残' + s.remaining + '）') + '</option>';
+          const conflict = occupied.some(o => isOverlap({ day: s.day, start: s.time_start, end: s.time_end }, o));
+          const disabled = full || conflict;
+          const note = full ? '（満席）' : (conflict ? '（時間重複）' : '（残' + s.remaining + '）');
+          html += '<option value="' + s.id + '"' + (disabled ? ' disabled' : '') + (String(s.id) === currentSlotId ? ' selected' : '') + '>' + s.time_start + ' 〜 ' + s.time_end + note + '</option>';
         }
         timeSel.innerHTML = html;
         timeSel.disabled = false;
+      }
+
+      // 全枠の time select を再評価
+      function updateAllTimeSelects() {
+        dayBlocksContainer.querySelectorAll('[data-progrow]').forEach(row => {
+          if (row.dataset.selectedKey) updateTimeSelect(row);
+        });
       }
       function rowHtml(day, idx) {
         const dayLabel = day === 'Day1' ? 'DAY 1' : 'DAY 2';
@@ -499,11 +568,14 @@ if (!success && env.DB) {
       }
       function attachRowHandlers(block, row) {
         const progSel = row.querySelector('[data-prog-select]');
+        const timeSel = row.querySelector('[data-time-select]');
         const venueEl = row.querySelector('[data-venue]');
         const delBtn = row.querySelector('[data-del]');
 
         progSel.addEventListener('change', () => {
           row.dataset.selectedKey = progSel.value;
+          // 種目を変更したら、その枠の時間選択はリセット（無効値を避ける）
+          if (timeSel) timeSel.value = '';
           if (progSel.value) {
             const g = programGroups.find(x => x.key === progSel.value);
             if (g && venueEl) {
@@ -514,12 +586,18 @@ if (!success && env.DB) {
           }
           updateTimeSelect(row);
           updateAllRowOptions();
+          updateAllTimeSelects();
           updateAddBtnsInCard();
+        });
+        timeSel.addEventListener('change', () => {
+          // 時間決定 → 他枠の time select を再評価（重複を反映）
+          updateAllTimeSelects();
         });
         delBtn.addEventListener('click', () => {
           row.remove();
           renumberBlock(block);
           updateAllRowOptions();
+          updateAllTimeSelects();
           updateAddBtnsInCard();
         });
       }
@@ -695,6 +773,77 @@ if (!success && env.DB) {
         });
       });
     });
+
+    // フォーム送信時に値を保存（エラー時の復元用）
+    const formEl = document.querySelector('.ap-form');
+    if (formEl) {
+      formEl.addEventListener('submit', () => saveFormState(formEl));
+    }
+
+    // 復元処理（エラーで戻ってきた場合）
+    const urlError = new URLSearchParams(location.search).get('error');
+    const urlSuccess = new URLSearchParams(location.search).get('success');
+    if (urlSuccess) {
+      // 申込完了 → 保存値クリア
+      clearFormState();
+    } else if (urlError) {
+      // エラーで戻った → 入力値を復元
+      const saved = loadFormState();
+      if (saved) {
+        // 1. 申込者情報の単純フィールド
+        ['name','furigana','email','tel','remarks'].forEach(k => {
+          if (saved[k] && saved[k][0]) {
+            const el = document.querySelector('[name="' + k + '"]');
+            if (el) el.value = saved[k][0];
+          }
+        });
+        // 2. 参加人数（→ rebuild トリガー）
+        if (saved.attendees && saved.attendees[0]) {
+          attendeesSelect.value = saved.attendees[0];
+          attendeesSelect.dispatchEvent(new Event('change'));
+        }
+        // 3. ご本人も参加
+        if (saved.self_join) {
+          if (selfJoinCb) {
+            selfJoinCb.checked = true;
+            applySelfJoin();
+          }
+        }
+        // 4. 参加希望日チェック
+        document.querySelectorAll('[data-pday]').forEach(cb => {
+          if (saved.participation_days && saved.participation_days.includes(cb.value)) {
+            cb.checked = true;
+          }
+        });
+        // refreshDayBlocks 起動
+        list.querySelectorAll('.ap-attendee').forEach(card => {
+          if (typeof card.refreshDayBlocks === 'function') card.refreshDayBlocks();
+        });
+        // 5. 参加者の名前・ふりがな・生年月日
+        for (let i = 1; i <= 10; i++) {
+          ['name','furigana','birth'].forEach(suffix => {
+            const key = 'attendee_' + i + '_' + suffix;
+            const v = saved[key] && saved[key][0];
+            if (v) {
+              const el = document.querySelector('[name="' + key + '"]');
+              if (el) {
+                el.value = v;
+                if (suffix === 'birth') el.dispatchEvent(new Event('change'));
+              }
+            }
+          });
+        }
+        // 6. 同意系
+        ['consent_rules','consent_photo','consent_allergy'].forEach(k => {
+          if (saved[k]) {
+            const el = document.querySelector('[name="' + k + '"]');
+            if (el) el.checked = true;
+          }
+        });
+        // 7. スロット選択（時間セレクト）は非同期で復元（DOM生成後）
+        // 注意：時間セレクトは種目選択後に生成される→現状の復元は省略
+      }
+    }
   });
 </script>
 
