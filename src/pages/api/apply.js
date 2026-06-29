@@ -232,9 +232,13 @@ export async function POST({ request, locals }) {
       await env.DB.batch(slotInserts);
     }
 
+    // 実際にアクセスされた URL を siteUrl として使う（next/本番 自動判別）
+    const reqUrl = new URL(request.url);
+    const siteUrl = `${reqUrl.protocol}//${reqUrl.host}`;
+
     // 通知
     const summary = buildSummary(data, slotMap, attendees);
-    await sendEmailsAndSlack(env, data, attendees, slotMap, entryId, qrToken, summary);
+    await sendEmailsAndSlack(env, data, attendees, slotMap, entryId, qrToken, summary, siteUrl);
 
     return redirect(`/202612orisen/apply/?success=1&id=${entryId}&qr=${qrToken}`);
   } catch (err) {
@@ -274,12 +278,11 @@ function buildSummary(data, slotMap, attendees) {
   return lines.join('\n');
 }
 
-async function sendEmailsAndSlack(env, data, attendees, slotMap, entryId, qrToken, summary) {
+async function sendEmailsAndSlack(env, data, attendees, slotMap, entryId, qrToken, summary, siteUrl) {
   const fromEmail = env.FROM_EMAIL || 'info@funsportnexus.org';
   const fromName = env.FROM_NAME || 'fun sport nexus 運営事務局';
   const adminEmail = env.ADMIN_EMAIL_FALLBACK || 'funsportnexus@spoan.or.jp';
   const fromHeader = `${fromName} <${fromEmail}>`;
-  const siteUrl = env.SITE_URL || 'https://funsportnexus.org';
 
   if (env.RESEND_API_KEY) {
     const sendMail = async (payload) => {
