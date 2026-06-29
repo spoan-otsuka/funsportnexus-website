@@ -140,9 +140,15 @@ export async function POST({ request, locals }) {
     // per attendee バリデーション
     for (const a of attendees) {
       const slots = a.slot_ids.map(id => slotMap.get(id));
-      const codes = slots.map(s => s.program_code);
-      if (codes.length !== new Set(codes).size) {
-        return redirect('/202612orisen/apply/?error=duplicate_program');
+      // 同種目重複の検出（詳細付き）
+      const codeCount = {};
+      for (const s of slots) {
+        codeCount[s.program_code] = (codeCount[s.program_code] || 0) + 1;
+      }
+      const dupCodes = Object.keys(codeCount).filter(c => codeCount[c] > 1);
+      if (dupCodes.length > 0) {
+        const dupName = slots.find(s => s.program_code === dupCodes[0])?.program_name?.replace(/\s*[①②③④⑤⑥⑦⑧⑨⑩]\s*$/, '') || dupCodes[0];
+        return redirect(`/202612orisen/apply/?error=duplicate_program&dup=${encodeURIComponent(dupName)}&attendee=${encodeURIComponent(a.name)}`);
       }
       const dayCounts = {};
       for (const s of slots) {

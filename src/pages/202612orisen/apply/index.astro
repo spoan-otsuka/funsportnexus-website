@@ -10,6 +10,8 @@ const success = Astro.url.searchParams.get('success') === '1';
 const errorParam = Astro.url.searchParams.get('error') || '';
 const fullSlot = Astro.url.searchParams.get('slot') || '';
 const conflictInfo = Astro.url.searchParams.get('conflict') || '';
+const dupInfo = Astro.url.searchParams.get('dup') || '';
+const dupAttendee = Astro.url.searchParams.get('attendee') || '';
 const qrToken = Astro.url.searchParams.get('qr') || '';
 const entryId = Astro.url.searchParams.get('id') || '';
 
@@ -24,7 +26,7 @@ const errorMessages = {
   no_slots: 'いずれかの参加者で、1つ以上のプログラムを、選択してください。',
   invalid_slot: '選択されたプログラムが、無効です。',
   full: `満席のプログラムが含まれます${fullSlot ? `：${fullSlot}` : ''}。`,
-  duplicate_program: '同じ参加者で、同じ種目を、複数選ばれています。マルチスポーツ体験のため、種目はおひとり1回までです。',
+  duplicate_program: `同じ参加者で、同じ種目を、複数選ばれています${dupAttendee ? `（${dupAttendee} 様 ／ ${dupInfo}）` : ''}。マルチスポーツ体験のため、種目はおひとり1回までです。お手数ですが、画面を更新してから、ご選択をやり直してください。`,
   daily_limit: 'おひとり1日に申し込めるのは、最大3つまでです。',
   time_conflict: `時間帯が重複するプログラムが、選択されています。${conflictInfo ? `（${conflictInfo}）` : ''}`,
   db_unavailable: 'システム一時障害です。しばらく後にお試しください。',
@@ -72,7 +74,10 @@ if (!success && env.DB) {
       <h1 class="dec-sub-hero__title">参加申込</h1>
       <p class="dec-sub-hero__lead">
         ご参加者ごとに、参加プログラムを、選択してください。<br>
-        マルチスポーツ体験のため、同じ種目は、おひとり1回まで・1日3つまでです。
+        マルチスポーツ体験のため、同じ種目は、おひとり1回まで・1日3つまでです。<br>
+        <span style="display:inline-block;margin-top:8px;padding:4px 14px;background:rgba(249,115,22,0.2);border-radius:999px;font-size:0.82rem;font-weight:700;">
+          ※当日、現地にて、空きがあるプログラムには、ご参加いただけます。
+        </span>
       </p>
     </div>
   </section>
@@ -774,10 +779,54 @@ if (!success && env.DB) {
       });
     });
 
-    // フォーム送信時に値を保存（エラー時の復元用）
+    // フォーム送信時に値を保存（エラー時の復元用）＋フロント側最終検証
     const formEl = document.querySelector('.ap-form');
     if (formEl) {
-      formEl.addEventListener('submit', () => saveFormState(formEl));
+      formEl.addEventListener('submit', (ev) => {
+        // 各参加者カードごとに同種目重複チェック
+        const attendeeCards = list.querySelectorAll('.ap-attendee');
+        for (const card of attendeeCards) {
+          const pos = card.dataset.position;
+          const rows = card.querySelectorAll('[data-progrow]');
+          const codes = [];
+          for (const r of rows) {
+            const key = r.dataset.selectedKey;
+            if (key) {
+              // key = 'Day1::legit-dance' → program_code 部分のみ
+              const code = key.split('::')[1] || '';
+              if (code) codes.push(code);
+            }
+          }
+          const dupCode = codes.find((c, i) => codes.indexOf(c) !== i);
+          if (dupCode) {
+            ev.preventDefault();
+            alert(pos + '人目で、同じ種目（' + dupCode + '）が複数選択されています。\n画面を更新してから、選び直してください。');
+            return;
+          }
+          // 時間重複も最終チェック
+          const usedTimes = []; // {day, start, end}
+          for (const r of rows) {
+            const timeSel = r.querySelector('[data-time-select]');
+            const sid = parseInt(timeSel?.value || '0', 10);
+            if (!sid) continue;
+            let foundSlot = null;
+            for (const g of programGroups) {
+              foundSlot = g.slots.find(x => x.id === sid);
+              if (foundSlot) break;
+            }
+            if (foundSlot) {
+              const cur = { day: foundSlot.day, start: foundSlot.time_start, end: foundSlot.time_end };
+              if (usedTimes.some(t => t.day === cur.day && cur.start < t.end && t.start < cur.end)) {
+                ev.preventDefault();
+                alert(pos + '人目で、時間が重複するプログラムが選択されています。\n画面を更新してから、選び直してください。');
+                return;
+              }
+              usedTimes.push(cur);
+            }
+          }
+        }
+        saveFormState(formEl);
+      });
     }
 
     // 復元処理（エラーで戻ってきた場合）
