@@ -582,20 +582,37 @@ if (!success && env.DB) {
         return el;
       }
 
-      // 参加希望日に応じて day block を生成（外部から呼ばれる）
+      // 参加希望日に応じて day block を増減（既存ブロックは保持）
       card.refreshDayBlocks = function refreshDayBlocks() {
         const allowed = getAllowedDays();
-        // 既存の選択（slot_id）はリセット
-        dayBlocksContainer.innerHTML = '';
+        const existing = {};
+        dayBlocksContainer.querySelectorAll('[data-day-block]').forEach(b => {
+          existing[b.dataset.day] = b;
+        });
+
         if (allowed.length === 0) {
+          Object.values(existing).forEach(b => b.remove());
           if (noDayNote) noDayNote.style.display = '';
           return;
         }
         if (noDayNote) noDayNote.style.display = 'none';
+
+        // チェックを外された日のブロックを削除
+        for (const day of Object.keys(existing)) {
+          if (!allowed.includes(day)) existing[day].remove();
+        }
+
+        // 新たに追加された日のブロックだけ生成
         ['Day1', 'Day2'].forEach(day => {
           if (!allowed.includes(day)) return;
+          if (existing[day]) return; // 既存維持
           const block = buildDayBlockEl(day);
-          dayBlocksContainer.appendChild(block);
+          // Day1の後ろに Day2 が来るよう、Day2は末尾、Day1は先頭に
+          if (day === 'Day1') {
+            dayBlocksContainer.insertBefore(block, dayBlocksContainer.firstChild);
+          } else {
+            dayBlocksContainer.appendChild(block);
+          }
           addRowToBlock(block); // 初期1枠
         });
       };
@@ -819,6 +836,50 @@ if (!success && env.DB) {
     letter-spacing: 0.12em;
   }
   .ap-day__date { font-size: 0.95rem; font-weight: 700; }
+
+  /* Day block コンテナ・タイトル */
+  .ap-day-blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-bottom: 8px;
+  }
+  .ap-day-blocks__note {
+    padding: 16px;
+    background: var(--fsn-cyan);
+    border-radius: var(--fsn-radius-sm);
+    font-size: 0.88rem;
+    color: var(--fsn-navy-deep);
+    margin: 0;
+  }
+  .ap-day-block {
+    background: var(--fsn-white);
+    border-radius: var(--fsn-radius-sm);
+    border: 1px solid var(--fsn-gray-200);
+    padding: 16px 18px;
+  }
+  .ap-day-block__title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 0 14px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+  }
+  .ap-day-block__tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--fsn-white);
+  }
+  .ap-day-block__tag--navy { background: var(--fsn-navy-deep); }
+  .ap-day-block__tag--orange { background: var(--fsn-orange); }
+  .ap-day-block__date { font-size: 0.95rem; }
 
   /* Program slot rows (順次追加方式) */
   .ap-progslots { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
