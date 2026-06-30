@@ -6,19 +6,19 @@ import '../../../styles/apply-form.css';
 export const prerender = false;
 ---
 <BaseLayout
-  title="参加者チェックイン ｜ fun sport nexus 2026.12"
-  description="お客様セルフ受付：QRコードを読み取って、その場で、チェックインができます。"
+  title="ご来場受付 ｜ fun sport nexus 2026.12"
+  description="会場受付：当日参加の方はこちらから、お申し込みください。"
   noindex={true}
 >
 
   <section class="dec-sub-hero">
     <div class="dec-sub-hero__bg"></div>
     <div class="dec-sub-hero__inner">
-      <p class="dec-sub-hero__label">SELF CHECK-IN</p>
-      <h1 class="dec-sub-hero__title">参加者チェックイン</h1>
+      <p class="dec-sub-hero__label">CHECK-IN</p>
+      <h1 class="dec-sub-hero__title">ご来場受付</h1>
       <p class="dec-sub-hero__lead">
         ご来場、ありがとうございます。<br>
-        以下から、お選びください。
+        以下から、お進みください。
       </p>
     </div>
   </section>
@@ -26,46 +26,9 @@ export const prerender = false;
   <section class="ap-section">
     <div class="ap-section__inner" style="max-width: 760px;">
 
-      <!-- 事前申込済 -->
+      <!-- 当日 ご参加の方（メイン） -->
       <div class="ap-step">
-        <h2 class="ap-step__title"><span class="ap-step__num">1</span> 事前にお申し込みの方</h2>
-        <p class="ap-step__desc">
-          お申込み完了メールの、<strong>QRコード</strong>を、お読み取りください。
-        </p>
-
-        <!-- カメラスキャナー -->
-        <div class="ck-scanner-wrap">
-          <button type="button" id="start-scan" class="ck-big-btn ck-big-btn--navy">
-            <i class="fa-solid fa-camera"></i>
-            <span data-label>カメラを起動してQRを読み取る</span>
-          </button>
-
-          <div id="scanner" class="ck-scanner" hidden>
-            <video id="video" playsinline muted></video>
-            <canvas id="canvas" style="display:none;"></canvas>
-            <div class="ck-scanner__overlay">
-              <div class="ck-scanner__frame"></div>
-              <p class="ck-scanner__hint">QRを枠内に映してください</p>
-            </div>
-          </div>
-
-          <div id="status" class="ck-status" hidden></div>
-        </div>
-
-        <details class="ck-fallback">
-          <summary>QRが読み取れない場合 ／ メールがお手元にない方</summary>
-          <div class="ck-fallback__body">
-            <p>管理ID（受付番号）と、ご登録のメールアドレスで、お調べいただけます。</p>
-            <a href="/202612orisen/lookup/" class="ap-submit__btn" style="display:inline-flex;text-decoration:none;font-size:0.95rem;padding:12px 26px;">
-              <i class="fa-solid fa-search"></i> 管理ID＋メールで照会
-            </a>
-          </div>
-        </details>
-      </div>
-
-      <!-- 当日参加 -->
-      <div class="ap-step">
-        <h2 class="ap-step__title"><span class="ap-step__num">2</span> 当日 ご参加の方</h2>
+        <h2 class="ap-step__title"><span class="ap-step__num">1</span> 当日 ご参加の方</h2>
         <p class="ap-step__desc">
           事前のお申し込みなしで、ご来場された方は、その場で、お申し込みいただけます。<br>
           ※当日 空きがあるプログラムのみ、ご参加可能です。
@@ -74,6 +37,70 @@ export const prerender = false;
           <i class="fa-solid fa-pen-to-square"></i>
           <span>当日申込フォームへ進む</span>
         </a>
+      </div>
+
+      <!-- 事前にお申し込み済の方 -->
+      <div class="ap-step">
+        <h2 class="ap-step__title"><span class="ap-step__num">2</span> 事前にお申し込みの方</h2>
+        <div class="ck-pre-guide">
+          <p class="ck-pre-guide__lead">
+            <i class="fa-solid fa-envelope-open-text"></i>
+            <strong>お申込み完了メール</strong>を、ご確認ください
+          </p>
+          <ol class="ck-steps">
+            <li>
+              <span class="ck-steps__num">1</span>
+              <div>
+                <p class="ck-steps__title">受信箱から、メールを、開きます</p>
+                <p class="ck-steps__hint">件名：「【受付完了】fun sport nexus 2026.12 参加申込」</p>
+              </div>
+            </li>
+            <li>
+              <span class="ck-steps__num">2</span>
+              <div>
+                <p class="ck-steps__title">本文中の<strong>QRコードURL</strong>を、タップします</p>
+                <p class="ck-steps__hint">「当日受付用 QRコード」と書かれた、URLです</p>
+              </div>
+            </li>
+            <li>
+              <span class="ck-steps__num">3</span>
+              <div>
+                <p class="ck-steps__title">受付画面で、お手続きを、お進めください</p>
+                <p class="ck-steps__hint">ぱん食い競走への参加意思のご確認 → チェックイン完了</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <details class="ck-fallback">
+          <summary>メールが、お手元にない場合は、こちら</summary>
+          <div class="ck-fallback__body">
+            <p><strong>管理ID（受付番号）</strong>と、ご登録の<strong>メールアドレス</strong>で、照会できます。</p>
+            <a href="/202612orisen/lookup/" class="ap-submit__btn" style="display:inline-flex;text-decoration:none;font-size:0.95rem;padding:12px 26px;">
+              <i class="fa-solid fa-search"></i> 管理ID＋メールで照会
+            </a>
+          </div>
+        </details>
+
+        <details class="ck-fallback">
+          <summary>紙のQRコードを、お持ちの方は、こちら</summary>
+          <div class="ck-fallback__body">
+            <p>印刷したQRなどを、お持ちの場合は、カメラで、読み取れます。</p>
+            <button type="button" id="start-scan" class="ck-mini-btn">
+              <i class="fa-solid fa-camera"></i>
+              <span data-label>カメラを起動してQRを読み取る</span>
+            </button>
+            <div id="scanner" class="ck-scanner" hidden>
+              <video id="video" playsinline muted></video>
+              <canvas id="canvas" style="display:none;"></canvas>
+              <div class="ck-scanner__overlay">
+                <div class="ck-scanner__frame"></div>
+                <p class="ck-scanner__hint">QRを枠内に映してください</p>
+              </div>
+            </div>
+            <div id="status" class="ck-status" hidden></div>
+          </div>
+        </details>
       </div>
 
       <p class="ck-help">
@@ -87,13 +114,13 @@ export const prerender = false;
   <script is:inline>
     (function() {
       const startBtn = document.getElementById('start-scan');
+      if (!startBtn) return;
       const scannerEl = document.getElementById('scanner');
       const video = document.getElementById('video');
       const canvas = document.getElementById('canvas');
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       const statusEl = document.getElementById('status');
       const label = startBtn.querySelector('[data-label]');
-
       let stream = null;
       let scanning = false;
 
@@ -122,18 +149,13 @@ export const prerender = false;
       }
       function stop() {
         scanning = false;
-        if (stream) {
-          stream.getTracks().forEach(t => t.stop());
-          stream = null;
-        }
+        if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
         video.srcObject = null;
         scannerEl.hidden = true;
         label.textContent = 'カメラを起動してQRを読み取る';
         statusEl.hidden = true;
       }
-      startBtn.addEventListener('click', () => {
-        if (scanning) stop(); else start();
-      });
+      startBtn.addEventListener('click', () => { if (scanning) stop(); else start(); });
 
       function tick() {
         if (!scanning) return;
@@ -145,8 +167,6 @@ export const prerender = false;
           const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
           if (code && code.data) {
             let url = code.data;
-            // URLに /202612orisen/qr/?t=XXX が含まれていればそれに遷移
-            // それ以外でも t パラメータを取り出して /qr/ に遷移
             const m = url.match(/[?&]t=([^&]+)/);
             const token = m ? decodeURIComponent(m[1]) : '';
             if (token) {
@@ -154,14 +174,17 @@ export const prerender = false;
               setStatus('受付情報を確認中…', 'success');
               if (navigator.vibrate) navigator.vibrate(150);
               setTimeout(() => {
-                location.href = '/202612orisen/qr/?t=' + encodeURIComponent(token);
+                location.href = '/202612orisen/qr/?t=' + encodeURIComponent(token) + '&from=checkin';
               }, 300);
               return;
             } else if (/^https?:/.test(url) && url.includes('/qr/')) {
               scanning = false;
               setStatus('受付情報を確認中…', 'success');
               if (navigator.vibrate) navigator.vibrate(150);
-              setTimeout(() => { location.href = url; }, 300);
+              // 会場経由のフラグ付与
+              const sep = url.includes('?') ? '&' : '?';
+              const finalUrl = url + sep + 'from=checkin';
+              setTimeout(() => { location.href = finalUrl; }, 300);
               return;
             }
           }
@@ -198,24 +221,97 @@ export const prerender = false;
     color: var(--fsn-white);
   }
   .ck-big-btn i { font-size: 1.3em; }
-  .ck-big-btn--navy { background: linear-gradient(135deg, var(--fsn-navy), var(--fsn-navy-deep)); }
   .ck-big-btn--orange { background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark)); }
 
-  /* スキャナー */
-  .ck-scanner-wrap { margin: 0 0 12px; }
+  /* 小ボタン */
+  .ck-mini-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    border: 0;
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .ck-mini-btn:hover { background: #050d2e; color: var(--fsn-white); }
+
+  /* 事前申込ガイド */
+  .ck-pre-guide {
+    padding: 24px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-md);
+    border-left: 4px solid var(--fsn-navy-deep);
+  }
+  .ck-pre-guide__lead {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 18px;
+  }
+  .ck-pre-guide__lead i { color: var(--fsn-orange); font-size: 1.3em; }
+
+  .ck-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .ck-steps li {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  .ck-steps__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border-radius: 50%;
+    font-family: var(--fsn-font-num);
+    font-weight: 900;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .ck-steps__title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--fsn-navy-deep);
+    margin: 4px 0 4px;
+    line-height: 1.5;
+  }
+  .ck-steps__hint {
+    font-size: 0.82rem;
+    color: var(--fsn-gray-700);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* スキャナー（フォールバック内） */
   .ck-scanner {
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1;
-    max-width: 480px;
-    margin: 16px auto 0;
+    max-width: 360px;
+    margin: 12px auto 0;
     background: #000;
     border-radius: 12px;
     overflow: hidden;
   }
-  .ck-scanner video {
-    width: 100%; height: 100%; object-fit: cover;
-  }
+  .ck-scanner video { width: 100%; height: 100%; object-fit: cover; }
   .ck-scanner__overlay {
     position: absolute; inset: 0;
     display: flex; flex-direction: column;
@@ -231,23 +327,23 @@ export const prerender = false;
   }
   .ck-scanner__hint {
     position: absolute;
-    bottom: 16px;
+    bottom: 12px;
     color: #fff;
     background: rgba(0,0,0,0.55);
-    padding: 6px 14px;
+    padding: 4px 12px;
     border-radius: 999px;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     margin: 0;
   }
 
   .ck-status {
-    margin-top: 12px;
-    padding: 12px 14px;
+    margin-top: 10px;
+    padding: 10px 12px;
     background: var(--fsn-gray-100);
     color: var(--fsn-gray-700);
     border-radius: var(--fsn-radius-sm);
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 600;
   }
   .ck-status--scanning { background: #DBEAFE; color: #1E40AF; }
@@ -256,7 +352,7 @@ export const prerender = false;
 
   /* フォールバック */
   .ck-fallback {
-    margin-top: 16px;
+    margin-top: 12px;
     background: var(--fsn-gray-50);
     border-radius: var(--fsn-radius-sm);
     overflow: hidden;

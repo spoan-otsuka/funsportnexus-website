@@ -20,8 +20,15 @@ export async function POST({ request, locals }) {
   const token = (form.get('token') || '').toString().trim();
   if (!token) return redirect('/202612orisen/qr/?error=no_token');
 
+  // 会場経由フラグの検証（来場前のチェックイン防止）
+  // フォーム送信時に hidden で from=checkin が含まれていることを必須化
+  const fromCheckin = (form.get('from') || '').toString().trim();
+  if (fromCheckin !== 'checkin') {
+    return redirect(`/202612orisen/qr/?t=${encodeURIComponent(token)}&error=need_venue`);
+  }
+
   const allergyOk = form.get('allergy_ok') ? 1 : 0;
-  if (!allergyOk) return redirect(`/202612orisen/qr/?t=${encodeURIComponent(token)}&error=no_allergy`);
+  if (!allergyOk) return redirect(`/202612orisen/qr/?t=${encodeURIComponent(token)}&error=no_allergy&from=checkin`);
 
   // 当日同行者の収集
   const extraNames = form.getAll('extra_name').map(v => v.toString().trim());

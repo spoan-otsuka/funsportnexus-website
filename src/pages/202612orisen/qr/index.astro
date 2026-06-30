@@ -9,6 +9,7 @@ const env = Astro.locals?.runtime?.env ?? {};
 const token = Astro.url.searchParams.get('t') || '';
 const done = Astro.url.searchParams.get('done') === '1';
 const qrError = Astro.url.searchParams.get('error') || '';
+const isCheckinMode = Astro.url.searchParams.get('from') === 'checkin';
 
 let entry = null;
 let attendees = [];
@@ -89,6 +90,7 @@ for (const s of entrySlots) {
               {qrError === 'no_allergy' ? '食物アレルギーの確認に、チェックを、お願いいたします。' :
                qrError === 'invalid_token' ? '受付情報が見つかりません。再度、QRから、お進みください。' :
                qrError === 'server' ? 'システム障害が発生しました。スタッフにお声がけください。' :
+               qrError === 'need_venue' ? 'チェックインは、会場の受付QRから、お進みください。' :
                'エラーが発生しました：' + qrError}
             </div>
           )}
@@ -135,8 +137,20 @@ for (const s of entrySlots) {
             </div>
           </div>
 
+          {!isCheckinMode && (
+            <div class="ap-error-banner" style="background:#FEF3C7;color:#92400E;">
+              <i class="fa-solid fa-info-circle"></i>
+              <div>
+                <strong style="display:block;margin-bottom:4px;">ご来場後に、チェックインを、お願いいたします</strong>
+                チェックインは、会場の<strong>受付QRコード</strong>を、お読み取りいただいた後の画面から、お進みください。<br>
+                このページでは、お申し込み内容のご確認のみ、可能です。
+              </div>
+            </div>
+          )}
+
+          {isCheckinMode && (
           <div class="ap-step">
-            <h2 class="ap-step__title"><span class="ap-step__num">?</span> ぱん食い競走への参加について</h2>
+            <h2 class="ap-step__title"><span class="ap-step__num">3</span> ぱん食い競走への参加について</h2>
             <p class="ap-step__desc">
               「スポあんぱん食い競走」は、当日 自由参加でお楽しみいただけます。<br>
               参加されるご予定の方は、以下から、お申し込みください。<br>
@@ -145,6 +159,7 @@ for (const s of entrySlots) {
 
             <form class="qr-pan-form" action="/api/qr-panshoku" method="POST">
               <input type="hidden" name="token" value={token} />
+              <input type="hidden" name="from" value="checkin" />
 
               <h3 class="qr-pan-section__title">お申込み時の、ご参加者</h3>
               <div class="qr-pan-attendees">
@@ -230,6 +245,7 @@ for (const s of entrySlots) {
               })();
             </script>
           </div>
+          )}
         </div>
       )}
     </div>
