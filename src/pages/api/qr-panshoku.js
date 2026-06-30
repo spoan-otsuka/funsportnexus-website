@@ -23,6 +23,21 @@ export async function POST({ request, locals }) {
   const allergyOk = form.get('allergy_ok') ? 1 : 0;
   if (!allergyOk) return redirect(`/202612orisen/qr/?t=${encodeURIComponent(token)}&error=no_allergy`);
 
+  // 当日同行者の収集
+  const extraNames = form.getAll('extra_name').map(v => v.toString().trim());
+  const extraBirths = form.getAll('extra_birth').map(v => v.toString().trim());
+  const extraAttrs = form.getAll('extra_attr').map(v => v.toString().trim());
+  const extras = [];
+  for (let i = 0; i < extraNames.length; i++) {
+    const name = extraNames[i];
+    if (!name) continue;
+    extras.push({
+      name,
+      birth: extraBirths[i] || '',
+      attr: extraAttrs[i] || '',
+    });
+  }
+
   try {
     const entry = await env.DB.prepare('SELECT id FROM entries WHERE qr_token = ?').bind(token).first();
     if (!entry) return redirect('/202612orisen/qr/?error=invalid_token');
@@ -41,6 +56,11 @@ export async function POST({ request, locals }) {
       `).bind(join, allergyOk, now, a.id);
     });
     if (stmts.length > 0) await env.DB.batch(stmts);
+
+    // 当日同行者を entries.panshoku_extras に JSON で保存
+    await env.DB.prepare(
+      'UPDATE entries SET panshoku_extras = ? WHERE id = ?'
+    ).bind(extras.length > 0 ? JSON.stringify(extras) : null, entry.id).run();
 
     return redirect(`/202612orisen/qr/?t=${encodeURIComponent(token)}&done=1`);
   } catch (e) {
