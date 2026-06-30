@@ -6,7 +6,7 @@ export const prerender = false;
 const env = Astro.locals?.runtime?.env ?? {};
 
 let errorMsg = null;
-let kpi = { entry: 0, attendee: 0, slot: 0, checkin: 0, panJoin: 0, panExtras: 0, day1Only: 0, day2Only: 0, both: 0 };
+let kpi = { entry: 0, attendee: 0, slot: 0, checkin: 0, panJoin: 0, panExtras: 0, day1Only: 0, day2Only: 0, both: 0, ckDay1: 0, ckDay2: 0, ckTest: 0 };
 let slotRows = [];
 let gradeRows = [];
 let dailyRows = [];
@@ -34,6 +34,12 @@ if (env.DB) {
   kpi.slot = r3?.c ?? 0;
   const r4 = await safeGet(`SELECT COUNT(*) AS c FROM entries WHERE status='confirmed' AND checked_in_at IS NOT NULL`);
   kpi.checkin = r4?.c ?? 0;
+  const ckDayRows = await safeAll(`SELECT checkin_day AS d, COUNT(*) AS c FROM entries WHERE status='confirmed' AND checked_in_at IS NOT NULL GROUP BY checkin_day`);
+  for (const r of ckDayRows) {
+    if (r.d === 'Day1') kpi.ckDay1 = r.c;
+    else if (r.d === 'Day2') kpi.ckDay2 = r.c;
+    else kpi.ckTest += r.c;
+  }
   const r5 = await safeGet(`SELECT COUNT(*) AS c FROM entry_attendees ea INNER JOIN entries e ON ea.entry_id=e.id WHERE e.status='confirmed' AND ea.panshoku_join=1`);
   kpi.panJoin = r5?.c ?? 0;
   const r6 = await safeGet(`SELECT COUNT(*) AS c FROM entries WHERE status='confirmed' AND panshoku_extras IS NOT NULL`);
@@ -199,6 +205,25 @@ const extrasTotal = Object.values(extrasAttrs).reduce((s, v) => s + v, 0);
         <div class="day-tile day-tile--both">
           <p class="day-tile__day">両日参加</p>
           <p class="day-tile__num">{kpi.both}<span class="day-tile__unit">名</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Day別チェックイン -->
+    <section class="dash-section">
+      <h2 class="dash-section__title"><i class="fa-solid fa-circle-check"></i> 当日チェックイン（申込単位）</h2>
+      <div class="dash-day">
+        <div class="day-tile day-tile--navy">
+          <p class="day-tile__day">DAY 1 (12/19) チェックイン</p>
+          <p class="day-tile__num">{kpi.ckDay1}<span class="day-tile__unit">件</span></p>
+        </div>
+        <div class="day-tile day-tile--orange">
+          <p class="day-tile__day">DAY 2 (12/20) チェックイン</p>
+          <p class="day-tile__num">{kpi.ckDay2}<span class="day-tile__unit">件</span></p>
+        </div>
+        <div class="day-tile" style="background:var(--fsn-gray-700);">
+          <p class="day-tile__day">テストチェックイン</p>
+          <p class="day-tile__num">{kpi.ckTest}<span class="day-tile__unit">件</span></p>
         </div>
       </div>
     </section>

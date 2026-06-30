@@ -401,3 +401,35 @@ textarea.ap-input { resize: vertical; line-height: 1.7; }
 .ck-status--scanning { background: #DBEAFE; color: #1E40AF; }
 .ck-status--success { background: #DCFCE7; color: #166534; }
 .ck-status--error { background: #FEE2E2; color: #991B1B; }
+
+/* ぱん食い参加者カード 縦並び */
+.qr-pan-attendees {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px;
+}
+.qr-pan-attendees .qr-pan-card { width: 100%; }
+
+/* 同行者追加ボタン（大きく目立つ） */
+.qr-pan-add-big {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 22px;
+  margin-top: 8px;
+  background: var(--fsn-white);
+  color: var(--fsn-orange-dark);
+  border: 2.5px dashed var(--fsn-orange);
+  border-radius: var(--fsn-radius-md);
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s, border-style 0.15s;
+}
+.qr-pan-add-big:hover {
+  background: #FFF7ED;
+  border-style: solid;
+}
+.qr-pan-add-big i { font-size: 1.4em; color: var(--fsn-orange); }

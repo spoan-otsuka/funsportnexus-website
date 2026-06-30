@@ -160,6 +160,15 @@ for (const s of entrySlots) {
               <i class="fa-solid fa-circle-check"></i>
               <h2>{checkinDone ? 'チェックインが、完了しました' : 'チェックイン済'}</h2>
               <p>{entry.applicant_name} 様<br>受付番号 <strong>#{entry.id}</strong></p>
+              {entry.checkin_day && (
+                <p style="margin-top:8px;">
+                  <span class={`day-pill ${entry.checkin_day === 'Day1' ? 'day-pill--navy' : (entry.checkin_day === 'Day2' ? 'day-pill--orange' : '')}`} style="font-size:0.95rem;padding:6px 18px;">
+                    {entry.checkin_day === 'Day1' ? 'DAY 1 ／ 12月19日（土）'
+                      : entry.checkin_day === 'Day2' ? 'DAY 2 ／ 12月20日（日）'
+                      : entry.checkin_day} のチェックイン
+                  </span>
+                </p>
+              )}
               <div class="ap-thanks__notes">
                 <p>当日は、各プログラムへ、お進みください。<br>会場マップ・スケジュールは、受付スタッフが、ご案内いたします。</p>
               </div>
@@ -206,7 +215,10 @@ for (const s of entrySlots) {
                   <input type="hidden" name="from" value="checkin" />
                   <input type="hidden" name="redirect_to" value={`/202612orisen/lookup/?id=${entry.id}&email=${encodeURIComponent(entry.email)}`} />
 
-                  <h4 class="qr-pan-section__title">お申込み時の、ご参加者</h4>
+                  <h4 class="qr-pan-section__title">ぱん食い競走に、ご参加される方</h4>
+                  <p class="qr-pan-section__desc">
+                    お申込み時の、ご参加者から、ぱん食い競走に、ご参加される方を、お選びください。
+                  </p>
                   <div class="qr-pan-attendees">
                     {attendees.map(a => (
                       <label class="qr-pan-card">
@@ -223,13 +235,14 @@ for (const s of entrySlots) {
                     ))}
                   </div>
 
-                  <h4 class="qr-pan-section__title" style="margin-top:18px;">当日 同行される方（任意）</h4>
+                  <h4 class="qr-pan-section__title" style="margin-top:24px;">ぱん食い競走に、参加される同行者の方</h4>
                   <p class="qr-pan-section__desc">
-                    保護者・お子さま・ご一緒の方など、ぱん食い競走に、ご参加される方を、お一人ずつ、ご入力ください。
+                    お申込みに記載のない、保護者・きょうだいの方など、当日その場で、ぱん食い競走に、ご参加される方を、ご入力ください。
                   </p>
                   <div class="qr-pan-extras" data-extras></div>
-                  <button type="button" class="qr-pan-add" data-add-extra>
-                    <i class="fa-solid fa-plus"></i> 当日同行者を追加
+                  <button type="button" class="qr-pan-add-big" data-add-extra>
+                    <i class="fa-solid fa-circle-plus"></i>
+                    <span>同行者を追加する</span>
                   </button>
 
                   <div class="ap-consents" style="margin-top:18px;">

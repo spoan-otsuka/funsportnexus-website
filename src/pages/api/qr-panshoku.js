@@ -64,11 +64,24 @@ export async function POST({ request, locals }) {
     });
     if (stmts.length > 0) await env.DB.batch(stmts);
 
+    // チェックイン日を JST で判定
+    // 2026-12-19 → Day1、2026-12-20 → Day2、それ以外（テスト等） → null
+    const jst = new Date(Date.now() + 9 * 3600 * 1000);
+    const ymd = jst.toISOString().slice(0, 10);
+    let checkinDay = null;
+    if (ymd === '2026-12-19') checkinDay = 'Day1';
+    else if (ymd === '2026-12-20') checkinDay = 'Day2';
+    else checkinDay = `Test(${ymd})`;
+
     // 当日同行者を entries.panshoku_extras に JSON で保存
-    // 同時にチェックイン時刻も記録（初回のみ）
+    // 同時にチェックイン時刻・チェックイン日も記録（初回のみ）
     await env.DB.prepare(
-      'UPDATE entries SET panshoku_extras = ?, checked_in_at = COALESCE(checked_in_at, ?) WHERE id = ?'
-    ).bind(extras.length > 0 ? JSON.stringify(extras) : null, now, entry.id).run();
+      `UPDATE entries SET
+         panshoku_extras = ?,
+         checked_in_at = COALESCE(checked_in_at, ?),
+         checkin_day = COALESCE(checkin_day, ?)
+       WHERE id = ?`
+    ).bind(extras.length > 0 ? JSON.stringify(extras) : null, now, checkinDay, entry.id).run();
 
     // Slack通知（チェックイン完了）
     if (env.SLACK_WEBHOOK_URL) {
@@ -80,7 +93,7 @@ export async function POST({ request, locals }) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            text: `✅ *セルフチェックイン* #${entry.id} ${entryFull?.applicant_name || ''} 様（${entryFull?.attendees || 0}名）${extras.length > 0 ? `\n  当日同行者: ${extras.length}名` : ''}`,
+            text: `✅ *セルフチェックイン* [${checkinDay}] #${entry.id} ${entryFull?.applicant_name || ''} 様（${entryFull?.attendees || 0}名）${extras.length > 0 ? `\n  当日同行者: ${extras.length}名` : ''}`,
           }),
         });
       } catch {}
