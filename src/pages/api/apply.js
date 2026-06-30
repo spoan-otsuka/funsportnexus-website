@@ -274,7 +274,7 @@ function buildSummary(data, slotMap, attendees) {
   if (data.remarks) {
     lines.push('', `▼ご要望・特記事項\n  ${data.remarks}`);
   }
-  lines.push(`▼同意：プライバシーポリシー${data.consent_rules ? '◯' : '×'}／写真利用${data.consent_photo ? '◯' : '×'}／アレルギー${data.consent_allergy ? '◯' : '×'}`);
+  lines.push(`▼同意：プライバシーポリシー${data.consent_rules ? '◯' : '×'}／写真利用${data.consent_photo ? '◯' : '×'}`);
   return lines.join('\n');
 }
 
