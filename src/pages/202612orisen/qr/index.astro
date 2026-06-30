@@ -66,36 +66,47 @@ for (const s of entrySlots) {
       ) : (
         <div class="qr-confirm">
           <div class="ap-step">
-            <h2 class="ap-step__title"><span class="ap-step__num">!</span> ご予約内容</h2>
-            <dl class="qr-meta">
-              <div><dt>受付番号</dt><dd><strong>{entry.id}</strong></dd></div>
-              <div><dt>お申込み者</dt><dd>{entry.applicant_name} 様（{entry.applicant_furigana}）</dd></div>
-              <div><dt>連絡先</dt><dd>{entry.email} ／ {entry.tel}</dd></div>
-              <div><dt>参加人数</dt><dd>{entry.attendees} 名</dd></div>
+            <h2 class="ap-step__title"><span class="ap-step__num">1</span> お申込み者（代表者）情報</h2>
+            <dl class="lk-meta">
+              <div><dt>受付番号</dt><dd><strong>#{entry.id}</strong></dd></div>
+              <div><dt>お名前</dt><dd>{entry.applicant_name} 様（{entry.applicant_furigana}）</dd></div>
+              <div><dt>メール</dt><dd>{entry.email}</dd></div>
+              <div><dt>お電話</dt><dd>{entry.tel}</dd></div>
             </dl>
+          </div>
 
-            <ul class="qr-attendees">
-              {attendees.map(a => (
-                <li class="qr-attendee">
-                  <p class="qr-attendee__head">
-                    <span class="ap-attendee__num">{a.position}人目</span>
-                    {a.is_representative ? <span class="ap-attendee__tag">代表者</span> : null}
-                    <span class="qr-attendee__name">{a.name}</span>
-                    {a.grade && <span class="qr-attendee__grade">{a.grade}</span>}
-                  </p>
-                  <ul class="qr-slots">
-                    {(slotsByAttendee[a.id] || []).map(s => (
-                      <li>
-                        <span class={`ap-progrow__day ${s.day === 'Day1' ? 'ap-progrow__day--navy' : 'ap-progrow__day--orange'}`}>{s.day === 'Day1' ? 'DAY 1' : 'DAY 2'}</span>
-                        <span>{s.time_start}〜{s.time_end}</span>
-                        <strong>{s.program_name}</strong>
-                        <span class="qr-slot__venue"><i class="fa-solid fa-location-dot"></i> {s.venue}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ul>
+          <div class="ap-step">
+            <h2 class="ap-step__title"><span class="ap-step__num">2</span> ご参加者（{entry.attendees}名）</h2>
+
+            <div class="lk-attendees">
+              {attendees.map(a => {
+                const slots = slotsByAttendee[a.id] || [];
+                return (
+                  <article class="lk-attendee">
+                    <header class="lk-attendee__head">
+                      <span class="ap-attendee__num">{a.position}人目</span>
+                      {a.is_representative ? <span class="ap-attendee__tag">代表者</span> : null}
+                      <span class="lk-attendee__name">{a.name}</span>
+                      {a.grade && <span class="lk-attendee__grade">{a.grade}</span>}
+                    </header>
+                    {slots.length === 0 ? (
+                      <p class="lk-attendee__empty">参加プログラムの選択はありません</p>
+                    ) : (
+                      <ul class="lk-slots">
+                        {slots.map(s => (
+                          <li class="lk-slot">
+                            <span class={`lk-slot__day ${s.day === 'Day1' ? 'lk-slot__day--navy' : 'lk-slot__day--orange'}`}>{s.day === 'Day1' ? 'DAY 1' : 'DAY 2'}</span>
+                            <span class="lk-slot__time">{s.time_start}〜{s.time_end}</span>
+                            <span class="lk-slot__name">{s.program_name}</span>
+                            <span class="lk-slot__venue"><i class="fa-solid fa-location-dot"></i> {s.venue}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
           </div>
 
           <div class="ap-step">
