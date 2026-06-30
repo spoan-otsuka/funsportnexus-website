@@ -165,13 +165,24 @@ textarea.ap-input { resize: vertical; line-height: 1.7; }
   margin: 0 0 14px;
 }
 .ap-attendee__num {
-  display: inline-block;
-  padding: 4px 12px;
-  background: var(--fsn-gray-700);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--fsn-orange);
   color: var(--fsn-white);
-  border-radius: var(--fsn-radius-pill);
+  border-radius: 50%;
+  font-family: var(--fsn-font-num);
+  font-size: 1rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+.ap-attendee__label {
   font-size: 0.8rem;
-  font-weight: 800;
+  font-weight: 700;
+  color: var(--fsn-gray-700);
+  letter-spacing: 0.04em;
 }
 .ap-attendee__tag {
   display: inline-block;
