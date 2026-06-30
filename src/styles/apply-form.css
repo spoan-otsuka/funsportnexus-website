@@ -433,3 +433,74 @@ textarea.ap-input { resize: vertical; line-height: 1.7; }
   border-style: solid;
 }
 .qr-pan-add-big i { font-size: 1.4em; color: var(--fsn-orange); }
+
+/* lookup 出欠チェック */
+.lk-slot--checkable {
+  position: relative;
+  padding-left: 14px;
+}
+.lk-slot__check {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 4px;
+}
+.lk-slot__check input[type="checkbox"] {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+.lk-slot__check-box {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--fsn-gray-400, #9CA3AF);
+  border-radius: 5px;
+  background: var(--fsn-white);
+  position: relative;
+  transition: background 0.15s, border-color 0.15s;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.lk-slot__check input:checked + .lk-slot__check-box {
+  background: var(--fsn-orange);
+  border-color: var(--fsn-orange);
+}
+.lk-slot__check input:checked + .lk-slot__check-box::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fsn-white);
+  font-weight: 900;
+  font-size: 0.95rem;
+}
+/* 欠席 (unchecked) 状態の見え方 */
+.lk-slot--checkable {
+  grid-template-columns: auto auto auto 1fr;
+}
+@media (max-width: 600px) {
+  .lk-slot--checkable {
+    grid-template-columns: auto auto 1fr;
+  }
+  .lk-slot--checkable .lk-slot__time { grid-column: 3; }
+}
+.lk-slot--checkable:has(input:not(:checked)) {
+  opacity: 0.55;
+  text-decoration: line-through;
+  text-decoration-color: var(--fsn-gray-500);
+}
+.lk-slot--checkable:has(input:not(:checked))::before {
+  content: "欠席";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 2px 8px;
+  background: #DC2626;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  border-radius: 999px;
+  text-decoration: none;
+  pointer-events: none;
+}
