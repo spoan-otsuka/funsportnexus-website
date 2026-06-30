@@ -218,6 +218,101 @@ const steps = [
     </div>
   </section>
 
+  <!-- FAQ -->
+  <section class="ev-section" id="faq" style="background:var(--fsn-white);">
+    <div class="ev-section__inner">
+      <div class="ev-block-head">
+        <p class="ev-block-head__label">FAQ</p>
+        <h2 class="ev-block-head__title">よくあるご質問</h2>
+      </div>
+
+      <div class="ev-faq">
+        <details class="ev-faq__item">
+          <summary><i class="fa-solid fa-circle-info"></i> お申し込み後の、内容変更は、可能ですか？</summary>
+          <div class="ev-faq__body">
+            お申し込み後の、ご自身による、内容変更は、できません。<br>
+            変更を、ご希望の場合は、お申し込み完了メールへの、ご返信、または、<a href="/contact/">お問い合わせフォーム</a>より、ご連絡ください。
+          </div>
+        </details>
+
+        <details class="ev-faq__item">
+          <summary><i class="fa-solid fa-users"></i> 参加者ごとに、参加する日や、プログラムが、異なっても、申し込めますか？</summary>
+          <div class="ev-faq__body">
+            はい、可能です。お申し込み1件に対して、各ご参加者ごとに、独立して、参加プログラムを、選択できます。<br>
+            例えば、<br>
+            ・「1人目は、Day1のみ」「2人目は、Day2のみ」<br>
+            ・「1人目は、Day1とDay2 両方」「2人目は、Day1のみ」<br>
+            といった、自由な組み合わせで、お申し込みいただけます。<br>
+            参加されない日は、プログラムを、選ばないまま、お進みください。
+          </div>
+        </details>
+
+        <details class="ev-faq__item">
+          <summary><i class="fa-solid fa-circle-info"></i> キャンセルは、どのように、すればよいですか？</summary>
+          <div class="ev-faq__body">
+            キャンセルも、お申し込み完了メールへの、ご返信、または、<a href="/contact/">お問い合わせフォーム</a>より、ご連絡ください。<br>
+            ご連絡をいただきましたら、運営事務局にて、対応いたします。
+          </div>
+        </details>
+
+        <details class="ev-faq__item">
+          <summary><i class="fa-solid fa-yen-sign"></i> 参加費は、かかりますか？</summary>
+          <div class="ev-faq__body">
+            <strong>参加費は、無料</strong>です。お申し込み時の、ご請求は、ございません。
+          </div>
+        </details>
+
+        <details class="ev-faq__item">
+          <summary><i class="fa-solid fa-shoe-prints"></i> 当日の、持ち物は、ありますか？</summary>
+          <div class="ev-faq__body">
+            動きやすい服装、室内シューズ、お飲み物を、ご持参ください。<br>
+            各プログラムによって、追加で、必要なものがある場合は、当日、受付にて、ご案内いたします。
+          </div>
+        </details>
+
+        <details class="ev-faq__item">
+          <summary><i class="fa-solid fa-walking"></i> 当日、申し込みは、できますか？</summary>
+          <div class="ev-faq__body">
+            当日、現地にて、空きがあるプログラムには、ご参加いただけます。<br>
+            事前のお申し込みが、優先となりますので、お早めの、お申し込みを、おすすめいたします。
+          </div>
+        </details>
+
+        <details class="ev-faq__item">
+          <summary><i class="fa-solid fa-qrcode"></i> 当日、QRコードを、忘れた場合は？</summary>
+          <div class="ev-faq__body">
+            受付番号（管理ID）、または、お名前を、受付スタッフに、お伝えください。<br>
+            ご登録の、お名前で、お調べいたします。
+          </div>
+        </details>
+
+        <details class="ev-faq__item">
+          <summary><i class="fa-solid fa-cloud-rain"></i> 雨天の場合は、どうなりますか？</summary>
+          <div class="ev-faq__body">
+            全プログラムが、屋内開催のため、雨天時も、開催いたします。<br>
+            万が一、悪天候等で、開催に変更がある場合は、お申し込みメールアドレス宛に、ご案内いたします。
+          </div>
+        </details>
+
+        <details class="ev-faq__item">
+          <summary><i class="fa-solid fa-child"></i> お子さま、おひとりでの、参加は、可能ですか？</summary>
+          <div class="ev-faq__body">
+            小学生以下のお子さまは、保護者の方と、ご一緒の、参加を、お願いいたします。<br>
+            中学生以上は、おひとりでの、ご参加も、可能です。
+          </div>
+        </details>
+
+        <details class="ev-faq__item">
+          <summary><i class="fa-solid fa-car"></i> 駐車場は、ありますか？</summary>
+          <div class="ev-faq__body">
+            会場（国立オリンピック記念青少年総合センター）には、有料の、来場者用駐車場が、ございます。<br>
+            ただし、台数に限りがございますので、公共交通機関での、ご来場を、おすすめいたします。
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
 </BaseLayout>
 
 <style>
@@ -659,5 +754,61 @@ const steps = [
   @media (max-width: 600px) {
     .ev-archive-item { flex-direction: column; align-items: stretch; }
     .ev-archive-item__more { align-self: flex-end; }
+  }
+
+  /* FAQ */
+  .ev-faq { display: flex; flex-direction: column; gap: 12px; }
+  .ev-faq__item {
+    border: 1.5px solid var(--fsn-gray-200);
+    border-radius: var(--fsn-radius-md);
+    background: var(--fsn-white);
+    overflow: hidden;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .ev-faq__item[open] {
+    border-color: var(--fsn-orange);
+    background: var(--fsn-gray-50);
+  }
+  .ev-faq__item summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 22px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--fsn-navy-deep);
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    line-height: 1.6;
+  }
+  .ev-faq__item summary::-webkit-details-marker { display: none; }
+  .ev-faq__item summary > i {
+    color: var(--fsn-orange);
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .ev-faq__item summary::after {
+    content: "+";
+    position: absolute;
+    right: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--fsn-orange);
+    line-height: 1;
+  }
+  .ev-faq__item[open] summary::after { content: "−"; }
+  .ev-faq__body {
+    padding: 0 22px 18px 56px;
+    font-size: 0.92rem;
+    line-height: 1.95;
+    color: var(--fsn-gray-700);
+  }
+  .ev-faq__body a {
+    color: var(--fsn-orange);
+    text-decoration: underline;
   }
 </style>

@@ -241,137 +241,15 @@ if (!success && env.DB) {
             <div class="ap-attendees" data-attendees-list></div>
           </div>
 
-          <!-- Step 3: ご確認事項（FAQ） -->
+          <!-- Step 3: 同意 -->
           <div class="ap-step">
             <h2 class="ap-step__title">
               <span class="ap-step__num">3</span>
-              ご確認事項・よくあるご質問
-            </h2>
-            <p class="ap-step__desc">
-              お申し込みの前に、以下を、ご確認ください。
-            </p>
-            <div class="ap-faq">
-              <details class="ap-faq__item" open>
-                <summary>
-                  <i class="fa-solid fa-circle-info" style="color:var(--fsn-orange);"></i>
-                  お申し込み後の、内容変更は、可能ですか？
-                </summary>
-                <div class="ap-faq__body">
-                  お申し込み後の、ご自身による、内容変更は、できません。<br>
-                  変更を、ご希望の場合は、お申し込み完了メールへの、ご返信、または、<a href="/contact/" target="_blank">お問い合わせフォーム</a>より、ご連絡ください。
-                </div>
-              </details>
-
-              <details class="ap-faq__item">
-                <summary>
-                  <i class="fa-solid fa-circle-info" style="color:var(--fsn-orange);"></i>
-                  キャンセルは、どのように、すればよいですか？
-                </summary>
-                <div class="ap-faq__body">
-                  キャンセルも、お申し込み完了メールへの、ご返信、または、<a href="/contact/" target="_blank">お問い合わせフォーム</a>より、ご連絡ください。<br>
-                  ご連絡をいただきましたら、運営事務局にて、対応いたします。
-                </div>
-              </details>
-
-              <details class="ap-faq__item">
-                <summary>
-                  <i class="fa-solid fa-users" style="color:var(--fsn-orange);"></i>
-                  参加者ごとに、参加する日や、プログラムが、異なっても、申し込めますか？
-                </summary>
-                <div class="ap-faq__body">
-                  はい、可能です。お申し込み1件に対して、各ご参加者ごとに、独立して、参加プログラムを、選択できます。<br>
-                  例えば、<br>
-                  ・「1人目は、Day1のみ」「2人目は、Day2のみ」<br>
-                  ・「1人目は、Day1とDay2 両方」「2人目は、Day1のみ」<br>
-                  といった、自由な組み合わせで、お申し込みいただけます。<br>
-                  参加されない日は、プログラムを、選ばないまま、お進みください。
-                </div>
-              </details>
-
-              <details class="ap-faq__item">
-                <summary>
-                  <i class="fa-solid fa-yen-sign" style="color:var(--fsn-orange);"></i>
-                  参加費は、かかりますか？
-                </summary>
-                <div class="ap-faq__body">
-                  <strong>参加費は、無料</strong>です。お申し込み時の、ご請求は、ございません。
-                </div>
-              </details>
-
-              <details class="ap-faq__item">
-                <summary>
-                  <i class="fa-solid fa-shoe-prints" style="color:var(--fsn-orange);"></i>
-                  当日の、持ち物は、ありますか？
-                </summary>
-                <div class="ap-faq__body">
-                  動きやすい服装、室内シューズ、お飲み物を、ご持参ください。<br>
-                  各プログラムによって、追加で、必要なものがある場合は、当日、受付にて、ご案内いたします。
-                </div>
-              </details>
-
-              <details class="ap-faq__item">
-                <summary>
-                  <i class="fa-solid fa-walking" style="color:var(--fsn-orange);"></i>
-                  当日、申し込みは、できますか？
-                </summary>
-                <div class="ap-faq__body">
-                  当日、現地にて、空きがあるプログラムには、ご参加いただけます。<br>
-                  事前のお申し込みが、優先となりますので、お早めの、お申し込みを、おすすめいたします。
-                </div>
-              </details>
-
-              <details class="ap-faq__item">
-                <summary>
-                  <i class="fa-solid fa-qrcode" style="color:var(--fsn-orange);"></i>
-                  当日、QRコードを、忘れた場合は？
-                </summary>
-                <div class="ap-faq__body">
-                  受付番号（管理ID）、または、お名前を、受付スタッフに、お伝えください。<br>
-                  ご登録の、お名前で、お調べいたします。
-                </div>
-              </details>
-
-              <details class="ap-faq__item">
-                <summary>
-                  <i class="fa-solid fa-cloud-rain" style="color:var(--fsn-orange);"></i>
-                  雨天の場合は、どうなりますか？
-                </summary>
-                <div class="ap-faq__body">
-                  全プログラムが、屋内開催のため、雨天時も、開催いたします。<br>
-                  万が一、悪天候等で、開催に変更がある場合は、お申し込みメールアドレス宛に、ご案内いたします。
-                </div>
-              </details>
-
-              <details class="ap-faq__item">
-                <summary>
-                  <i class="fa-solid fa-child" style="color:var(--fsn-orange);"></i>
-                  お子さま、おひとりでの、参加は、可能ですか？
-                </summary>
-                <div class="ap-faq__body">
-                  小学生以下のお子さまは、保護者の方と、ご一緒の、参加を、お願いいたします。<br>
-                  中学生以上は、おひとりでの、ご参加も、可能です。
-                </div>
-              </details>
-
-              <details class="ap-faq__item">
-                <summary>
-                  <i class="fa-solid fa-car" style="color:var(--fsn-orange);"></i>
-                  駐車場は、ありますか？
-                </summary>
-                <div class="ap-faq__body">
-                  会場（国立オリンピック記念青少年総合センター）には、有料の、来場者用駐車場が、ございます。<br>
-                  ただし、台数に限りがございますので、公共交通機関での、ご来場を、おすすめいたします。
-                </div>
-              </details>
-            </div>
-          </div>
-
-          <!-- Step 4: 同意 -->
-          <div class="ap-step">
-            <h2 class="ap-step__title">
-              <span class="ap-step__num">4</span>
               ご確認・同意事項
             </h2>
+            <p class="ap-step__desc">
+              ご不明な点は、<a href="/events/#faq" target="_blank" style="color:var(--fsn-orange);text-decoration:underline;">募集ページの よくあるご質問</a>を、ご確認ください。
+            </p>
             <div class="ap-consents">
               <label class="ap-consent">
                 <input type="checkbox" name="consent_rules" required />
