@@ -489,6 +489,44 @@ textarea.ap-input { resize: vertical; line-height: 1.7; }
   text-decoration: line-through;
   text-decoration-color: var(--fsn-gray-500);
 }
+/* 当日チェックイン状況 */
+.lk-checkin-status { display: flex; flex-direction: column; gap: 10px; margin: 8px 0; }
+.lk-checkin-day {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--fsn-gray-50);
+  border: 1.5px solid var(--fsn-gray-200);
+  border-radius: var(--fsn-radius-sm);
+  font-size: 0.95rem;
+  color: var(--fsn-navy-deep);
+}
+.lk-checkin-day--done {
+  background: #DCFCE7;
+  border-color: #BBF7D0;
+}
+.lk-checkin-day__pill { white-space: nowrap; }
+.lk-checkin-day__date { font-weight: 700; }
+.lk-checkin-day__state {
+  justify-self: end;
+  font-weight: 800;
+  color: var(--fsn-gray-700);
+}
+.lk-checkin-day--done .lk-checkin-day__state {
+  color: #166534;
+}
+.lk-checkin-day__state i { margin-right: 4px; }
+@media (max-width: 600px) {
+  .lk-checkin-day {
+    grid-template-columns: auto 1fr;
+    gap: 8px 10px;
+  }
+  .lk-checkin-day__date { grid-column: 2; }
+  .lk-checkin-day__state { grid-column: 1 / -1; justify-self: start; }
+}
+
 .lk-slot--checkable:has(input:not(:checked))::before {
   content: "欠席";
   position: absolute;

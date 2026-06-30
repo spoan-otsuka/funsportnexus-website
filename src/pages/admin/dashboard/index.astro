@@ -34,7 +34,8 @@ if (env.DB) {
   kpi.slot = r3?.c ?? 0;
   const r4 = await safeGet(`SELECT COUNT(*) AS c FROM entries WHERE status='confirmed' AND checked_in_at IS NOT NULL`);
   kpi.checkin = r4?.c ?? 0;
-  const ckDayRows = await safeAll(`SELECT checkin_day AS d, COUNT(*) AS c FROM entries WHERE status='confirmed' AND checked_in_at IS NOT NULL GROUP BY checkin_day`);
+  // entry_checkins ベース（日別の実チェックイン数）
+  const ckDayRows = await safeAll(`SELECT day AS d, COUNT(*) AS c FROM entry_checkins GROUP BY day`);
   for (const r of ckDayRows) {
     if (r.d === 'Day1') kpi.ckDay1 = r.c;
     else if (r.d === 'Day2') kpi.ckDay2 = r.c;

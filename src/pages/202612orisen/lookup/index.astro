@@ -51,6 +51,36 @@ for (const s of entrySlots) {
   if (!slotsByAttendee[k]) slotsByAttendee[k] = [];
   slotsByAttendee[k].push(s);
 }
+
+// 当日（JST）の Day 判定
+const jst = new Date(Date.now() + 9 * 3600 * 1000);
+const ymd = jst.toISOString().slice(0, 10);
+let todayDay = null;
+if (ymd === '2026-12-19') todayDay = 'Day1';
+else if (ymd === '2026-12-20') todayDay = 'Day2';
+
+// 日別チェックイン状況の取得
+let dayCheckins = {};
+if (entry && env.DB) {
+  try {
+    const cks = (await env.DB.prepare(
+      `SELECT day, checked_at FROM entry_checkins WHERE entry_id = ?`
+    ).bind(entry.id).all())?.results ?? [];
+    for (const c of cks) dayCheckins[c.day] = c.checked_at;
+  } catch {}
+}
+
+// 申込している日を判別
+const reservedDays = new Set(entrySlots.map(s => s.day));
+const hasDay1 = reservedDays.has('Day1');
+const hasDay2 = reservedDays.has('Day2');
+
+// 今日チェックイン済かどうか
+const todayChecked = todayDay ? !!dayCheckins[todayDay] : false;
+// すべての参加日がチェックイン済か
+const allDaysChecked =
+  (hasDay1 ? !!dayCheckins['Day1'] : true) &&
+  (hasDay2 ? !!dayCheckins['Day2'] : true);
 ---
 <BaseLayout
   title="申込内容の確認 ｜ fun sport nexus 2026.12"
@@ -180,30 +210,71 @@ for (const s of entrySlots) {
             </form>
           </div>
 
-          {(entry.checked_in_at || checkinDone) ? (
+          {/* 今日のチェックイン状況サマリ */}
+          <div class="ap-step" style="margin-top:24px;">
+            <h2 class="ap-step__title"><span class="ap-step__num">3</span> 当日 チェックイン</h2>
+
+            <div class="lk-checkin-status">
+              {hasDay1 && (
+                <div class={`lk-checkin-day ${dayCheckins['Day1'] ? 'lk-checkin-day--done' : ''}`}>
+                  <span class="lk-checkin-day__pill day-pill day-pill--navy">DAY 1</span>
+                  <span class="lk-checkin-day__date">12月19日（土）</span>
+                  <span class="lk-checkin-day__state">
+                    {dayCheckins['Day1']
+                      ? <><i class="fa-solid fa-circle-check"></i> チェックイン済</>
+                      : <><i class="fa-regular fa-circle"></i> 未チェックイン</>}
+                  </span>
+                </div>
+              )}
+              {hasDay2 && (
+                <div class={`lk-checkin-day ${dayCheckins['Day2'] ? 'lk-checkin-day--done' : ''}`}>
+                  <span class="lk-checkin-day__pill day-pill day-pill--orange">DAY 2</span>
+                  <span class="lk-checkin-day__date">12月20日（日）</span>
+                  <span class="lk-checkin-day__state">
+                    {dayCheckins['Day2']
+                      ? <><i class="fa-solid fa-circle-check"></i> チェックイン済</>
+                      : <><i class="fa-regular fa-circle"></i> 未チェックイン</>}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {checkinDone && (
+              <div class="ap-error-banner" style="background:#DCFCE7;color:#166534;margin-top:14px;">
+                <i class="fa-solid fa-circle-check"></i>
+                {todayDay ? `${todayDay === 'Day1' ? 'DAY 1 (12/19)' : 'DAY 2 (12/20)'} のチェックインが、完了しました。`
+                          : 'チェックインが、完了しました。'}
+              </div>
+            )}
+          </div>
+
+          {(todayChecked || (checkinDone && todayDay)) ? (
             <div class="ap-thanks" style="margin-top:24px;">
               <i class="fa-solid fa-circle-check"></i>
-              <h2>{checkinDone ? 'チェックインが、完了しました' : 'チェックイン済'}</h2>
+              <h2>本日の、チェックインは、完了しています</h2>
               <p>{entry.applicant_name} 様<br>受付番号 <strong>#{entry.id}</strong></p>
-              {entry.checkin_day && (
+              {todayDay && (
                 <p style="margin-top:8px;">
-                  <span class={`day-pill ${entry.checkin_day === 'Day1' ? 'day-pill--navy' : (entry.checkin_day === 'Day2' ? 'day-pill--orange' : '')}`} style="font-size:0.95rem;padding:6px 18px;">
-                    {entry.checkin_day === 'Day1' ? 'DAY 1 ／ 12月19日（土）'
-                      : entry.checkin_day === 'Day2' ? 'DAY 2 ／ 12月20日（日）'
-                      : entry.checkin_day} のチェックイン
+                  <span class={`day-pill ${todayDay === 'Day1' ? 'day-pill--navy' : 'day-pill--orange'}`} style="font-size:0.95rem;padding:6px 18px;">
+                    {todayDay === 'Day1' ? 'DAY 1 ／ 12月19日（土）' : 'DAY 2 ／ 12月20日（日）'} 受付済
                   </span>
                 </p>
               )}
               <div class="ap-thanks__notes">
                 <p>当日は、各プログラムへ、お進みください。<br>会場マップ・スケジュールは、受付スタッフが、ご案内いたします。</p>
               </div>
+              {(hasDay1 && hasDay2 && !allDaysChecked) && (
+                <p style="margin-top:16px;font-size:0.88rem;color:var(--fsn-orange-dark);font-weight:700;">
+                  ※翌日（{!dayCheckins['Day1'] ? 'DAY 1' : 'DAY 2'}）にも、改めて、受付QRからチェックインを、お願いいたします。
+                </p>
+              )}
               <a href="/202612orisen/" class="ap-thanks__back">
                 <i class="fa-solid fa-arrow-left"></i> 特設サイトに戻る
               </a>
             </div>
           ) : (
             <div class="ap-step" style="margin-top:24px;">
-              <h2 class="ap-step__title"><span class="ap-step__num">3</span> 会場到着 → チェックイン</h2>
+              <h2 class="ap-step__title"><span class="ap-step__num">4</span> {todayDay ? `${todayDay === 'Day1' ? 'DAY 1 (12/19)' : 'DAY 2 (12/20)'} 会場到着 → チェックイン` : '会場到着 → チェックイン'}</h2>
               <p class="ap-step__desc">
                 ご来場後に、以下から、チェックインを、お進めください。<br>
                 <strong>会場の受付QRコード</strong>を、お読み取りいただいたあと、ぱん食い競走の参加意思を、ご確認いただきます。
