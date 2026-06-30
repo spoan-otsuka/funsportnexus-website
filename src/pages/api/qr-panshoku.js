@@ -86,6 +86,12 @@ export async function POST({ request, locals }) {
       } catch {}
     }
 
+    // 完了後のリダイレクト先（lookup から来た場合は lookup に戻す）
+    const redirectTo = (form.get('redirect_to') || '').toString().trim();
+    if (redirectTo && redirectTo.startsWith('/202612orisen/')) {
+      const sep = redirectTo.includes('?') ? '&' : '?';
+      return redirect(`${redirectTo}${sep}checkin_done=1`);
+    }
     return redirect(`/202612orisen/qr/?t=${encodeURIComponent(token)}&done=1`);
   } catch (e) {
     console.error('qr-panshoku error:', e);

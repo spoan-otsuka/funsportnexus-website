@@ -8,6 +8,7 @@ export const prerender = false;
 const env = Astro.locals?.runtime?.env ?? {};
 const idParam = Astro.url.searchParams.get('id') || '';
 const emailParam = Astro.url.searchParams.get('email') || '';
+const checkinDone = Astro.url.searchParams.get('checkin_done') === '1';
 
 let entry = null;
 let attendees = [];
@@ -154,12 +155,100 @@ for (const s of entrySlots) {
 
           </div>
 
-          <p style="text-align:center;margin-top:24px;">
-            <a href={`/202612orisen/qr/?t=${entry.qr_token}`} class="ap-submit__btn" style="display:inline-flex;text-decoration:none;">
-              <i class="fa-solid fa-qrcode"></i> 当日受付ページへ
-            </a>
-          </p>
-          <p style="text-align:center;margin-top:8px;font-size:0.82rem;color:var(--fsn-gray-500);">
+          {(entry.checked_in_at || checkinDone) ? (
+            <div class="ap-thanks" style="margin-top:24px;">
+              <i class="fa-solid fa-circle-check"></i>
+              <h2>{checkinDone ? 'チェックインが、完了しました' : 'チェックイン済'}</h2>
+              <p>{entry.applicant_name} 様<br>受付番号 <strong>#{entry.id}</strong></p>
+              <div class="ap-thanks__notes">
+                <p>当日は、各プログラムへ、お進みください。<br>会場マップ・スケジュールは、受付スタッフが、ご案内いたします。</p>
+              </div>
+              <a href="/202612orisen/" class="ap-thanks__back">
+                <i class="fa-solid fa-arrow-left"></i> 特設サイトに戻る
+              </a>
+            </div>
+          ) : (
+            <div class="ap-step" style="margin-top:24px;">
+              <h2 class="ap-step__title"><span class="ap-step__num">3</span> 会場到着 → チェックイン</h2>
+              <p class="ap-step__desc">
+                ご来場後に、以下から、チェックインを、お進めください。<br>
+                <strong>会場の受付QRコード</strong>を、お読み取りいただいたあと、ぱん食い競走の参加意思を、ご確認いただきます。
+              </p>
+
+              <button type="button" id="start-scan" class="ck-big-btn ck-big-btn--navy" style="width:100%;">
+                <i class="fa-solid fa-camera"></i>
+                <span data-camera-label>会場の受付QRを読み取る</span>
+              </button>
+
+              <div id="scanner" class="ck-scanner" hidden>
+                <video id="video" playsinline muted></video>
+                <canvas id="canvas" style="display:none;"></canvas>
+                <div class="ck-scanner__overlay">
+                  <div class="ck-scanner__frame"></div>
+                  <p class="ck-scanner__hint">会場の受付QRを枠内に映してください</p>
+                </div>
+              </div>
+
+              <div id="venue-status" class="ck-status" hidden></div>
+
+              <!-- 会場QR検証成功後に表示 -->
+              <div id="checkin-form-area" hidden>
+                <h3 style="margin:24px 0 12px;font-size:1.05rem;color:var(--fsn-navy-deep);">
+                  <i class="fa-solid fa-check" style="color:var(--fsn-orange);"></i>
+                  会場到着を、確認しました
+                </h3>
+                <p style="font-size:0.9rem;color:var(--fsn-gray-700);margin:0 0 16px;line-height:1.7;">
+                  ぱん食い競走への、参加意思を、ご確認ください。
+                </p>
+
+                <form class="qr-pan-form" action="/api/qr-panshoku" method="POST">
+                  <input type="hidden" name="token" value={entry.qr_token} />
+                  <input type="hidden" name="from" value="checkin" />
+                  <input type="hidden" name="redirect_to" value={`/202612orisen/lookup/?id=${entry.id}&email=${encodeURIComponent(entry.email)}`} />
+
+                  <h4 class="qr-pan-section__title">お申込み時の、ご参加者</h4>
+                  <div class="qr-pan-attendees">
+                    {attendees.map(a => (
+                      <label class="qr-pan-card">
+                        <input type="checkbox" name={`pan_${a.id}`} value="1" defaultChecked={!!a.panshoku_join} />
+                        <span class="qr-pan-card__check"></span>
+                        <span class="qr-pan-card__body">
+                          <span class="qr-pan-card__name">
+                            <span class="ap-attendee__num">{a.position}</span>
+                            {a.name}
+                          </span>
+                          {a.grade && <span class="qr-pan-card__grade">{a.grade}</span>}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <h4 class="qr-pan-section__title" style="margin-top:18px;">当日 同行される方（任意）</h4>
+                  <p class="qr-pan-section__desc">
+                    保護者・お子さま・ご一緒の方など、ぱん食い競走に、ご参加される方を、お一人ずつ、ご入力ください。
+                  </p>
+                  <div class="qr-pan-extras" data-extras></div>
+                  <button type="button" class="qr-pan-add" data-add-extra>
+                    <i class="fa-solid fa-plus"></i> 当日同行者を追加
+                  </button>
+
+                  <div class="ap-consents" style="margin-top:18px;">
+                    <label class="ap-consent">
+                      <input type="checkbox" name="allergy_ok" value="1" required />
+                      <span><strong>食物アレルギー</strong>について、確認いたしました。参加者本人およびご家族のアレルギー有無を確認し、安全な範囲でご参加いただくことに、同意します。（必須）</span>
+                    </label>
+                  </div>
+                  <div class="ap-submit">
+                    <button type="submit" class="ap-submit__btn">
+                      <i class="fa-solid fa-check"></i> チェックインを完了する
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          <p style="text-align:center;margin-top:16px;font-size:0.82rem;color:var(--fsn-gray-500);">
             変更・キャンセルは、お申込みメールにご返信ください。
           </p>
           </>
@@ -167,5 +256,120 @@ for (const s of entrySlots) {
       </form>
     </div>
   </section>
+
+  {entry && !entry.checked_in_at && (
+    <>
+      <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+      <script is:inline define:vars={{ VENUE_CODE: 'fsn2026-12' }}>
+        (function() {
+          const startBtn = document.getElementById('start-scan');
+          const scannerEl = document.getElementById('scanner');
+          const video = document.getElementById('video');
+          const canvas = document.getElementById('canvas');
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          const statusEl = document.getElementById('venue-status');
+          const formArea = document.getElementById('checkin-form-area');
+          const cameraLabel = startBtn.querySelector('[data-camera-label]');
+          let stream = null;
+          let scanning = false;
+
+          function setStatus(msg, type) {
+            statusEl.hidden = false;
+            statusEl.textContent = msg;
+            statusEl.className = 'ck-status ' + (type ? 'ck-status--' + type : '');
+          }
+
+          async function start() {
+            try {
+              stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' }, audio: false,
+              });
+              video.srcObject = stream;
+              await video.play();
+              scannerEl.hidden = false;
+              scanning = true;
+              cameraLabel.textContent = '読み取り中… 停止';
+              setStatus('会場の受付QRを枠内に映してください', 'scanning');
+              tick();
+            } catch (e) {
+              setStatus('カメラを起動できません: ' + e.message, 'error');
+            }
+          }
+          function stop() {
+            scanning = false;
+            if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+            video.srcObject = null;
+            scannerEl.hidden = true;
+            cameraLabel.textContent = '会場の受付QRを読み取る';
+          }
+          startBtn.addEventListener('click', () => { if (scanning) stop(); else start(); });
+
+          function tick() {
+            if (!scanning) return;
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+              if (code && code.data) {
+                const data = code.data;
+                // 会場QR検証: URL内 venue=VENUE_CODE または 文字列に VENUE_CODE が含まれる
+                if (data.includes(VENUE_CODE) || (data.match(/venue=([^&]+)/) || [])[1] === VENUE_CODE) {
+                  scanning = false;
+                  stop();
+                  if (navigator.vibrate) navigator.vibrate(180);
+                  setStatus('✓ 会場到着を確認しました', 'success');
+                  formArea.hidden = false;
+                  startBtn.hidden = true;
+                  formArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  return;
+                } else {
+                  setStatus('別のQRコードが読み取られました。会場の受付QRを、お読み取りください。', 'error');
+                }
+              }
+            }
+            requestAnimationFrame(tick);
+          }
+
+          // 同行者 動的追加
+          const extrasEl = document.querySelector('[data-extras]');
+          const addBtn = document.querySelector('[data-add-extra]');
+          if (extrasEl && addBtn) {
+            function addRow() {
+              const div = document.createElement('div');
+              div.className = 'qr-pan-extra';
+              div.innerHTML =
+                '<div class="qr-pan-extra__head">' +
+                  '<span class="ap-attendee__num">+</span>' +
+                  '<span class="ap-attendee__label">同行者</span>' +
+                  '<button type="button" class="qr-pan-extra__del" aria-label="削除">' +
+                    '<i class="fa-solid fa-xmark"></i>' +
+                  '</button>' +
+                '</div>' +
+                '<div class="qr-pan-extra__grid">' +
+                  '<div class="ap-field"><label class="ap-label">お名前 <span class="ap-required">必須</span></label>' +
+                    '<input type="text" name="extra_name" required class="ap-input" placeholder="例：田中 太郎" /></div>' +
+                  '<div class="ap-field"><label class="ap-label">生年月日 <span class="ap-required">必須</span></label>' +
+                    '<input type="date" name="extra_birth" required class="ap-input" min="1920-01-01" max="2026-12-31" /></div>' +
+                  '<div class="ap-field"><label class="ap-label">ご属性 <span class="ap-required">必須</span></label>' +
+                    '<select name="extra_attr" required class="ap-input">' +
+                      '<option value="">選択してください</option>' +
+                      '<option value="保護者">保護者</option>' +
+                      '<option value="子ども">子ども</option>' +
+                      '<option value="一般">一般</option>' +
+                      '<option value="指導者">指導者</option>' +
+                      '<option value="運営団体">運営団体</option>' +
+                    '</select></div>' +
+                '</div>';
+              extrasEl.appendChild(div);
+              div.querySelector('.qr-pan-extra__del').addEventListener('click', () => div.remove());
+            }
+            addBtn.addEventListener('click', addRow);
+          }
+        })();
+      </script>
+    </>
+  )}
 
 </BaseLayout>

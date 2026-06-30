@@ -304,7 +304,7 @@ async function sendEmailsAndSlack(env, data, attendees, slotMap, entryId, qrToke
       text: `申込ID: ${entryId}\nQRトークン: ${qrToken}\n\n${summary}`,
     });
 
-    const qrUrl = `${siteUrl}/202612orisen/qr/?t=${qrToken}`;
+    const lookupQuickUrl = `${siteUrl}/202612orisen/lookup/?id=${entryId}&email=${encodeURIComponent(data.email)}`;
     const adminLookupUrl = `${siteUrl}/202612orisen/lookup/`;
     const userText = [
       `${data.name} 様`,
@@ -322,9 +322,10 @@ async function sendEmailsAndSlack(env, data, attendees, slotMap, entryId, qrToke
       summary,
       '',
       '━━━━━━━━━━━━━━━━━━━━━━━',
-      '【当日受付用 QRコード】',
-      `${qrUrl}`,
-      '※当日、こちらのURLを開いて、受付までお越しください。',
+      '【当日 チェックイン用 URL】',
+      `${lookupQuickUrl}`,
+      '※当日、ご来場後に、こちらをお開きください。',
+      '※会場の「受付QRコード」を、お読み取りいただくと、チェックインができます。',
       '━━━━━━━━━━━━━━━━━━━━━━━',
       '',
       '【ご案内】',

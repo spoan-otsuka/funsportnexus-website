@@ -5,7 +5,10 @@ export const prerender = false;
 
 // 受付ランディングURL（リクエスト元から自動構築）
 const reqUrl = Astro.url;
-const checkinUrl = `${reqUrl.protocol}//${reqUrl.host}/202612orisen/checkin/`;
+// 会場確認用：シンプルな文字列。/lookup/ のスキャナーが含有チェック
+const VENUE_CODE = 'fsn2026-12';
+// 当日参加の方が読んだ場合は /checkin/ に遷移するURL（事前申込の方は /lookup/ で読み取る）
+const checkinUrl = `${reqUrl.protocol}//${reqUrl.host}/202612orisen/checkin/?venue=${VENUE_CODE}`;
 const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=20&data=${encodeURIComponent(checkinUrl)}`;
 ---
 <BaseLayout
