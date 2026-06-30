@@ -1,0 +1,222 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export const prerender = false;
+
+// 受付ランディングURL（リクエスト元から自動構築）
+const reqUrl = Astro.url;
+const checkinUrl = `${reqUrl.protocol}//${reqUrl.host}/202612orisen/checkin/`;
+const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=20&data=${encodeURIComponent(checkinUrl)}`;
+---
+<BaseLayout
+  title="受付QR印刷 ｜ fun sport nexus 管理"
+  description="運営用 受付QR印刷ページ"
+  noindex={true}
+  hideHeader={true}
+  hideFooter={true}
+>
+
+  <div class="ckqr-wrap">
+    <header class="ckqr-head no-print">
+      <div>
+        <a href="/admin/" class="ckqr-back">← 管理TOP</a>
+        <h1>受付QR 印刷</h1>
+      </div>
+      <button onclick="window.print()" class="ckqr-btn">
+        <i class="fa-solid fa-print"></i> このページを印刷
+      </button>
+    </header>
+
+    <div class="ckqr-sheet">
+      <div class="ckqr-title">
+        <p class="ckqr-event">fun sport nexus 2026.12</p>
+        <h2 class="ckqr-heading">ご来場 受付</h2>
+      </div>
+
+      <div class="ckqr-step">
+        <p class="ckqr-step__num">1</p>
+        <p class="ckqr-step__text">
+          スマートフォンで<br>
+          このQRコードを、読み取ってください
+        </p>
+      </div>
+
+      <div class="ckqr-qr">
+        <img src={qrSrc} alt="受付QR" width="480" height="480" />
+      </div>
+
+      <p class="ckqr-url">{checkinUrl}</p>
+
+      <div class="ckqr-info">
+        <div class="ckqr-info__col">
+          <h3>事前 お申し込みの方</h3>
+          <p>お申込み完了メールの<br><strong>QRコード</strong>または<strong>管理ID</strong>で、受付できます</p>
+        </div>
+        <div class="ckqr-info__col">
+          <h3>当日 ご参加の方</h3>
+          <p>QRから、その場で<br><strong>当日申込フォーム</strong>に、お進みいただけます</p>
+        </div>
+      </div>
+
+      <p class="ckqr-foot">ご不明な点は、受付スタッフへ、お声がけください</p>
+    </div>
+
+    <p class="no-print ckqr-note">
+      A4横向き、または、ポスター印刷（A3）が、おすすめ。<br>
+      ブラウザの印刷設定で「ヘッダーとフッター」をOFFにすると、より見やすい仕上がりになります。
+    </p>
+  </div>
+
+</BaseLayout>
+
+<style is:global>
+  .ckqr-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+    color: var(--fsn-gray-900);
+  }
+  .ckqr-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--fsn-orange);
+  }
+  .ckqr-head h1 { font-size: 1.3rem; margin: 6px 0 0; color: var(--fsn-navy-deep); }
+  .ckqr-back { font-size: 0.85rem; color: var(--fsn-gray-700); text-decoration: none; }
+  .ckqr-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 18px; background: var(--fsn-navy-deep); color: var(--fsn-white);
+    border: 0; border-radius: var(--fsn-radius-sm); cursor: pointer;
+    font-size: 0.92rem; font-weight: 800;
+  }
+  .ckqr-note { font-size: 0.82rem; color: var(--fsn-gray-500); margin-top: 16px; }
+
+  /* 印刷シート（A4縦想定） */
+  .ckqr-sheet {
+    background: var(--fsn-white);
+    border: 3px solid var(--fsn-orange);
+    border-radius: 12px;
+    padding: 40px 32px;
+    text-align: center;
+    page-break-after: always;
+  }
+  .ckqr-title {
+    padding-bottom: 16px;
+    border-bottom: 1px dashed var(--fsn-gray-300);
+    margin-bottom: 24px;
+  }
+  .ckqr-event {
+    font-size: 0.95rem;
+    color: var(--fsn-orange-dark);
+    font-weight: 700;
+    margin: 0 0 6px;
+    letter-spacing: 0.04em;
+  }
+  .ckqr-heading {
+    font-size: 2.4rem;
+    color: var(--fsn-navy-deep);
+    margin: 0;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+  }
+
+  .ckqr-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--fsn-navy-deep);
+    color: var(--fsn-white);
+    padding: 14px 24px;
+    border-radius: 999px;
+    margin-bottom: 24px;
+  }
+  .ckqr-step__num {
+    font-family: var(--fsn-font-num);
+    font-size: 1.6rem;
+    font-weight: 900;
+    width: 36px;
+    height: 36px;
+    background: var(--fsn-orange);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    flex-shrink: 0;
+  }
+  .ckqr-step__text { margin: 0; font-size: 1rem; font-weight: 700; text-align: left; }
+
+  .ckqr-qr {
+    display: inline-block;
+    padding: 20px;
+    background: var(--fsn-white);
+    border: 2px solid var(--fsn-gray-200);
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  .ckqr-qr img {
+    display: block;
+    width: 480px;
+    height: 480px;
+    max-width: 100%;
+  }
+
+  .ckqr-url {
+    font-family: var(--fsn-font-num);
+    font-size: 0.78rem;
+    color: var(--fsn-gray-700);
+    margin: 0 0 28px;
+    word-break: break-all;
+  }
+
+  .ckqr-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .ckqr-info__col {
+    padding: 18px;
+    background: var(--fsn-gray-50);
+    border-radius: 8px;
+    border-left: 4px solid var(--fsn-orange);
+    text-align: left;
+  }
+  .ckqr-info__col h3 {
+    font-size: 1rem;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 8px;
+    font-weight: 800;
+  }
+  .ckqr-info__col p {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--fsn-gray-900);
+    margin: 0;
+  }
+
+  .ckqr-foot {
+    font-size: 0.95rem;
+    color: var(--fsn-gray-700);
+    margin: 0;
+    padding-top: 16px;
+    border-top: 1px dashed var(--fsn-gray-300);
+  }
+
+  @media print {
+    .no-print { display: none !important; }
+    body { background: #fff; margin: 0; }
+    .ckqr-wrap { padding: 0; max-width: none; }
+    .ckqr-sheet {
+      border-color: #F97316 !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      margin: 0; box-shadow: none;
+    }
+    .ckqr-step { background: #0A143F !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .ckqr-step__num { background: #F97316 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .ckqr-info__col { background: #F8F9FB !important; border-left-color: #F97316 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>

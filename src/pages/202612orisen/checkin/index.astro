@@ -1,0 +1,211 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/202612orisen.css';
+import '../../../styles/apply-form.css';
+
+export const prerender = false;
+---
+<BaseLayout
+  title="ご来場受付 ｜ fun sport nexus 2026.12"
+  description="会場受付：事前申込の方は管理ID・QRから、当日参加の方は新規申込から、お進みください。"
+  noindex={true}
+>
+
+  <section class="dec-sub-hero">
+    <div class="dec-sub-hero__bg"></div>
+    <div class="dec-sub-hero__inner">
+      <p class="dec-sub-hero__label">CHECK-IN</p>
+      <h1 class="dec-sub-hero__title">ご来場受付</h1>
+      <p class="dec-sub-hero__lead">
+        ご来場、ありがとうございます。<br>
+        以下から、お選びください。
+      </p>
+    </div>
+  </section>
+
+  <section class="ap-section">
+    <div class="ap-section__inner" style="max-width: 760px;">
+      <div class="ck-cards">
+        <a href="#preapplied" class="ck-card ck-card--navy">
+          <div class="ck-card__icon"><i class="fa-solid fa-circle-check"></i></div>
+          <h2 class="ck-card__title">事前にお申し込みの方</h2>
+          <p class="ck-card__text">
+            お申し込み完了メールの<br>
+            <strong>QRコード／管理ID</strong>から、受付します
+          </p>
+          <span class="ck-card__btn">こちらをタップ <i class="fa-solid fa-arrow-down"></i></span>
+        </a>
+
+        <a href="/202612orisen/apply/?walkin=1" class="ck-card ck-card--orange">
+          <div class="ck-card__icon"><i class="fa-solid fa-pen-to-square"></i></div>
+          <h2 class="ck-card__title">当日 ご参加の方</h2>
+          <p class="ck-card__text">
+            その場で、お申し込みいただけます<br>
+            <strong>空きがあるプログラムのみ、ご参加可能</strong>
+          </p>
+          <span class="ck-card__btn">当日申込フォームへ <i class="fa-solid fa-arrow-right"></i></span>
+        </a>
+      </div>
+
+      <!-- 事前申込済みの方 詳細 -->
+      <div id="preapplied" class="ap-step" style="margin-top: 32px;">
+        <h2 class="ap-step__title">
+          <span class="ap-step__num">1</span>
+          事前にお申し込みの方
+        </h2>
+
+        <div class="ck-options">
+          <div class="ck-option">
+            <p class="ck-option__num">A</p>
+            <h3 class="ck-option__title">お申込み完了メールの<br>QRコードをタップ</h3>
+            <p class="ck-option__text">
+              受信箱から、お申込み完了メールを、お開きください。<br>
+              本文中の<strong>QRコードURL</strong>を、タップすると、自動で、受付画面に、お進みいただけます。
+            </p>
+          </div>
+
+          <div class="ck-option ck-option--alt">
+            <p class="ck-option__num">B</p>
+            <h3 class="ck-option__title">管理ID＋メールで、照会</h3>
+            <p class="ck-option__text">
+              メールが、お手元にない場合は、<br>
+              <strong>管理ID</strong>と、ご登録の<strong>メールアドレス</strong>で、照会できます。
+            </p>
+            <a href="/202612orisen/lookup/" class="ck-option__btn">
+              <i class="fa-solid fa-search"></i> 申込内容を照会する
+            </a>
+          </div>
+        </div>
+
+        <p class="ck-help">
+          ご不明な点は、お近くの<strong>受付スタッフ</strong>に、お声がけください。
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style is:global>
+  .ck-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 760px) { .ck-cards { grid-template-columns: 1fr; } }
+
+  .ck-card {
+    display: flex;
+    flex-direction: column;
+    padding: 28px 22px;
+    border-radius: var(--fsn-radius-md);
+    text-decoration: none;
+    color: var(--fsn-white);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    min-height: 220px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  .ck-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    color: var(--fsn-white);
+  }
+  .ck-card--navy {
+    background: linear-gradient(135deg, var(--fsn-navy), var(--fsn-navy-deep));
+  }
+  .ck-card--orange {
+    background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+  }
+  .ck-card__icon {
+    font-size: 2.4rem;
+    margin-bottom: 12px;
+    opacity: 0.95;
+  }
+  .ck-card__title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--fsn-white);
+    margin: 0 0 10px;
+    line-height: 1.4;
+  }
+  .ck-card__text {
+    font-size: 0.92rem;
+    line-height: 1.7;
+    margin: 0 0 16px;
+    color: rgba(255,255,255,0.95);
+    flex: 1;
+  }
+  .ck-card__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.18);
+    border-radius: var(--fsn-radius-pill);
+    font-size: 0.88rem;
+    font-weight: 700;
+    backdrop-filter: blur(4px);
+    align-self: flex-start;
+  }
+
+  /* 事前申込 詳細 */
+  .ck-options { display: flex; flex-direction: column; gap: 14px; margin: 0 0 16px; }
+  .ck-option {
+    padding: 20px 22px;
+    background: var(--fsn-gray-50);
+    border-radius: var(--fsn-radius-md);
+    border-left: 4px solid var(--fsn-navy-deep);
+    position: relative;
+  }
+  .ck-option--alt { border-left-color: var(--fsn-orange); }
+  .ck-option__num {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-family: var(--fsn-font-num);
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: var(--fsn-navy-deep);
+    opacity: 0.18;
+    margin: 0;
+    line-height: 1;
+  }
+  .ck-option__title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 10px;
+    padding-right: 50px;
+  }
+  .ck-option__text {
+    font-size: 0.92rem;
+    line-height: 1.85;
+    color: var(--fsn-gray-700);
+    margin: 0 0 12px;
+  }
+  .ck-option__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: var(--fsn-orange);
+    color: var(--fsn-white);
+    border-radius: var(--fsn-radius-pill);
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 700;
+    transition: background 0.15s;
+  }
+  .ck-option__btn:hover {
+    background: var(--fsn-orange-dark);
+    color: var(--fsn-white);
+  }
+  .ck-help {
+    text-align: center;
+    font-size: 0.88rem;
+    color: var(--fsn-gray-700);
+    margin: 16px 0 0;
+  }
+</style>

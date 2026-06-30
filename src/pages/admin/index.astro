@@ -63,10 +63,15 @@ if (env.DB) {
         <h2>ダッシュボード</h2>
         <p>申込状況の集計：KPI・プログラム充填率・参加者属性・推移グラフ。</p>
       </a>
-      <a href="/admin/checkin/" class="admin-card">
+      <a href="/admin/checkin-qr/" class="admin-card">
         <i class="fa-solid fa-qrcode"></i>
-        <h2>QRチェックイン</h2>
-        <p>当日受付：カメラで申込者のQRを読み取り、チェックイン。</p>
+        <h2>受付QR 印刷</h2>
+        <p>会場掲示用：参加者がスマホで読み取って受付できる QRコード（印刷可）。</p>
+      </a>
+      <a href="/admin/checkin/" class="admin-card admin-card--ghost">
+        <i class="fa-solid fa-camera"></i>
+        <h2>スタッフ用 QRスキャン</h2>
+        <p>受付スタッフがカメラで参加者QRを読み取って手動チェックイン。</p>
       </a>
       <a href="/admin/programs/" class="admin-card">
         <i class="fa-solid fa-clipboard-list"></i>
