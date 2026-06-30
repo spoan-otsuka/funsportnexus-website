@@ -7,6 +7,8 @@ export const prerender = false;
 
 const env = Astro.locals?.runtime?.env ?? {};
 const token = Astro.url.searchParams.get('t') || '';
+const done = Astro.url.searchParams.get('done') === '1';
+const qrError = Astro.url.searchParams.get('error') || '';
 
 let entry = null;
 let attendees = [];
@@ -63,8 +65,33 @@ for (const s of entrySlots) {
         <div class="ap-error-banner"><i class="fa-solid fa-circle-exclamation"></i> トークンが指定されていません。お申込み完了メールのQRコードから、お進みください。</div>
       ) : !entry ? (
         <div class="ap-error-banner"><i class="fa-solid fa-circle-exclamation"></i> 該当のお申込みが、見つかりませんでした。{lookupError && `（${lookupError}）`}</div>
+      ) : done ? (
+        <div class="ap-thanks">
+          <i class="fa-solid fa-circle-check"></i>
+          <h2>チェックイン完了</h2>
+          <p>
+            {entry.applicant_name} 様<br>
+            受付番号 <strong>#{entry.id}</strong> の<br>
+            チェックインが、完了いたしました。
+          </p>
+          <div class="ap-thanks__notes">
+            <p>当日は、各プログラムへ、お進みください。<br>会場マップ・スケジュールは、受付スタッフが、ご案内いたします。</p>
+          </div>
+          <a href="/202612orisen/" class="ap-thanks__back">
+            <i class="fa-solid fa-arrow-left"></i> 特設サイトに戻る
+          </a>
+        </div>
       ) : (
         <div class="qr-confirm">
+          {qrError && (
+            <div class="ap-error-banner">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              {qrError === 'no_allergy' ? '食物アレルギーの確認に、チェックを、お願いいたします。' :
+               qrError === 'invalid_token' ? '受付情報が見つかりません。再度、QRから、お進みください。' :
+               qrError === 'server' ? 'システム障害が発生しました。スタッフにお声がけください。' :
+               'エラーが発生しました：' + qrError}
+            </div>
+          )}
           <div class="ap-step">
             <h2 class="ap-step__title"><span class="ap-step__num">1</span> お申込み者（代表者）情報</h2>
             <dl class="lk-meta">

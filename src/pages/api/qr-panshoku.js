@@ -58,9 +58,26 @@ export async function POST({ request, locals }) {
     if (stmts.length > 0) await env.DB.batch(stmts);
 
     // 当日同行者を entries.panshoku_extras に JSON で保存
+    // 同時にチェックイン時刻も記録（初回のみ）
     await env.DB.prepare(
-      'UPDATE entries SET panshoku_extras = ? WHERE id = ?'
-    ).bind(extras.length > 0 ? JSON.stringify(extras) : null, entry.id).run();
+      'UPDATE entries SET panshoku_extras = ?, checked_in_at = COALESCE(checked_in_at, ?) WHERE id = ?'
+    ).bind(extras.length > 0 ? JSON.stringify(extras) : null, now, entry.id).run();
+
+    // Slack通知（チェックイン完了）
+    if (env.SLACK_WEBHOOK_URL) {
+      try {
+        const entryFull = await env.DB.prepare(
+          'SELECT applicant_name, attendees FROM entries WHERE id = ?'
+        ).bind(entry.id).first();
+        await fetch(env.SLACK_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: `✅ *セルフチェックイン* #${entry.id} ${entryFull?.applicant_name || ''} 様（${entryFull?.attendees || 0}名）${extras.length > 0 ? `\n  当日同行者: ${extras.length}名` : ''}`,
+          }),
+        });
+      } catch {}
+    }
 
     return redirect(`/202612orisen/qr/?t=${encodeURIComponent(token)}&done=1`);
   } catch (e) {
