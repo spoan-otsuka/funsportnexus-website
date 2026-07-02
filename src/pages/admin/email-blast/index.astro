@@ -1,0 +1,499 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/admin.css';
+import '../../../styles/apply-form.css';
+
+export const prerender = false;
+
+const env = Astro.locals?.runtime?.env ?? {};
+const sent = Astro.url.searchParams.get('sent') || '';
+const failed = Astro.url.searchParams.get('failed') || '';
+const total = Astro.url.searchParams.get('total') || '';
+const errorMsg = Astro.url.searchParams.get('error') || '';
+
+// 送信履歴
+let history = [];
+if (env.DB) {
+  try {
+    history = (await env.DB.prepare(
+      `SELECT id, sent_at, template, filter, subject, target_count, success_count, failed_count, testmode
+       FROM email_log ORDER BY sent_at DESC LIMIT 10`
+    ).all())?.results ?? [];
+  } catch {}
+}
+
+// 集計
+let counts = { all: 0, day1: 0, day2: 0, both: 0 };
+if (env.DB) {
+  try {
+    const r1 = await env.DB.prepare(`SELECT COUNT(*) AS c FROM entries WHERE status='confirmed'`).first();
+    counts.all = r1?.c ?? 0;
+
+    const r2 = await env.DB.prepare(`
+      SELECT
+        SUM(CASE WHEN d1>0 AND d2=0 THEN 1 ELSE 0 END) AS d1only,
+        SUM(CASE WHEN d2>0 AND d1=0 THEN 1 ELSE 0 END) AS d2only,
+        SUM(CASE WHEN d1>0 AND d2>0 THEN 1 ELSE 0 END) AS both_d
+      FROM (
+        SELECT e.id,
+          SUM(CASE WHEN s.day='Day1' THEN 1 ELSE 0 END) AS d1,
+          SUM(CASE WHEN s.day='Day2' THEN 1 ELSE 0 END) AS d2
+        FROM entries e
+        LEFT JOIN entry_slots es ON es.entry_id=e.id
+        LEFT JOIN slots s ON es.slot_id=s.id
+        WHERE e.status='confirmed'
+        GROUP BY e.id
+      )
+    `).first();
+    counts.day1 = (r2?.d1only ?? 0) + (r2?.both_d ?? 0);
+    counts.day2 = (r2?.d2only ?? 0) + (r2?.both_d ?? 0);
+    counts.both = r2?.both_d ?? 0;
+  } catch {}
+}
+
+// メールテンプレート
+const TEMPLATES = {
+  remind_week: {
+    label: '01 ／ 開催1週間前リマインド',
+    subject: '【開催1週間前】fun sport nexus 2026.12 開催のご案内（管理ID #{id}）',
+    body: `{name} 様
+
+fun sport nexus 2026.12 の、開催が、いよいよ、1週間後に、迫って、まいりました。
+お申込みいただいた、内容を、改めて、ご案内いたします。
+
+━━━━━━━━━━━━━━━━━━━━━━━
+■ 管理ID：#{id}
+■ ご参加人数：{count}名
+━━━━━━━━━━━━━━━━━━━━━━━
+
+【開催日】
+2026年12月19日（土）〜 20日（日）
+
+【会場】
+国立オリンピック記念青少年総合センター（東京都渋谷区）
+JR山手線 「代々木駅」 から、徒歩 約7分
+小田急線 「参宮橋駅」 から、徒歩 約7分
+
+【当日 チェックイン用URL】
+{url}
+※当日、ご来場後に、こちらをお開きください。
+※会場の「受付QRコード」を、お読み取りいただくと、チェックインができます。
+
+【ご持参いただくもの】
+・運動可能な、服装  ／  靴
+・タオル  ／  飲み物
+・スマートフォン（チェックイン用）
+
+【出欠の確認のお願い】
+ご都合により、ご参加できなく、なられた、プログラムが、ございましたら、
+お早めに、上記URL より、出欠変更を、お願いいたします。
+
+お会いできますことを、運営一同、楽しみに、しております。
+
+fun sport nexus 運営事務局
+公益財団法人スポーツ安全協会`,
+  },
+  remind_eve: {
+    label: '02 ／ 前日リマインド',
+    subject: '【明日 開催】fun sport nexus 2026.12 ／ 管理ID #{id}',
+    body: `{name} 様
+
+いよいよ、明日からの、ご来場、お待ち、しております。
+最終ご案内を、お送りいたします。
+
+━━━━━━━━━━━━━━━━━━━━━━━
+■ 管理ID：#{id}
+■ ご参加人数：{count}名
+━━━━━━━━━━━━━━━━━━━━━━━
+
+【会場】
+国立オリンピック記念青少年総合センター
+東京都渋谷区代々木神園町3-1
+
+【受付】
+会場 中央広場 にて、受付QRコードを、ご準備いたします。
+お申込みの方は、下記URLを、お開きいただき、
+「会場到着 →  チェックイン」ボタンから、お手続きください。
+
+【当日 チェックイン用URL】
+{url}
+
+【天候・服装】
+体育館内 ／ 屋内開催のため、雨天 決行いたします。
+動きやすい、服装  ／  屋内シューズ  ／  タオル  ／  飲み物を、ご持参ください。
+
+【ご注意】
+体調が、すぐれない場合は、ご無理なさらず、ご欠席ください。
+キャンセル・出欠変更は、上記URL より、お手続きいただけます。
+
+それでは、明日、お会いできますことを、楽しみに、しております。
+
+fun sport nexus 運営事務局
+公益財団法人スポーツ安全協会`,
+  },
+  survey: {
+    label: '03 ／ 開催後アンケート',
+    subject: '【ご来場、ありがとうございました】fun sport nexus 2026.12 ／ アンケートのお願い',
+    body: `{name} 様
+
+先日は、fun sport nexus 2026.12 に、ご参加いただき、誠に、ありがとうございました。
+
+ご来場いただいた、皆さまの、お声を、次回の運営に、活かさせていただきたく、
+お手数ですが、下記アンケートに、ご協力いただけますと、幸いです。
+
+【アンケートURL】
+（こちらに、Googleフォーム等の、URLを、ご記入ください）
+
+ご回答期限：2026年12月28日（日）まで
+
+━━━━━━━━━━━━━━━━━━━━━━━
+■ 管理ID：#{id}
+■ ご参加人数：{count}名
+━━━━━━━━━━━━━━━━━━━━━━━
+
+次回開催の、お知らせは、本メールアドレス宛に、ご連絡いたします。
+今後とも、fun sport nexus を、どうぞ、よろしく、お願いいたします。
+
+fun sport nexus 運営事務局
+公益財団法人スポーツ安全協会`,
+  },
+  emergency: {
+    label: '04 ／ 緊急連絡（フリーテキスト）',
+    subject: '【重要】fun sport nexus 2026.12 より、お知らせ',
+    body: `{name} 様
+
+fun sport nexus 2026.12 運営事務局、より、お知らせです。
+
+（こちらに、ご連絡内容を、ご記入ください）
+
+ご不明な点は、本メールに、ご返信ください。
+
+fun sport nexus 運営事務局
+公益財団法人スポーツ安全協会`,
+  },
+  cancel_event: {
+    label: '05 ／ 開催中止',
+    subject: '【重要】fun sport nexus 2026.12 開催中止の、お知らせ',
+    body: `{name} 様
+
+fun sport nexus 2026.12 へ、お申込みいただき、誠に、ありがとうございます。
+
+誠に、申し訳ございませんが、（理由）のため、
+2026年12月19日（土）〜 20日（日）に、予定して、おりました、本イベントを、
+中止する、決定を、いたしました。
+
+ご予定くださっていた、皆さまには、心より、お詫び、申し上げます。
+
+━━━━━━━━━━━━━━━━━━━━━━━
+■ 管理ID：#{id}
+■ ご参加人数：{count}名
+━━━━━━━━━━━━━━━━━━━━━━━
+
+【今後の、ご対応】
+お申込み情報は、本事務局にて、適切に、削除いたします。
+振替開催の予定は、決まり次第、本メールアドレス宛に、ご連絡いたします。
+
+ご不明な点は、本メールに、ご返信ください。
+重ねて、お詫び、申し上げます。
+
+fun sport nexus 運営事務局
+公益財団法人スポーツ安全協会`,
+  },
+  schedule_change: {
+    label: '06 ／ スケジュール変更',
+    subject: '【ご案内】fun sport nexus 2026.12 スケジュール変更の、お知らせ',
+    body: `{name} 様
+
+fun sport nexus 2026.12 へ、お申込みいただき、誠に、ありがとうございます。
+
+開催スケジュールに、一部、変更が、ございますため、
+以下、ご案内、申し上げます。
+
+【変更内容】
+（こちらに、変更内容を、ご記入ください）
+
+【ご対応のお願い】
+変更後の内容で、ご都合が、合わない場合は、下記URL より、出欠変更、または、
+キャンセル手続きを、お願いいたします。
+
+{url}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+■ 管理ID：#{id}
+■ ご参加人数：{count}名
+━━━━━━━━━━━━━━━━━━━━━━━
+
+直前の、ご案内となり、誠に、申し訳ございません。
+ご不明な点は、本メールに、ご返信ください。
+
+fun sport nexus 運営事務局
+公益財団法人スポーツ安全協会`,
+  },
+};
+
+const tplArray = Object.entries(TEMPLATES).map(([k, v]) => ({ key: k, ...v }));
+---
+<BaseLayout
+  title="メール一斉送信 ｜ 管理"
+  description="申込者へのメール一斉送信"
+  noindex={true}
+  hideHeader={true}
+  hideFooter={true}
+>
+
+  <div class="admin-wrap" style="max-width:1080px;">
+    <header class="admin-head">
+      <h1>メール一斉送信</h1>
+      <div style="display:flex;gap:8px;">
+        <a href="/admin/" class="admin-btn admin-btn--ghost">管理TOP</a>
+      </div>
+    </header>
+
+    {sent && (
+      <div class="ap-error-banner" style="background:#DCFCE7;color:#166534;">
+        <i class="fa-solid fa-check-circle"></i>
+        送信完了：{sent}件 成功{failed && Number(failed) > 0 ? ` ／ ${failed}件 失敗` : ''}（対象 {total}件）
+      </div>
+    )}
+    {errorMsg && (
+      <div class="ap-error-banner"><i class="fa-solid fa-circle-exclamation"></i> エラー：{errorMsg}</div>
+    )}
+
+    <p style="font-size:0.88rem;color:var(--fsn-gray-700);line-height:1.7;">
+      対象（status='confirmed' のみ、キャンセル済は自動除外）：
+      全員 <strong>{counts.all}</strong> 件　／
+      Day1参加 <strong>{counts.day1}</strong> 件　／
+      Day2参加 <strong>{counts.day2}</strong> 件　／
+      両日参加 <strong>{counts.both}</strong> 件
+    </p>
+
+    <!-- プレビュー結果表示エリア -->
+    <div id="preview-area" hidden class="eb-preview">
+      <h3 class="eb-preview__h">プレビュー（最大3件表示）</h3>
+      <p id="preview-total" class="eb-preview__total"></p>
+      <div id="preview-list"></div>
+      <div class="eb-preview__actions">
+        <button type="button" id="confirm-send-btn" class="ap-submit__btn">
+          <i class="fa-solid fa-paper-plane"></i> プレビュー内容で送信する
+        </button>
+        <button type="button" id="close-preview-btn" class="rc-btn rc-btn--link" style="margin-left:8px;">
+          編集に戻る
+        </button>
+      </div>
+    </div>
+
+    <form action="/api/admin-email-blast" method="POST" class="eb-form" id="blast-form">
+
+      <div class="eb-grid">
+        <div class="eb-field">
+          <label class="ap-label">テンプレート</label>
+          <select name="template" id="tpl-select" required class="ap-input">
+            <option value="">選択してください</option>
+            {tplArray.map(t => <option value={t.key} data-subject={t.subject} data-body={t.body}>{t.label}</option>)}
+          </select>
+        </div>
+
+        <div class="eb-field">
+          <label class="ap-label">対象 フィルタ</label>
+          <select name="filter" required class="ap-input">
+            <option value="all">すべて（確定済 {counts.all}件）</option>
+            <option value="day1">Day 1 参加者（{counts.day1}件）</option>
+            <option value="day2">Day 2 参加者（{counts.day2}件）</option>
+            <option value="both">両日参加者（{counts.both}件）</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="eb-field">
+        <label class="ap-label">件名</label>
+        <input type="text" name="subject" id="tpl-subject" required class="ap-input"
+          placeholder="件名を入力（テンプレ選択で自動入力されます）" />
+        <small class="eb-hint">差し込み変数：<code>{`{id}`}</code> <code>{`{name}`}</code> <code>{`{count}`}</code> <code>{`{url}`}</code></small>
+      </div>
+
+      <div class="eb-field">
+        <label class="ap-label">本文</label>
+        <textarea name="body" id="tpl-body" required rows="22" class="ap-input eb-textarea"
+          placeholder="本文を入力（テンプレ選択で自動入力されます）"></textarea>
+        <small class="eb-hint">
+          差し込み変数を本文中で使えます：
+          <code>{`{id}`}</code>=管理ID、
+          <code>{`{name}`}</code>=申込者名、
+          <code>{`{count}`}</code>=人数、
+          <code>{`{url}`}</code>=チェックインURL
+        </small>
+      </div>
+
+      <label class="ap-consent">
+        <input type="checkbox" name="confirm" value="1" required />
+        <span>上記の内容を、対象 全員に、送信することに、同意します。（必須）</span>
+      </label>
+
+      <label class="ap-consent">
+        <input type="checkbox" name="testmode" value="1" />
+        <span>テストモード：管理者アドレスにのみ、1通だけ送信して、内容を確認する</span>
+      </label>
+
+      <div class="ap-submit" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button type="button" id="preview-btn" class="ap-submit__btn" style="background:var(--fsn-navy-deep);">
+          <i class="fa-solid fa-eye"></i> プレビュー（送信前確認）
+        </button>
+      </div>
+    </form>
+
+    <!-- 送信履歴 -->
+    {history.length > 0 && (
+      <section class="eb-history">
+        <h2>送信履歴（直近10件）</h2>
+        <table class="ent-table">
+          <thead>
+            <tr>
+              <th>日時</th>
+              <th>テンプレ</th>
+              <th>対象</th>
+              <th>件名</th>
+              <th>結果</th>
+            </tr>
+          </thead>
+          <tbody>
+            {history.map(h => (
+              <tr>
+                <td><small>{(h.sent_at || '').replace('T', ' ').slice(0, 16)}</small></td>
+                <td><small>{h.template}{h.testmode ? '（テスト）' : ''}</small></td>
+                <td><small>{h.filter}</small></td>
+                <td><small>{h.subject.slice(0, 50)}{h.subject.length > 50 ? '…' : ''}</small></td>
+                <td><small>✓{h.success_count}{h.failed_count > 0 ? ` / ✗${h.failed_count}` : ''} ／ {h.target_count}件</small></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    )}
+
+  </div>
+
+  <script is:inline>
+    const sel = document.getElementById('tpl-select');
+    const subjEl = document.getElementById('tpl-subject');
+    const bodyEl = document.getElementById('tpl-body');
+    sel?.addEventListener('change', () => {
+      const opt = sel.selectedOptions[0];
+      if (!opt) return;
+      subjEl.value = opt.dataset.subject || '';
+      bodyEl.value = opt.dataset.body || '';
+    });
+
+    // プレビュー
+    const previewBtn = document.getElementById('preview-btn');
+    const previewArea = document.getElementById('preview-area');
+    const previewList = document.getElementById('preview-list');
+    const previewTotal = document.getElementById('preview-total');
+    const confirmSendBtn = document.getElementById('confirm-send-btn');
+    const closePreviewBtn = document.getElementById('close-preview-btn');
+    const form = document.getElementById('blast-form');
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    previewBtn?.addEventListener('click', async () => {
+      // フォームのバリデーションチェック
+      const subj = subjEl.value.trim();
+      const body = bodyEl.value.trim();
+      const filter = form.elements['filter'].value;
+      const confirmEl = form.elements['confirm'];
+      const testmodeEl = form.elements['testmode'];
+
+      if (!subj || !body) {
+        alert('件名と本文を入力してください。');
+        return;
+      }
+      if (!confirmEl.checked) {
+        alert('「送信に同意」のチェックを入れてください。');
+        return;
+      }
+
+      previewBtn.disabled = true;
+      previewBtn.textContent = 'プレビュー取得中…';
+
+      const fd = new FormData();
+      fd.append('subject', subj);
+      fd.append('body', body);
+      fd.append('filter', filter);
+
+      try {
+        const res = await fetch('/api/admin-email-preview', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) { alert('エラー: ' + (data?.error || res.status)); return; }
+
+        const total = data.total ?? 0;
+        const previews = data.previews ?? [];
+        previewTotal.innerHTML = `対象 <strong>${total}</strong> 件 ／ プレビュー: ${previews.length} 件`;
+        previewList.innerHTML = previews.map(p =>
+          '<div class="eb-pv">' +
+            '<div class="eb-pv__head">' +
+              '<span class="eb-pv__id">#' + esc(p.id) + '</span>' +
+              '<span class="eb-pv__to">→ ' + esc(p.to) + '（' + esc(p.toName) + ' 様）</span>' +
+            '</div>' +
+            '<div class="eb-pv__subject"><strong>件名:</strong> ' + esc(p.subject) + '</div>' +
+            '<pre class="eb-pv__body">' + esc(p.body) + '</pre>' +
+          '</div>'
+        ).join('');
+
+        previewArea.hidden = false;
+        previewArea.scrollIntoView({ behavior: 'smooth' });
+
+        // 確認送信ボタンに対象件数を表示
+        const testmode = testmodeEl.checked;
+        confirmSendBtn.textContent = testmode
+          ? 'テスト送信を実行（管理者宛 1通）'
+          : `${total}件 全員に送信する`;
+      } catch (e) {
+        alert('エラー: ' + e.message);
+      } finally {
+        previewBtn.disabled = false;
+        previewBtn.innerHTML = '<i class="fa-solid fa-eye"></i> プレビュー（送信前確認）';
+      }
+    });
+
+    closePreviewBtn?.addEventListener('click', () => {
+      previewArea.hidden = true;
+    });
+
+    confirmSendBtn?.addEventListener('click', () => {
+      const testmode = form.elements['testmode'].checked;
+      const total = previewTotal.textContent;
+      const msg = testmode
+        ? 'テスト送信を実行します（管理者宛 1通）。\nよろしいですか？'
+        : `本当に対象 全員に送信しますか？\nこの操作は取り消せません。\n\n${total}`;
+      if (confirm(msg)) {
+        form.submit();
+      }
+    });
+  </script>
+
+</BaseLayout>
+
+<style is:global>
+  .eb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .eb-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .eb-textarea { font-family: 'Meiryo', monospace; font-size: 0.88rem; line-height: 1.7; }
+  .eb-hint { font-size: 0.78rem; color: var(--fsn-gray-500); }
+  .eb-hint code { background: var(--fsn-gray-100); padding: 1px 6px; border-radius: 4px; font-family: monospace; color: var(--fsn-orange-dark); }
+  @media (max-width: 720px) { .eb-grid { grid-template-columns: 1fr; } }
+
+  .eb-preview { background: #FEF3C7; border: 2px solid #FBBF24; border-radius: var(--fsn-radius-md); padding: 18px 22px; margin: 14px 0; }
+  .eb-preview__h { font-size: 1.05rem; color: #92400E; margin: 0 0 8px; }
+  .eb-preview__total { font-size: 0.95rem; color: var(--fsn-gray-900); margin: 0 0 14px; }
+  .eb-preview__total strong { color: #DC2626; font-size: 1.2em; }
+  .eb-preview__actions { margin-top: 12px; padding-top: 12px; border-top: 1px solid #FCD34D; display: flex; gap: 8px; align-items: center; }
+  .eb-pv { background: var(--fsn-white); border: 1px solid var(--fsn-gray-200); border-radius: var(--fsn-radius-sm); padding: 12px 14px; margin-bottom: 10px; }
+  .eb-pv__head { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; font-size: 0.86rem; color: var(--fsn-gray-700); }
+  .eb-pv__id { font-weight: 800; color: var(--fsn-orange-dark); }
+  .eb-pv__to { color: var(--fsn-gray-700); }
+  .eb-pv__subject { font-size: 0.88rem; margin-bottom: 8px; padding: 6px 8px; background: var(--fsn-gray-50); border-radius: 4px; }
+  .eb-pv__body { font-family: 'Meiryo', monospace; font-size: 0.82rem; line-height: 1.65; background: var(--fsn-gray-50); padding: 10px 12px; border-radius: 4px; white-space: pre-wrap; word-break: break-word; max-height: 320px; overflow-y: auto; margin: 0; }
+
+  .eb-history { margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--fsn-gray-200); }
+  .eb-history h2 { font-size: 1.05rem; color: var(--fsn-navy-deep); margin: 0 0 12px; }
+</style>
