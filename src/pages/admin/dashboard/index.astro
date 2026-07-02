@@ -68,7 +68,7 @@ if (env.DB) {
   // プログラム別充填
   slotRows = await safeAll(`
     SELECT s.id, s.program_name, s.day, s.time_start, s.time_end, s.venue, s.capacity,
-      COUNT(es.id) AS reserved
+      COUNT(CASE WHEN e.id IS NOT NULL THEN es.id END) AS reserved
     FROM slots s
     LEFT JOIN entry_slots es ON s.id = es.slot_id
     LEFT JOIN entries e ON es.entry_id = e.id AND e.status='confirmed'

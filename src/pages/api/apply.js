@@ -135,7 +135,7 @@ export async function POST({ request, locals }) {
       SELECT
         s.id, s.code, s.program_code, s.program_name, s.day, s.time_start, s.time_end, s.venue,
         s.capacity, s.is_active,
-        COALESCE(SUM(es.attendees), 0) AS reserved
+        COALESCE(SUM(CASE WHEN e.id IS NOT NULL THEN es.attendees END), 0) AS reserved
       FROM slots s
       LEFT JOIN entry_slots es ON s.id = es.slot_id
       LEFT JOIN entries e ON es.entry_id = e.id AND e.status = 'confirmed'
