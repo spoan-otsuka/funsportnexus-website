@@ -8,14 +8,20 @@ export const prerender = false;
 const env = Astro.locals?.runtime?.env ?? {};
 const idParam = Astro.url.searchParams.get('id') || '';
 const emailParam = Astro.url.searchParams.get('email') || '';
+const tokenParam = Astro.url.searchParams.get('t') || '';
 const checkinDone = Astro.url.searchParams.get('checkin_done') === '1';
 const attSaved = Astro.url.searchParams.get('saved') === '1';
+const cancelDone = Astro.url.searchParams.get('cancel_done') === '1';
+const cancelError = Astro.url.searchParams.get('cancel_error') || '';
 
 let entry = null;
 let attendees = [];
 let entrySlots = [];
 let lookupError = null;
 let notFound = false;
+// トークン検証 → 編集可能（キャンセル・出欠変更・チェックイン）
+// 未検証 → 閲覧のみ
+let tokenVerified = false;
 
 if (idParam && emailParam && env.DB) {
   try {
@@ -24,6 +30,15 @@ if (idParam && emailParam && env.DB) {
     ).bind(parseInt(idParam, 10), emailParam.trim()).first();
     if (e) {
       entry = e;
+      // トークン検証：URL に t=xxx が付いていて qr_token と一致すれば編集可
+      if (tokenParam && tokenParam === e.qr_token) {
+        tokenVerified = true;
+      }
+      // 認証失敗の記録（audit_log）
+      try {
+        const { audit } = await import('../../../lib/audit.js');
+        await audit(env, Astro.request, tokenVerified ? 'lookup_full' : 'lookup_readonly', String(e.id), null);
+      } catch {}
       const a = await env.DB.prepare(
         'SELECT * FROM entry_attendees WHERE entry_id = ? ORDER BY position'
       ).bind(e.id).all();
@@ -91,7 +106,7 @@ const allDaysChecked =
   <section class="dec-sub-hero">
     <div class="dec-sub-hero__bg"></div>
     <div class="dec-sub-hero__inner">
-      <p class="dec-sub-hero__label">LOOKUP</p>
+      <p class="dec-sub-hero__label">fun sport nexus 2026  ／  LOOKUP</p>
       <h1 class="dec-sub-hero__title">申込内容の確認</h1>
       <p class="dec-sub-hero__lead">
         お申込み完了メールに記載の<strong>管理ID</strong>と、<br>
@@ -142,6 +157,39 @@ const allDaysChecked =
 
         {entry && (
           <>
+          {entry.status === 'cancelled' && (
+            <div class="ap-thanks" style="background:#FEE2E2;color:#991B1B;border:1.5px solid #FCA5A5;">
+              <i class="fa-solid fa-circle-xmark" style="color:#DC2626;"></i>
+              <h2>このお申込みは、キャンセル済です</h2>
+              <p>{entry.applicant_name} 様<br>管理ID <strong>#{entry.id}</strong></p>
+              {entry.cancelled_at && (
+                <p style="font-size:0.85rem;margin-top:8px;">キャンセル受付：{entry.cancelled_at}</p>
+              )}
+              {entry.cancel_reason && (
+                <p style="font-size:0.85rem;margin-top:4px;">理由：{entry.cancel_reason}</p>
+              )}
+              <p style="margin-top:16px;font-size:0.9rem;">再度ご参加をご希望の場合は、特設サイトより、お申込みください。</p>
+              <a href="/202612orisen/" class="ap-thanks__back">
+                <i class="fa-solid fa-arrow-left"></i> 特設サイトに戻る
+              </a>
+            </div>
+          )}
+
+          {entry.status !== 'cancelled' && (
+            <>
+          {cancelError === 'no_confirm' && (
+            <div class="ap-error-banner"><i class="fa-solid fa-circle-exclamation"></i> キャンセルの確認チェックを、お願いいたします。</div>
+          )}
+          {cancelError === 'no_token' && (
+            <div class="ap-error-banner"><i class="fa-solid fa-circle-exclamation"></i> キャンセル操作は、メール内のURLから、お開きください。</div>
+          )}
+          {cancelError === 'unauthorized' && (
+            <div class="ap-error-banner"><i class="fa-solid fa-circle-exclamation"></i> 認証情報が一致しません。メール内のURLから、お開きください。</div>
+          )}
+          {cancelError === 'server' && (
+            <div class="ap-error-banner"><i class="fa-solid fa-circle-exclamation"></i> エラーが発生しました。お手数ですが、お問い合わせください。</div>
+          )}
+
           <div class="ap-step">
             <h2 class="ap-step__title"><span class="ap-step__num">1</span> お申込み者（代表者）情報</h2>
             <dl class="lk-meta">
@@ -153,11 +201,25 @@ const allDaysChecked =
             </dl>
           </div>
 
+          {!tokenVerified && (
+            <div class="ap-error-banner" style="background:#FEF3C7;color:#92400E;">
+              <i class="fa-solid fa-shield-halved"></i>
+              <div>
+                <strong style="display:block;margin-bottom:4px;">閲覧モードで、表示しています</strong>
+                お申込み内容の、確認のみ、可能です。<br>
+                出欠の変更・チェックイン・キャンセルには、<strong>お申込み完了メール内の「当日 チェックイン用 URL」</strong>から、お開きください。
+              </div>
+            </div>
+          )}
+
           <div class="ap-step">
             <h2 class="ap-step__title"><span class="ap-step__num">2</span> ご参加者（{entry.attendees}名）／ 各プログラム 出欠</h2>
             <p class="ap-step__desc">
-              <strong>欠席</strong>されるプログラムがある場合は、チェックを、外してください。<br>
-              （初期値は、すべて「参加」になっています）
+              {tokenVerified ? (
+                <><strong>欠席</strong>されるプログラムがある場合は、チェックを、外してください。<br />（初期値は、すべて「参加」になっています）</>
+              ) : (
+                <>お申込みの、各プログラム 一覧です。</>
+              )}
             </p>
             {attSaved && (
               <div class="ap-error-banner" style="background:#DCFCE7;color:#166534;">
@@ -168,6 +230,7 @@ const allDaysChecked =
             <form action="/api/attendance" method="POST" class="lk-att-form">
               <input type="hidden" name="id" value={entry.id} />
               <input type="hidden" name="email" value={entry.email} />
+              <input type="hidden" name="t" value={tokenParam} />
 
             <div class="lk-attendees">
               {attendees.map(a => {
@@ -186,7 +249,7 @@ const allDaysChecked =
                         {slots.map(s => (
                           <li class={`lk-slot lk-slot--checkable ${s.attended === 0 ? 'lk-slot--absent' : ''}`}>
                             <label class="lk-slot__check">
-                              <input type="checkbox" name={`att_${s.entry_slot_id}`} value="1" checked={s.attended !== 0} />
+                              <input type="checkbox" name={`att_${s.entry_slot_id}`} value="1" checked={s.attended !== 0} disabled={!tokenVerified} />
                               <span class="lk-slot__check-box"></span>
                             </label>
                             <span class={`lk-slot__day ${s.day === 'Day1' ? 'lk-slot__day--navy' : 'lk-slot__day--orange'}`}>{s.day === 'Day1' ? 'DAY 1' : 'DAY 2'}</span>
@@ -202,14 +265,17 @@ const allDaysChecked =
               })}
             </div>
 
-              <div class="ap-submit" style="margin-top:18px;">
-                <button type="submit" class="ap-submit__btn" style="font-size:0.95rem;padding:14px 36px;">
-                  <i class="fa-solid fa-floppy-disk"></i> 出欠を保存する
-                </button>
-              </div>
+              {tokenVerified && (
+                <div class="ap-submit" style="margin-top:18px;">
+                  <button type="submit" class="ap-submit__btn" style="font-size:0.95rem;padding:14px 36px;">
+                    <i class="fa-solid fa-floppy-disk"></i> 出欠を保存する
+                  </button>
+                </div>
+              )}
             </form>
           </div>
 
+          {tokenVerified && (<>
           {/* 今日のチェックイン状況サマリ */}
           <div class="ap-step" style="margin-top:24px;">
             <h2 class="ap-step__title"><span class="ap-step__num">3</span> 当日 チェックイン</h2>
@@ -356,10 +422,44 @@ const allDaysChecked =
               </div>
             </div>
           )}
+          </>)}
 
           <p style="text-align:center;margin-top:16px;font-size:0.82rem;color:var(--fsn-gray-500);">
-            変更・キャンセルは、お申込みメールにご返信ください。
+            お申込み内容の変更や、お問い合わせは、お申込みメールに、ご返信ください。
           </p>
+
+          {tokenVerified && (
+          <details class="ap-cancel">
+            <summary>
+              <i class="fa-solid fa-circle-xmark"></i>
+              お申込みを、キャンセルする
+            </summary>
+            <div class="ap-cancel__body">
+              <p>キャンセル処理は、取り消しできません。<br>本当に、キャンセルされる場合のみ、以下にチェックして、ご送信ください。</p>
+              <form action="/api/cancel" method="POST">
+                <input type="hidden" name="id" value={entry.id} />
+                <input type="hidden" name="email" value={entry.email} />
+                <input type="hidden" name="t" value={tokenParam} />
+                <div class="ap-field">
+                  <label class="ap-label">キャンセル理由（任意）</label>
+                  <textarea name="reason" class="ap-input" rows="3" maxlength="500"
+                    placeholder="差し支えなければ、ご記入ください。今後の運営の参考にいたします。"></textarea>
+                </div>
+                <label class="ap-consent" style="margin-top:12px;">
+                  <input type="checkbox" name="confirm" value="1" required />
+                  <span>上記の内容で、お申込みを、キャンセルすることに、同意します。（必須）</span>
+                </label>
+                <div class="ap-submit" style="margin-top:14px;">
+                  <button type="submit" class="ap-cancel__btn">
+                    <i class="fa-solid fa-trash"></i> 申込をキャンセルする
+                  </button>
+                </div>
+              </form>
+            </div>
+          </details>
+          )}
+          </>
+          )}
           </>
         )}
       </form>

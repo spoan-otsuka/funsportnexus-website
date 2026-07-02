@@ -6,6 +6,7 @@ import '../../../styles/apply-form.css';
 export const prerender = false;
 
 const env = Astro.locals?.runtime?.env ?? {};
+const turnstileSiteKey = env.TURNSTILE_SITE_KEY || '';
 const success = Astro.url.searchParams.get('success') === '1';
 const errorParam = Astro.url.searchParams.get('error') || '';
 const fullSlot = Astro.url.searchParams.get('slot') || '';
@@ -31,6 +32,7 @@ const errorMessages = {
   time_conflict: `時間帯が重複するプログラムが、選択されています。${conflictInfo ? `（${conflictInfo}）` : ''}`,
   db_unavailable: 'システム一時障害です。しばらく後にお試しください。',
   server_error: 'サーバーエラーが発生しました。お手数ですが、再度お試しください。',
+  turnstile: 'ロボット判定チェックを完了できませんでした。ページを再読み込みして、お試しください。',
 };
 
 let slots = [];
@@ -42,8 +44,8 @@ if (!success && env.DB) {
         s.id, s.code, s.program_code, s.program_name,
         s.day, s.date, s.time_start, s.time_end, s.venue,
         s.capacity, s.description,
-        COALESCE(SUM(es.attendees), 0) AS reserved,
-        (s.capacity - COALESCE(SUM(es.attendees), 0)) AS remaining
+        COALESCE(SUM(CASE WHEN e.id IS NOT NULL THEN es.attendees END), 0) AS reserved,
+        (s.capacity - COALESCE(SUM(CASE WHEN e.id IS NOT NULL THEN es.attendees END), 0)) AS remaining
       FROM slots s
       LEFT JOIN entry_slots es ON s.id = es.slot_id
       LEFT JOIN entries e ON es.entry_id = e.id AND e.status = 'confirmed'
@@ -70,7 +72,7 @@ if (!success && env.DB) {
         <i class="fa-solid fa-angle-right"></i>
         <span>参加申込</span>
       </nav>
-      <p class="dec-sub-hero__label">APPLY</p>
+      <p class="dec-sub-hero__label">fun sport nexus 2026  ／  APPLY</p>
       <h1 class="dec-sub-hero__title">参加申込</h1>
       <p class="dec-sub-hero__lead">
         ご参加者ごとに、参加プログラムを、選択してください。<br>
@@ -266,6 +268,16 @@ if (!success && env.DB) {
 
           <input type="text" name="website" class="ap-honeypot" tabindex="-1" autocomplete="off" />
 
+          {turnstileSiteKey && (
+            <div class="ap-turnstile">
+              <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="light" data-language="ja"></div>
+              <p class="ap-turnstile__note">
+                <i class="fa-solid fa-shield-halved"></i>
+                ロボットで、ないことの、ご確認を、お願いいたします。
+              </p>
+            </div>
+          )}
+
           <div class="ap-submit">
             <button type="submit" class="ap-submit__btn">
               <i class="fa-solid fa-paper-plane"></i>
@@ -279,6 +291,10 @@ if (!success && env.DB) {
 
   <!-- スロットデータをJSに渡す -->
   <script type="application/json" id="slots-data" set:html={JSON.stringify(slots)}></script>
+
+  {turnstileSiteKey && (
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  )}
 
 </BaseLayout>
 

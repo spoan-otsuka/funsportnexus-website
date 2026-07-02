@@ -94,11 +94,12 @@ export async function POST({ request, locals }) {
         const entryFull = await env.DB.prepare(
           'SELECT applicant_name, attendees FROM entries WHERE id = ?'
         ).bind(entry.id).first();
+        const { maskName } = await import('../../lib/mask.js');
         await fetch(env.SLACK_WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            text: `✅ *セルフチェックイン* [${checkinDay}] #${entry.id} ${entryFull?.applicant_name || ''} 様（${entryFull?.attendees || 0}名）${extras.length > 0 ? `\n  当日同行者: ${extras.length}名` : ''}`,
+            text: `✅ *セルフチェックイン* [${checkinDay}] #${entry.id} ${maskName(entryFull?.applicant_name)} 様（${entryFull?.attendees || 0}名）${extras.length > 0 ? `\n  当日同行者: ${extras.length}名` : ''}`,
           }),
         });
       } catch {}

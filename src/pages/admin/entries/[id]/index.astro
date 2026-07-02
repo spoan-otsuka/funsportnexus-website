@@ -1,0 +1,207 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import '../../../../styles/admin.css';
+
+export const prerender = false;
+
+const env = Astro.locals?.runtime?.env ?? {};
+const id = parseInt(Astro.params.id, 10);
+const cancelled = Astro.url.searchParams.get('cancelled') || '';
+const error = Astro.url.searchParams.get('error') || '';
+
+let entry = null;
+let attendees = [];
+let slots = [];
+let checkins = [];
+
+if (id && env.DB) {
+  try {
+    entry = await env.DB.prepare(`SELECT * FROM entries WHERE id = ?`).bind(id).first();
+    if (entry) {
+      attendees = (await env.DB.prepare(
+        `SELECT * FROM entry_attendees WHERE entry_id = ? ORDER BY position`
+      ).bind(id).all())?.results ?? [];
+      slots = (await env.DB.prepare(`
+        SELECT es.id AS entry_slot_id, es.attendee_id, es.attended,
+               s.program_name, s.day, s.time_start, s.time_end, s.venue
+        FROM entry_slots es
+        INNER JOIN slots s ON es.slot_id = s.id
+        WHERE es.entry_id = ?
+        ORDER BY s.day, s.time_start
+      `).bind(id).all())?.results ?? [];
+      checkins = (await env.DB.prepare(
+        `SELECT day, checked_at FROM entry_checkins WHERE entry_id = ?`
+      ).bind(id).all())?.results ?? [];
+    }
+  } catch {}
+}
+
+const slotsByAttendee = {};
+for (const s of slots) {
+  const k = s.attendee_id || 0;
+  if (!slotsByAttendee[k]) slotsByAttendee[k] = [];
+  slotsByAttendee[k].push(s);
+}
+
+let extras = [];
+if (entry?.panshoku_extras) {
+  try { extras = JSON.parse(entry.panshoku_extras); } catch {}
+}
+---
+<BaseLayout
+  title={`#${id} 申込詳細 ｜ 管理`}
+  description="申込詳細"
+  noindex={true}
+  hideHeader={true}
+  hideFooter={true}
+>
+
+  <div class="admin-wrap" style="max-width:960px;">
+    <header class="admin-head">
+      <h1>#{id} 申込詳細</h1>
+      <div style="display:flex;gap:8px;">
+        <a href="/admin/entries/" class="admin-btn admin-btn--ghost">一覧に戻る</a>
+        <a href="/admin/" class="admin-btn admin-btn--ghost">管理TOP</a>
+      </div>
+    </header>
+
+    {!entry && (
+      <div class="ap-error-banner"><i class="fa-solid fa-circle-exclamation"></i> 申込が見つかりません</div>
+    )}
+
+    {cancelled === '1' && (
+      <div class="ap-error-banner" style="background:#DCFCE7;color:#166534;">
+        <i class="fa-solid fa-check-circle"></i> キャンセル処理を完了しました。
+      </div>
+    )}
+    {cancelled === 'already' && (
+      <div class="ap-error-banner" style="background:#FEF3C7;color:#92400E;">
+        <i class="fa-solid fa-info-circle"></i> すでにキャンセル済です。
+      </div>
+    )}
+    {error === 'server' && (
+      <div class="ap-error-banner"><i class="fa-solid fa-circle-exclamation"></i> サーバーエラーが発生しました。</div>
+    )}
+
+    {entry && (
+      <>
+      <section class="ent-d">
+        <h2 class="ent-d__h">基本情報</h2>
+        <table class="ent-d__t">
+          <tr><th>状態</th><td>
+            {entry.status === 'cancelled'
+              ? <span class="badge badge--absent">キャンセル</span>
+              : <span class="badge badge--ok">確定</span>}
+          </td></tr>
+          <tr><th>管理ID</th><td>#{entry.id}</td></tr>
+          <tr><th>お名前</th><td>{entry.applicant_name} 様（{entry.applicant_furigana}）</td></tr>
+          <tr><th>メール</th><td><a href={`mailto:${entry.email}`}>{entry.email}</a></td></tr>
+          <tr><th>お電話</th><td>{entry.tel}</td></tr>
+          <tr><th>申込人数</th><td>{entry.attendees}名</td></tr>
+          <tr><th>申込日時</th><td>{entry.created_at}</td></tr>
+          {entry.cancelled_at && <tr><th>キャンセル日時</th><td>{entry.cancelled_at}</td></tr>}
+          {entry.cancel_reason && <tr><th>キャンセル理由</th><td>{entry.cancel_reason}</td></tr>}
+          {entry.remarks && <tr><th>備考</th><td>{entry.remarks}</td></tr>}
+        </table>
+      </section>
+
+      <section class="ent-d">
+        <h2 class="ent-d__h">チェックイン状況</h2>
+        {checkins.length === 0 ? (
+          <p style="color:var(--fsn-gray-500);">未チェックイン</p>
+        ) : (
+          <ul class="ent-d__ck">
+            {checkins.map(c => (
+              <li>
+                <span class={`day-pill ${c.day === 'Day1' ? 'day-pill--navy' : (c.day === 'Day2' ? 'day-pill--orange' : '')}`}>{c.day}</span>
+                <small>{c.checked_at}</small>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section class="ent-d">
+        <h2 class="ent-d__h">ご参加者 ／ プログラム</h2>
+        {attendees.map(a => {
+          const ass = slotsByAttendee[a.id] || [];
+          return (
+            <div class="ent-d__att">
+              <h3>{a.position}.&nbsp;{a.name}{a.grade && <small> ／ {a.grade}</small>}</h3>
+              <table class="ent-d__t">
+                <tr><th>ふりがな</th><td>{a.furigana || '-'}</td></tr>
+                <tr><th>生年月日</th><td>{a.birth_date || '-'}</td></tr>
+                <tr><th>ぱん食い参加</th><td>{a.panshoku_join ? '○' : '-'}</td></tr>
+              </table>
+              {ass.length > 0 && (
+                <ul class="ent-d__slots">
+                  {ass.map(s => (
+                    <li class={s.attended === 0 ? 'ent-d__slot--absent' : ''}>
+                      <span class={`day-pill ${s.day === 'Day1' ? 'day-pill--navy' : 'day-pill--orange'}`}>{s.day === 'Day1' ? 'DAY 1' : 'DAY 2'}</span>
+                      <span>{s.time_start}〜{s.time_end}</span>
+                      <strong>{s.program_name}</strong>
+                      <small>{s.venue}</small>
+                      {s.attended === 0 && <span class="badge badge--absent">欠席</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })}
+      </section>
+
+      {extras.length > 0 && (
+        <section class="ent-d">
+          <h2 class="ent-d__h">当日同行者（ぱん食い）</h2>
+          <table class="ent-d__t">
+            <tr><th>#</th><th>お名前</th><th>生年月日</th><th>属性</th></tr>
+            {extras.map((x, i) => (
+              <tr><td>{i+1}</td><td>{x.name}</td><td>{x.birth}</td><td>{x.attr}</td></tr>
+            ))}
+          </table>
+        </section>
+      )}
+
+      {entry.status !== 'cancelled' && (
+        <section class="ent-d ent-d--danger">
+          <h2 class="ent-d__h" style="color:#991B1B;">キャンセル処理</h2>
+          <p style="color:var(--fsn-gray-700);font-size:0.88rem;line-height:1.7;">
+            管理者によるキャンセル処理を行うと、申込者にキャンセル完了メールが送信されます。<br>
+            理由を入力すると、社内ログとメールに含まれます。
+          </p>
+          <form action="/api/admin-cancel" method="POST" onsubmit="return confirm('本当にキャンセル処理を行いますか？\nこの操作は取り消せません。');">
+            <input type="hidden" name="id" value={entry.id} />
+            <textarea name="reason" rows="2" placeholder="キャンセル理由（任意・メールに記載されます）"
+              style="width:100%;padding:10px;border:1px solid var(--fsn-gray-300);border-radius:6px;font-family:inherit;font-size:0.9rem;margin:8px 0;"></textarea>
+            <button type="submit" style="padding:12px 28px;background:#DC2626;color:#fff;border:0;border-radius:999px;font-weight:800;cursor:pointer;">
+              <i class="fa-solid fa-trash"></i> 管理者キャンセルを実行
+            </button>
+          </form>
+        </section>
+      )}
+      </>
+    )}
+
+  </div>
+
+</BaseLayout>
+
+<style is:global>
+  .admin-head h1 { font-size: 1.3rem; margin: 0; color: var(--fsn-navy-deep); }
+  .ent-d { background: var(--fsn-white); border: 1px solid var(--fsn-gray-200); border-radius: var(--fsn-radius-sm); padding: 20px 22px; margin-bottom: 16px; }
+  .ent-d--danger { border-color: #FCA5A5; background: #FEF2F2; }
+  .ent-d__h { font-size: 1.05rem; color: var(--fsn-navy-deep); margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--fsn-orange); }
+  .ent-d__t { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .ent-d__t th { width: 140px; text-align: left; padding: 6px 8px; color: var(--fsn-gray-500); font-weight: 700; vertical-align: top; }
+  .ent-d__t td { padding: 6px 8px; }
+  .ent-d__att { margin-bottom: 14px; padding: 12px 14px; background: var(--fsn-gray-50); border-radius: 6px; }
+  .ent-d__att h3 { font-size: 0.98rem; margin: 0 0 8px; color: var(--fsn-navy-deep); }
+  .ent-d__att h3 small { color: var(--fsn-gray-700); font-weight: 600; }
+  .ent-d__slots { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 6px; }
+  .ent-d__slots li { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; padding: 6px 8px; background: var(--fsn-white); border-radius: 4px; }
+  .ent-d__slots li small { color: var(--fsn-gray-500); }
+  .ent-d__slot--absent { opacity: 0.55; text-decoration: line-through; }
+  .ent-d__ck { list-style: none; padding: 0; margin: 0; display: flex; gap: 10px; flex-wrap: wrap; }
+  .ent-d__ck li { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--fsn-gray-50); border-radius: 6px; }
+</style>

@@ -24,8 +24,8 @@ export async function GET({ locals }) {
         s.id, s.code, s.program_code, s.program_name,
         s.day, s.date, s.time_start, s.time_end, s.venue,
         s.capacity, s.description, s.is_active, s.sort_order,
-        COALESCE(SUM(es.attendees), 0) AS reserved,
-        (s.capacity - COALESCE(SUM(es.attendees), 0)) AS remaining
+        COALESCE(SUM(CASE WHEN e.id IS NOT NULL THEN es.attendees END), 0) AS reserved,
+        (s.capacity - COALESCE(SUM(CASE WHEN e.id IS NOT NULL THEN es.attendees END), 0)) AS remaining
       FROM slots s
       LEFT JOIN entry_slots es ON s.id = es.slot_id
       LEFT JOIN entries e ON es.entry_id = e.id AND e.status = 'confirmed'

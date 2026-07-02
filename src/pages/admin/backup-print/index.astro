@@ -1,0 +1,236 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/admin.css';
+
+export const prerender = false;
+
+const env = Astro.locals?.runtime?.env ?? {};
+const day = Astro.url.searchParams.get('day') || 'all';
+
+let entries = [];
+let byProgram = {};
+let dbErr = null;
+
+if (env.DB) {
+  try {
+    let entrySql = `
+      SELECT e.id, e.applicant_name, e.applicant_furigana, e.email, e.tel, e.attendees, e.remarks
+      FROM entries e
+      WHERE e.status = 'confirmed'
+    `;
+    if (day === 'Day1' || day === 'Day2') {
+      entrySql += ` AND EXISTS (
+        SELECT 1 FROM entry_slots es INNER JOIN slots s ON es.slot_id = s.id
+        WHERE es.entry_id = e.id AND s.day = ?
+      )`;
+    }
+    entrySql += ` ORDER BY e.applicant_furigana, e.id`;
+
+    const params = (day === 'Day1' || day === 'Day2') ? [day] : [];
+    entries = (await env.DB.prepare(entrySql).bind(...params).all())?.results ?? [];
+
+    // プログラム別
+    let progSql = `
+      SELECT s.id AS slot_id, s.day, s.time_start, s.time_end, s.program_name, s.venue, s.capacity,
+             a.name, a.furigana, a.grade, a.birth_date,
+             e.id AS entry_id, e.applicant_name, e.tel
+      FROM entry_slots es
+      INNER JOIN slots s ON es.slot_id = s.id
+      INNER JOIN entries e ON es.entry_id = e.id AND e.status = 'confirmed'
+      LEFT JOIN entry_attendees a ON es.attendee_id = a.id
+    `;
+    if (day === 'Day1' || day === 'Day2') progSql += ` WHERE s.day = ?`;
+    progSql += ` ORDER BY s.day, s.time_start, s.program_name, a.furigana`;
+    const progRows = (await env.DB.prepare(progSql).bind(...params).all())?.results ?? [];
+    // slots テーブルからも定員を確実に取得（参加者0のプログラムも表示）
+    let slotsSql = `SELECT id, day, time_start, time_end, program_name, venue, capacity FROM slots`;
+    if (day === 'Day1' || day === 'Day2') slotsSql += ` WHERE day = ?`;
+    slotsSql += ` ORDER BY day, time_start, program_name`;
+    const slotRows = (await env.DB.prepare(slotsSql).bind(...params).all())?.results ?? [];
+    for (const s of slotRows) {
+      const key = `${s.day}｜${s.time_start}-${s.time_end}｜${s.program_name}｜${s.venue}`;
+      if (!byProgram[key]) byProgram[key] = { capacity: s.capacity || 30, list: [] };
+    }
+    for (const r of progRows) {
+      const key = `${r.day}｜${r.time_start}-${r.time_end}｜${r.program_name}｜${r.venue}`;
+      if (!byProgram[key]) byProgram[key] = { capacity: r.capacity || 30, list: [] };
+      byProgram[key].list.push(r);
+    }
+  } catch (e) { dbErr = e.message; }
+}
+
+const jstNow = new Date(Date.now() + 9 * 3600 * 1000).toISOString().replace('T', ' ').slice(0, 19);
+---
+<BaseLayout
+  title="バックアップ印刷台帳 ｜ 管理"
+  description="開催前夜 紙バックアップ印刷"
+  noindex={true}
+  hideHeader={true}
+  hideFooter={true}
+>
+
+  <div class="bp-wrap">
+    <header class="bp-head no-print">
+      <h1>バックアップ印刷台帳</h1>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <a href="/admin/backup-print/" class={`bp-tab ${day === 'all' ? 'bp-tab--on' : ''}`}>両日</a>
+        <a href="/admin/backup-print/?day=Day1" class={`bp-tab ${day === 'Day1' ? 'bp-tab--on' : ''}`}>DAY 1</a>
+        <a href="/admin/backup-print/?day=Day2" class={`bp-tab ${day === 'Day2' ? 'bp-tab--on' : ''}`}>DAY 2</a>
+        <span style="margin:0 4px;color:var(--fsn-gray-500);">|</span>
+        <button onclick="window.print()" class="admin-btn">
+          <i class="fa-solid fa-print"></i> 印刷 (Ctrl+P)
+        </button>
+        <a href="/admin/" class="admin-btn admin-btn--ghost">管理TOP</a>
+      </div>
+    </header>
+
+    {dbErr && <p style="color:#b00;">エラー：{dbErr}</p>}
+
+    <div class="bp-cover">
+      <h2>fun sport nexus 2026.12 ／ バックアップ受付台帳</h2>
+      <p>出力日時：{jstNow}（JST） ／ 対象：{day === 'Day1' ? 'DAY 1（12/19）' : day === 'Day2' ? 'DAY 2（12/20）' : '両日'} ／ 対象申込：{entries.length} 件</p>
+      <p class="bp-note">
+        ※このシートは、当日の <strong>回線障害・システムダウン時のバックアップ</strong> として、手書きでチェックイン可能な形式です。<br>
+        ※<strong>開催前日までに印刷し、当日会場に持参</strong>してください。<br>
+        ※チェックインは、まず システム側で試み、正常時は、システム操作を優先してください。
+      </p>
+    </div>
+
+    <!-- 申込者名簿 -->
+    <section class="bp-section page-break">
+      <h2 class="bp-h2">1. 申込者 名簿（ふりがな 50音順）</h2>
+      <table class="bp-table">
+        <thead>
+          <tr>
+            <th style="width:60px;">#</th>
+            <th style="width:220px;">お名前（ふりがな）</th>
+            <th style="width:60px;">人数</th>
+            <th style="width:130px;">お電話</th>
+            <th style="width:80px;">DAY1<br>受付</th>
+            <th style="width:80px;">DAY2<br>受付</th>
+            <th>備考</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.map(e => (
+            <tr>
+              <td>#{e.id}</td>
+              <td>
+                <strong>{e.applicant_name}</strong><br>
+                <small>{e.applicant_furigana}</small>
+              </td>
+              <td style="text-align:center;">{e.attendees}名</td>
+              <td>{e.tel}</td>
+              <td class="bp-check"></td>
+              <td class="bp-check"></td>
+              <td><small>{e.remarks}</small></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- プログラム別 -->
+    <section class="bp-section">
+      <h2 class="bp-h2">2. プログラム別 参加者 名簿</h2>
+      {Object.entries(byProgram).map(([progKey, prog]) => {
+        const cap = prog.capacity || 30;
+        const rows = Math.max(prog.list.length, cap);
+        return (
+        <div class="bp-prog page-break">
+          <h3 class="bp-h3">{progKey}</h3>
+          <p style="font-size:0.85rem;color:#555;margin:4px 0 8px;">
+            参加予定：<strong>{prog.list.length}</strong> 名 ／ 定員：<strong>{cap}</strong> 名
+            {prog.list.length > cap && <span style="color:#DC2626;font-weight:700;"> ／ 定員超過 {prog.list.length - cap} 名</span>}
+          </p>
+          <table class="bp-table">
+            <thead>
+              <tr>
+                <th style="width:44px;">#</th>
+                <th style="width:200px;">お名前（ふりがな）</th>
+                <th style="width:90px;">学年</th>
+                <th style="width:150px;">申込者</th>
+                <th style="width:130px;">お電話</th>
+                <th style="width:60px;">出席</th>
+                <th>備考</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: rows }, (_, i) => {
+                const p = prog.list[i];
+                return (
+                  <tr class={!p ? 'bp-empty-row' : ''}>
+                    <td>{i+1}</td>
+                    {p ? (
+                      <>
+                        <td>
+                          <strong>{p.name}</strong><br>
+                          <small>{p.furigana}</small>
+                        </td>
+                        <td>{p.grade || '-'}</td>
+                        <td>#{p.entry_id}<br><small>{p.applicant_name}</small></td>
+                        <td><small>{p.tel}</small></td>
+                        <td class="bp-check"></td>
+                        <td></td>
+                      </>
+                    ) : (
+                      <>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="bp-check"></td>
+                        <td></td>
+                      </>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        );
+      })}
+    </section>
+
+  </div>
+
+</BaseLayout>
+
+<style is:global>
+  .bp-wrap { max-width: 1200px; margin: 0 auto; padding: 20px; color: #1a1a1a; }
+  .bp-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--fsn-orange); }
+  .bp-head h1 { font-size: 1.3rem; margin: 0; color: var(--fsn-navy-deep); }
+  .bp-tab { padding: 6px 14px; background: var(--fsn-white); border: 1.5px solid var(--fsn-gray-300); color: var(--fsn-gray-700); border-radius: 999px; text-decoration: none; font-size: 0.85rem; font-weight: 700; }
+  .bp-tab--on { background: var(--fsn-navy-deep); color: var(--fsn-white); border-color: var(--fsn-navy-deep); }
+
+  .bp-cover { margin-bottom: 20px; padding: 16px 18px; background: #F8F5EE; border: 2px solid #D4C79A; }
+  .bp-cover h2 { margin: 0 0 6px; font-size: 1.2rem; color: var(--fsn-navy-deep); }
+  .bp-cover p { margin: 4px 0; font-size: 0.88rem; }
+  .bp-note { font-size: 0.8rem !important; line-height: 1.7; }
+
+  .bp-section { margin-bottom: 40px; }
+  .bp-h2 { font-size: 1.05rem; color: var(--fsn-navy-deep); border-bottom: 3px double var(--fsn-navy); padding-bottom: 4px; margin: 24px 0 10px; }
+  .bp-h3 { font-size: 0.95rem; margin: 20px 0 4px; padding: 6px 10px; background: var(--fsn-gray-100); border-left: 4px solid var(--fsn-orange); }
+
+  .bp-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .bp-table th { background: #EEE; padding: 6px 8px; text-align: left; border: 1px solid #999; font-weight: 700; }
+  .bp-table td { padding: 6px 8px; border: 1px solid #999; vertical-align: top; }
+  .bp-table small { color: #555; font-size: 0.72rem; }
+  .bp-check {
+    background: repeating-linear-gradient(45deg, transparent, transparent 3px, #F0F0F0 3px, #F0F0F0 4px);
+  }
+  .bp-empty-row td { height: 32px; color: #999; }
+
+  @media print {
+    .no-print { display: none !important; }
+    body { background: #fff !important; }
+    .bp-wrap { max-width: none; padding: 12mm 10mm; }
+    .bp-cover { background: transparent !important; border: 2px solid #000 !important; }
+    .bp-h2 { break-after: avoid; }
+    .bp-prog { page-break-inside: avoid; }
+    .page-break { page-break-before: auto; }
+    .bp-table th, .bp-table td { border-color: #000 !important; }
+    @page { size: A4; margin: 12mm 8mm; }
+  }
+</style>

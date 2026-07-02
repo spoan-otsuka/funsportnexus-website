@@ -20,14 +20,18 @@ export async function POST({ request, locals }) {
 
   const id = parseInt((form.get('id') || '').toString(), 10);
   const email = (form.get('email') || '').toString().trim();
+  const token = (form.get('t') || '').toString().trim();
   if (!id || !email) {
     return redirect('/202612orisen/lookup/?error=missing');
+  }
+  if (!token) {
+    return redirect(`/202612orisen/lookup/?id=${id}&email=${encodeURIComponent(email)}&error=no_token`);
   }
 
   try {
     const entry = await env.DB.prepare(
-      `SELECT id FROM entries WHERE id = ? AND LOWER(email) = LOWER(?)`
-    ).bind(id, email).first();
+      `SELECT id FROM entries WHERE id = ? AND LOWER(email) = LOWER(?) AND qr_token = ?`
+    ).bind(id, email, token).first();
     if (!entry) return redirect('/202612orisen/lookup/?error=unauthorized');
 
     // この申込の全 entry_slots を取得
@@ -51,19 +55,20 @@ export async function POST({ request, locals }) {
         const eFull = await env.DB.prepare(
           'SELECT applicant_name FROM entries WHERE id = ?'
         ).bind(entry.id).first();
+        const { maskName } = await import('../../lib/mask.js');
         await fetch(env.SLACK_WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            text: `⚠️ *出欠変更* #${entry.id} ${eFull?.applicant_name || ''} 様 ／ 欠席に変更: ${absentCount}件`,
+            text: `⚠️ *出欠変更* #${entry.id} ${maskName(eFull?.applicant_name)} 様 ／ 欠席に変更: ${absentCount}件`,
           }),
         });
       } catch {}
     }
 
-    return redirect(`/202612orisen/lookup/?id=${entry.id}&email=${encodeURIComponent(email)}&saved=1`);
+    return redirect(`/202612orisen/lookup/?id=${entry.id}&email=${encodeURIComponent(email)}&t=${encodeURIComponent(token)}&saved=1`);
   } catch (e) {
     console.error('attendance error:', e);
-    return redirect(`/202612orisen/lookup/?id=${id}&email=${encodeURIComponent(email)}&error=server`);
+    return redirect(`/202612orisen/lookup/?id=${id}&email=${encodeURIComponent(email)}&t=${encodeURIComponent(token)}&error=server`);
   }
 }

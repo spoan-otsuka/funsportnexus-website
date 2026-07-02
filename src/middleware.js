@@ -18,8 +18,9 @@ export const onRequest = async (context, next) => {
     return next();
   }
 
-  // /admin/* のみ保護対象
-  if (!path.startsWith('/admin')) {
+  // /admin/* と admin系 API のみ保護対象
+  const isAdminApi = path.startsWith('/api/admin-') && !path.startsWith('/api/admin-login') && !path.startsWith('/api/admin-logout');
+  if (!path.startsWith('/admin') && !isAdminApi) {
     return next();
   }
 
@@ -36,6 +37,10 @@ export const onRequest = async (context, next) => {
   const token = m ? decodeURIComponent(m[1]) : '';
 
   if (token !== expected) {
+    // API は 401、ページは login にリダイレクト
+    if (path.startsWith('/api/')) {
+      return new Response('Unauthorized', { status: 401 });
+    }
     return Response.redirect(`${url.origin}/admin/login/?next=${encodeURIComponent(path)}`, 302);
   }
 

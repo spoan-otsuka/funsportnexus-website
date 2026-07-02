@@ -1,0 +1,120 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/admin.css';
+
+export const prerender = false;
+
+const env = Astro.locals?.runtime?.env ?? {};
+const actionFilter = (Astro.url.searchParams.get('action') || '').trim();
+
+let logs = [];
+let counts = {};
+if (env.DB) {
+  try {
+    let sql = `SELECT id, ts, action, target, ip, ua, country, meta FROM audit_log`;
+    const params = [];
+    if (actionFilter) { sql += ` WHERE action = ?`; params.push(actionFilter); }
+    sql += ` ORDER BY ts DESC LIMIT 200`;
+    logs = (await env.DB.prepare(sql).bind(...params).all())?.results ?? [];
+
+    const cs = (await env.DB.prepare(
+      `SELECT action, COUNT(*) AS c FROM audit_log GROUP BY action ORDER BY c DESC`
+    ).all())?.results ?? [];
+    for (const r of cs) counts[r.action] = r.c;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+const ACTION_LABELS = {
+  admin_login: '管理ログイン',
+  admin_cancel: '管理者キャンセル',
+  staff_checkin: 'スタッフ手動チェックイン',
+  staff_checkin_undo: 'スタッフ チェックイン取消',
+  csv_export: 'CSV ダウンロード',
+  email_blast: 'メール一斉送信',
+};
+---
+<BaseLayout
+  title="監査ログ ｜ 管理"
+  description="admin 操作 監査ログ"
+  noindex={true}
+  hideHeader={true}
+  hideFooter={true}
+>
+
+  <div class="admin-wrap" style="max-width:1280px;">
+    <header class="admin-head">
+      <h1>監査ログ</h1>
+      <div style="display:flex;gap:8px;">
+        <a href="/admin/" class="admin-btn admin-btn--ghost">管理TOP</a>
+      </div>
+    </header>
+
+    <div class="al-filter">
+      <a href="/admin/audit-log/" class={`al-chip ${!actionFilter ? 'al-chip--on' : ''}`}>すべて</a>
+      {Object.entries(ACTION_LABELS).map(([k, label]) => (
+        counts[k] > 0 && (
+          <a href={`/admin/audit-log/?action=${k}`} class={`al-chip ${actionFilter === k ? 'al-chip--on' : ''}`}>
+            {label} <span class="al-chip__count">{counts[k]}</span>
+          </a>
+        )
+      ))}
+    </div>
+
+    <p class="ent-count">表示中：{logs.length} 件（上限 200 件）</p>
+
+    <div class="ent-table-wrap">
+      <table class="ent-table">
+        <thead>
+          <tr>
+            <th>時刻（JST相当）</th>
+            <th>操作</th>
+            <th>対象</th>
+            <th>IP / 国</th>
+            <th>UA</th>
+            <th>メタ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {logs.length === 0 && (
+            <tr><td colspan="6" style="text-align:center;color:var(--fsn-gray-500);padding:24px;">記録なし</td></tr>
+          )}
+          {logs.map(l => (
+            <tr>
+              <td><small>{(l.ts || '').replace('T', ' ').slice(0, 19)}</small></td>
+              <td>
+                <strong>{ACTION_LABELS[l.action] || l.action}</strong><br>
+                <small style="color:var(--fsn-gray-500);">{l.action}</small>
+              </td>
+              <td><small>{l.target || '-'}</small></td>
+              <td><small>{l.ip}{l.country && <span style="color:var(--fsn-gray-500);"> ({l.country})</span>}</small></td>
+              <td><small style="max-width:280px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title={l.ua}>{l.ua}</small></td>
+              <td>
+                {l.meta && <small style="max-width:220px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;" title={l.meta}>{l.meta}</small>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</BaseLayout>
+
+<style is:global>
+  .al-filter { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+  .al-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; background: var(--fsn-white);
+    border: 1.5px solid var(--fsn-gray-300);
+    color: var(--fsn-gray-700);
+    border-radius: 999px; text-decoration: none;
+    font-size: 0.82rem; font-weight: 700;
+  }
+  .al-chip:hover { border-color: var(--fsn-orange); color: var(--fsn-orange-dark); }
+  .al-chip--on { background: var(--fsn-navy-deep); color: var(--fsn-white); border-color: var(--fsn-navy-deep); }
+  .al-chip__count { background: rgba(255,255,255,0.2); padding: 1px 8px; border-radius: 999px; font-size: 0.72rem; }
+  .al-chip:not(.al-chip--on) .al-chip__count { background: var(--fsn-gray-100); color: var(--fsn-gray-700); }
+</style>

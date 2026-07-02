@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/admin.css';
 
 export const prerender = false;
 
@@ -68,10 +69,35 @@ if (env.DB) {
         <h2>受付QR 印刷</h2>
         <p>会場掲示用：参加者がスマホで読み取って受付できる QRコード（印刷可）。</p>
       </a>
+      <a href="/admin/reception/" class="admin-card">
+        <i class="fa-solid fa-user-check"></i>
+        <h2>受付スタッフ用 検索チェックイン</h2>
+        <p>当日 会場 運営PC専用。受付番号・名前で検索 →  Day別チェックイン。</p>
+      </a>
       <a href="/admin/programs/" class="admin-card">
         <i class="fa-solid fa-clipboard-list"></i>
         <h2>プログラム別 参加者リスト</h2>
         <p>各プログラム枠の参加者を一覧表示。印刷して当日運営に。</p>
+      </a>
+      <a href="/admin/entries/" class="admin-card">
+        <i class="fa-solid fa-list-check"></i>
+        <h2>申込一覧 ／ 詳細 ／ キャンセル</h2>
+        <p>申込検索・詳細表示・管理者キャンセル処理・CSV ダウンロード。</p>
+      </a>
+      <a href="/admin/email-blast/" class="admin-card">
+        <i class="fa-solid fa-paper-plane"></i>
+        <h2>メール一斉送信</h2>
+        <p>リマインド（1週間前／前日）・アンケート・緊急連絡・開催中止／変更 を一括送信。</p>
+      </a>
+      <a href="/admin/audit-log/" class="admin-card admin-card--ghost">
+        <i class="fa-solid fa-shield-halved"></i>
+        <h2>監査ログ</h2>
+        <p>ログイン・キャンセル・チェックイン・CSV・メール送信 の操作履歴。</p>
+      </a>
+      <a href="/admin/backup-print/" class="admin-card admin-card--ghost">
+        <i class="fa-solid fa-file-invoice"></i>
+        <h2>バックアップ印刷台帳</h2>
+        <p>回線障害時の紙バックアップ。開催前日までに印刷して当日会場持参用。</p>
       </a>
       <a href="/202612orisen/lookup/" class="admin-card admin-card--ghost" target="_blank">
         <i class="fa-solid fa-search"></i>
@@ -168,6 +194,14 @@ if (env.DB) {
     transform: translateY(-2px);
     box-shadow: var(--fsn-shadow-sm);
   }
+  .admin-card--ghost {
+    background: var(--fsn-gray-50);
+    border-style: dashed;
+    border-color: var(--fsn-gray-300);
+  }
+  .admin-card--ghost h2 { color: var(--fsn-gray-700); }
+  .admin-card--ghost i { color: var(--fsn-gray-500); }
+  .admin-card--ghost:hover { border-style: solid; }
   .admin-card i {
     font-size: 1.5rem;
     color: var(--fsn-orange);

@@ -1,0 +1,304 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/admin.css';
+
+export const prerender = false;
+
+const env = Astro.locals?.runtime?.env ?? {};
+const q = (Astro.url.searchParams.get('q') || '').trim();
+const checkedDone = Astro.url.searchParams.get('checked') || '';
+const errorMsg = Astro.url.searchParams.get('error') || '';
+
+let results = [];
+let dbErr = null;
+
+// 当日Day判定
+const jst = new Date(Date.now() + 9 * 3600 * 1000);
+const ymd = jst.toISOString().slice(0, 10);
+let todayDay = null;
+if (ymd === '2026-12-19') todayDay = 'Day1';
+else if (ymd === '2026-12-20') todayDay = 'Day2';
+
+if (q && env.DB) {
+  try {
+    // 受付番号完全一致 OR 名前部分一致
+    const r = await env.DB.prepare(`
+      SELECT e.id, e.applicant_name, e.applicant_furigana, e.email, e.tel,
+             e.attendees, e.status, e.checked_in_at
+      FROM entries e
+      WHERE e.status = 'confirmed'
+        AND (CAST(e.id AS TEXT) = ?
+             OR e.applicant_name LIKE ?
+             OR e.applicant_furigana LIKE ?
+             OR e.tel = ?)
+      ORDER BY e.applicant_furigana, e.id
+      LIMIT 30
+    `).bind(q, `%${q}%`, `%${q}%`, q).all();
+    results = r?.results ?? [];
+
+    // 各 entry の日別チェックイン状態を取得
+    if (results.length > 0) {
+      const ids = results.map(r => r.id);
+      const placeholders = ids.map(() => '?').join(',');
+      const cks = (await env.DB.prepare(
+        `SELECT entry_id, day FROM entry_checkins WHERE entry_id IN (${placeholders})`
+      ).bind(...ids).all())?.results ?? [];
+      const map = {};
+      for (const c of cks) {
+        if (!map[c.entry_id]) map[c.entry_id] = new Set();
+        map[c.entry_id].add(c.day);
+      }
+      results = results.map(r => ({
+        ...r,
+        day1Done: map[r.id]?.has('Day1') ?? false,
+        day2Done: map[r.id]?.has('Day2') ?? false,
+      }));
+    }
+  } catch (e) {
+    dbErr = e.message;
+  }
+}
+---
+<BaseLayout
+  title="受付スタッフ ／ 検索チェックイン"
+  description="運営用 受付ページ"
+  noindex={true}
+  hideHeader={true}
+  hideFooter={true}
+>
+
+  <div class="rc-wrap">
+    <header class="rc-head">
+      <div>
+        <h1>受付スタッフ ／ 検索チェックイン</h1>
+        <p class="rc-today">本日：{ymd}{todayDay && <span class={`day-pill ${todayDay === 'Day1' ? 'day-pill--navy' : 'day-pill--orange'}`} style="margin-left:10px;">{todayDay}</span>}</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <a href="/admin/" class="admin-btn admin-btn--ghost">管理TOP</a>
+      </div>
+    </header>
+
+    {checkedDone === 'day1' && (
+      <div class="rc-flash rc-flash--success"><i class="fa-solid fa-circle-check"></i> DAY 1 チェックイン 完了しました</div>
+    )}
+    {checkedDone === 'day2' && (
+      <div class="rc-flash rc-flash--success"><i class="fa-solid fa-circle-check"></i> DAY 2 チェックイン 完了しました</div>
+    )}
+    {checkedDone === 'undo_day1' && (
+      <div class="rc-flash rc-flash--warn"><i class="fa-solid fa-rotate-left"></i> DAY 1 チェックイン 取消しました</div>
+    )}
+    {checkedDone === 'undo_day2' && (
+      <div class="rc-flash rc-flash--warn"><i class="fa-solid fa-rotate-left"></i> DAY 2 チェックイン 取消しました</div>
+    )}
+    {errorMsg === 'already' && (
+      <div class="rc-flash rc-flash--warn"><i class="fa-solid fa-info-circle"></i> すでに本日のチェックインは完了しています</div>
+    )}
+    {errorMsg === 'server' && (
+      <div class="rc-flash rc-flash--error"><i class="fa-solid fa-circle-exclamation"></i> サーバーエラーが発生しました</div>
+    )}
+
+    <form method="GET" class="rc-search">
+      <input
+        type="search" name="q" value={q}
+        placeholder="受付番号 / お名前 / ふりがな / 電話番号 で検索"
+        class="rc-search__input"
+        autofocus
+        autocomplete="off"
+      />
+      <button type="submit" class="rc-search__btn">
+        <i class="fa-solid fa-magnifying-glass"></i> 検索
+      </button>
+      {q && <a href="/admin/reception/" class="rc-search__clear">クリア</a>}
+    </form>
+
+    {dbErr && <p style="color:#b00;">エラー：{dbErr}</p>}
+
+    {q && (
+      <div class="rc-results">
+        <p class="rc-count">該当 {results.length} 件 {results.length === 30 && '（30件まで表示）'}</p>
+        {results.length === 0 && (
+          <p class="rc-empty">該当する申込が見つかりませんでした。</p>
+        )}
+
+        {results.map(r => {
+          const todayDone = todayDay === 'Day1' ? r.day1Done : (todayDay === 'Day2' ? r.day2Done : false);
+          return (
+            <article class={`rc-card ${todayDone ? 'rc-card--done' : ''}`}>
+              <div class="rc-card__head">
+                <div class="rc-card__id">#{r.id}</div>
+                <div class="rc-card__name">
+                  <strong>{r.applicant_name}</strong> 様 ／ {r.attendees}名<br>
+                  <small>{r.applicant_furigana}　・　{r.tel}</small>
+                </div>
+                <div class="rc-card__status">
+                  <span class={`rc-pill ${r.day1Done ? 'rc-pill--done' : 'rc-pill--undone'}`}>
+                    DAY 1 {r.day1Done ? '✓' : '－'}
+                  </span>
+                  <span class={`rc-pill ${r.day2Done ? 'rc-pill--done' : 'rc-pill--undone'}`}>
+                    DAY 2 {r.day2Done ? '✓' : '－'}
+                  </span>
+                </div>
+              </div>
+
+              <div class="rc-card__actions">
+                {!r.day1Done ? (
+                  <form method="POST" action="/api/admin-checkin"
+                    onsubmit={`return confirm('${r.applicant_name} 様 (#${r.id}) を DAY 1 にチェックインします。よろしいですか？');`}>
+                    <input type="hidden" name="entry_id" value={r.id} />
+                    <input type="hidden" name="day" value="Day1" />
+                    <input type="hidden" name="q" value={q} />
+                    <button type="submit" class="rc-btn rc-btn--navy">
+                      DAY 1 にチェックイン
+                    </button>
+                  </form>
+                ) : (
+                  <form method="POST" action="/api/admin-checkin-undo"
+                    onsubmit={`return confirm('${r.applicant_name} 様 (#${r.id}) の DAY 1 チェックインを取消します。よろしいですか？');`}>
+                    <input type="hidden" name="entry_id" value={r.id} />
+                    <input type="hidden" name="day" value="Day1" />
+                    <input type="hidden" name="q" value={q} />
+                    <button type="submit" class="rc-btn rc-btn--undo">
+                      <i class="fa-solid fa-rotate-left"></i> DAY 1 取消
+                    </button>
+                  </form>
+                )}
+
+                {!r.day2Done ? (
+                  <form method="POST" action="/api/admin-checkin"
+                    onsubmit={`return confirm('${r.applicant_name} 様 (#${r.id}) を DAY 2 にチェックインします。よろしいですか？');`}>
+                    <input type="hidden" name="entry_id" value={r.id} />
+                    <input type="hidden" name="day" value="Day2" />
+                    <input type="hidden" name="q" value={q} />
+                    <button type="submit" class="rc-btn rc-btn--orange">
+                      DAY 2 にチェックイン
+                    </button>
+                  </form>
+                ) : (
+                  <form method="POST" action="/api/admin-checkin-undo"
+                    onsubmit={`return confirm('${r.applicant_name} 様 (#${r.id}) の DAY 2 チェックインを取消します。よろしいですか？');`}>
+                    <input type="hidden" name="entry_id" value={r.id} />
+                    <input type="hidden" name="day" value="Day2" />
+                    <input type="hidden" name="q" value={q} />
+                    <button type="submit" class="rc-btn rc-btn--undo">
+                      <i class="fa-solid fa-rotate-left"></i> DAY 2 取消
+                    </button>
+                  </form>
+                )}
+                <a href={`/admin/entries/${r.id}/`} class="rc-btn rc-btn--link" target="_blank">
+                  詳細を見る
+                </a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    )}
+
+    {!q && (
+      <div class="rc-help">
+        <h2>使い方</h2>
+        <ol>
+          <li>受付番号（管理ID）、お名前、ふりがな、電話番号 のいずれかで検索</li>
+          <li>該当する申込のカードで「DAY 1」または「DAY 2」のボタンをタップ</li>
+          <li>確認音と緑バナーで完了通知</li>
+        </ol>
+        <p style="margin-top:14px;font-size:0.85rem;color:var(--fsn-gray-700);">
+          ※スタッフ用のため、参加者には触らせず、運営PC側でご操作ください。
+        </p>
+      </div>
+    )}
+
+  </div>
+
+  <script is:inline>
+    if (window.location.search.includes('checked=')) {
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AC();
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = 880;
+        g.gain.value = 0.15;
+        o.connect(g); g.connect(ctx.destination);
+        o.start(); setTimeout(() => { o.frequency.value = 1320; }, 80);
+        setTimeout(() => { o.stop(); ctx.close(); }, 280);
+      } catch {}
+    }
+  </script>
+
+</BaseLayout>
+
+<style is:global>
+  .rc-wrap { max-width: 1200px; margin: 0 auto; padding: 24px; color: var(--fsn-gray-900); }
+  .rc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid var(--fsn-orange); }
+  .rc-head h1 { font-size: 1.3rem; margin: 0 0 4px; color: var(--fsn-navy-deep); }
+  .rc-today { font-size: 0.92rem; color: var(--fsn-gray-700); margin: 0; }
+
+  .rc-flash { padding: 14px 18px; border-radius: var(--fsn-radius-sm); font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+  .rc-flash--success { background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
+  .rc-flash--warn { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+  .rc-flash--error { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
+
+  .rc-search { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+  .rc-search__input {
+    flex: 1; padding: 16px 22px;
+    border: 2px solid var(--fsn-navy-deep);
+    border-radius: var(--fsn-radius-sm);
+    font-size: 1.1rem; font-weight: 600;
+    outline: none;
+  }
+  .rc-search__input:focus { border-color: var(--fsn-orange); }
+  .rc-search__btn {
+    padding: 16px 30px; background: var(--fsn-navy-deep); color: #fff;
+    border: 0; border-radius: var(--fsn-radius-sm);
+    font-size: 1rem; font-weight: 800; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .rc-search__btn:hover { background: var(--fsn-orange); }
+  .rc-search__clear { color: var(--fsn-gray-700); text-decoration: underline; font-size: 0.88rem; }
+
+  .rc-count { font-size: 0.88rem; color: var(--fsn-gray-700); margin: 0 0 12px; }
+  .rc-empty { color: var(--fsn-gray-500); padding: 24px; text-align: center; background: var(--fsn-gray-50); border-radius: var(--fsn-radius-sm); }
+
+  .rc-card { background: var(--fsn-white); border: 1.5px solid var(--fsn-gray-200); border-radius: var(--fsn-radius-md); padding: 18px 22px; margin-bottom: 14px; }
+  .rc-card--done { background: #F0FDF4; border-color: #BBF7D0; }
+
+  .rc-card__head { display: grid; grid-template-columns: 80px 1fr auto; gap: 16px; align-items: center; margin-bottom: 14px; }
+  .rc-card__id { font-family: var(--fsn-font-num); font-size: 1.6rem; font-weight: 900; color: var(--fsn-orange-dark); text-align: center; }
+  .rc-card__name { font-size: 1.05rem; }
+  .rc-card__name small { color: var(--fsn-gray-700); font-size: 0.85rem; }
+  .rc-card__status { display: flex; gap: 8px; }
+
+  .rc-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 800; }
+  .rc-pill--done { background: #DCFCE7; color: #166534; }
+  .rc-pill--undone { background: var(--fsn-gray-100); color: var(--fsn-gray-700); }
+
+  .rc-card__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .rc-card__actions form { margin: 0; }
+  .rc-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 14px 28px;
+    border: 0; border-radius: var(--fsn-radius-sm);
+    font-size: 1rem; font-weight: 800;
+    cursor: pointer; text-decoration: none;
+    transition: transform 0.1s;
+  }
+  .rc-btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .rc-btn:disabled { cursor: not-allowed; opacity: 0.6; }
+  .rc-btn--navy { background: var(--fsn-navy-deep); color: var(--fsn-white); }
+  .rc-btn--orange { background: var(--fsn-orange); color: var(--fsn-white); }
+  .rc-btn--done { background: #DCFCE7; color: #166534; }
+  .rc-btn--undo {
+    background: var(--fsn-white);
+    color: #DC2626;
+    border: 2px solid #FCA5A5;
+  }
+  .rc-btn--undo:hover { background: #FEE2E2; }
+  .rc-btn--link { background: var(--fsn-white); color: var(--fsn-gray-700); border: 1px solid var(--fsn-gray-300); padding: 14px 18px; }
+
+  .rc-help { background: var(--fsn-gray-50); padding: 24px; border-radius: var(--fsn-radius-md); }
+  .rc-help h2 { font-size: 1.05rem; color: var(--fsn-navy-deep); margin: 0 0 12px; }
+  .rc-help ol { padding-left: 22px; line-height: 2; color: var(--fsn-gray-700); }
+
+  .admin-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--fsn-navy-deep); color: var(--fsn-white); border: 0; border-radius: var(--fsn-radius-sm); text-decoration: none; font-size: 0.88rem; font-weight: 700; }
+  .admin-btn--ghost { background: var(--fsn-white); color: var(--fsn-navy-deep); border: 1px solid var(--fsn-gray-300); }
+</style>

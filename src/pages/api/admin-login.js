@@ -42,6 +42,12 @@ export async function POST({ request, locals }) {
     });
   }
 
+  // 監査ログ（ログイン成功）
+  try {
+    const { audit } = await import('../../lib/audit.js');
+    await audit(env, request, 'admin_login', next);
+  } catch {}
+
   // Slack通知（成功ログイン）
   if (env.SLACK_WEBHOOK_URL) {
     const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';

@@ -327,6 +327,29 @@ textarea.ap-input { resize: vertical; line-height: 1.7; }
   .lk-slot__venue { grid-column: 1 / -1; }
 }
 
+/* Turnstile 領域 */
+.ap-turnstile {
+  margin: 24px 0 12px;
+  padding: 20px;
+  background: var(--fsn-gray-50);
+  border-radius: var(--fsn-radius-sm);
+  border: 1px solid var(--fsn-gray-200);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.ap-turnstile__note {
+  font-size: 0.85rem;
+  color: var(--fsn-gray-700);
+  margin: 0;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ap-turnstile__note i { color: var(--fsn-navy); }
+
 /* checkin: 大ボタン・スキャナー（共通） */
 .ck-big-btn {
   display: flex;
@@ -433,6 +456,58 @@ textarea.ap-input { resize: vertical; line-height: 1.7; }
   border-style: solid;
 }
 .qr-pan-add-big i { font-size: 1.4em; color: var(--fsn-orange); }
+
+/* キャンセルセクション（折りたたみ） */
+.ap-cancel {
+  margin-top: 28px;
+  background: var(--fsn-gray-50);
+  border: 1px solid var(--fsn-gray-200);
+  border-radius: var(--fsn-radius-sm);
+  overflow: hidden;
+}
+.ap-cancel summary {
+  padding: 14px 18px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--fsn-gray-700);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ap-cancel summary::-webkit-details-marker { display: none; }
+.ap-cancel summary::after {
+  content: "▾";
+  margin-left: auto;
+  transition: transform 0.15s;
+}
+.ap-cancel[open] summary::after { transform: rotate(180deg); }
+.ap-cancel summary i { color: #DC2626; }
+.ap-cancel__body {
+  padding: 12px 18px 22px;
+  font-size: 0.92rem;
+  color: var(--fsn-gray-700);
+  border-top: 1px dashed var(--fsn-gray-300);
+  line-height: 1.7;
+}
+.ap-cancel__body p { margin: 8px 0 14px; }
+.ap-cancel__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: #DC2626;
+  color: #fff;
+  border: 0;
+  border-radius: var(--fsn-radius-pill);
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(220,38,38,0.25);
+}
+.ap-cancel__btn:hover { background: #B91C1C; }
 
 /* lookup 出欠チェック */
 .lk-slot--checkable {

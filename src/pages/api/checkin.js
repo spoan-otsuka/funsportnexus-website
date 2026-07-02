@@ -76,11 +76,12 @@ export async function POST({ request, locals }) {
     // Slack 通知（任意）
     if (env.SLACK_WEBHOOK_URL) {
       try {
+        const { maskName } = await import('../../lib/mask.js');
         await fetch(env.SLACK_WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            text: `✅ *チェックイン* #${entry.id} ${entry.applicant_name} 様（${entry.attendees}名）`,
+            text: `✅ *チェックイン* #${entry.id} ${maskName(entry.applicant_name)} 様（${entry.attendees}名）`,
           }),
         });
       } catch {}
