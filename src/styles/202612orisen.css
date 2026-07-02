@@ -69,6 +69,40 @@
   color: rgba(255,255,255,0.92);
 }
 
+/* ---------- Concept セクション ---------- */
+.dec-concept {
+  background: linear-gradient(180deg, #FFFDF8 0%, #FFF7EB 100%);
+  padding: clamp(56px, 8vw, 96px) 20px;
+}
+.dec-concept__body {
+  margin-top: 32px;
+  font-size: 1rem;
+  line-height: 2.2;
+  color: var(--fsn-gray-800, #1f2937);
+  text-align: center;
+}
+.dec-concept__body p { margin: 0 0 24px; }
+.dec-concept__end {
+  margin-top: 40px !important;
+  padding-top: 32px;
+  border-top: 2px solid var(--fsn-orange);
+  font-size: 1.1rem;
+  line-height: 2;
+}
+.dec-concept__end strong {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 1.4rem;
+  color: var(--fsn-orange-dark);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+@media (max-width: 600px) {
+  .dec-concept__body { font-size: 0.95rem; line-height: 2.0; }
+  .dec-concept__end { font-size: 1rem; }
+  .dec-concept__end strong { font-size: 1.2rem; }
+}
+
 /* ---------- Hero ---------- */
 .dec-hero {
   position: relative;
@@ -103,11 +137,12 @@
   width: 100%;
 }
 .dec-hero__label {
-  font-size: 0.85rem;
+  font-size: clamp(0.72rem, 1.6vw, 0.9rem);
   font-weight: 700;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.14em;
   color: var(--fsn-orange);
   margin: 0 0 18px;
+  line-height: 1.6;
 }
 .dec-hero__catch {
   font-size: clamp(2.2rem, 5vw, 3.6rem);

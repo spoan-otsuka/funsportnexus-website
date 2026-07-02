@@ -2,25 +2,60 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import '../../../styles/202612orisen.css';
 
+// カテゴリー：suru（する ／ 体験）／ shiru（知る ／ カンファレンス）／ tsunagaru（つながる ／ フィナーレ・交流）
 const day1 = [
-  { name: 'スポあんぱん食い競走', time: 'AM ／ PM の2回開催（事前申込不要）', venue: '中央広場', org: 'ぱん食い競走協会 ／ スポーツ安全協会', text: '名物プログラム。子どもからおとなまで、笑顔があふれます。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-bread-slice', featured: true },
-  { name: 'Baseball5 体験', time: '終日通し', venue: '第1体育室', org: '全日本野球協会 BFJ', text: 'ボールひとつで誰でも楽しめる、新しい野球です。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-baseball-bat-ball' },
-  { name: 'ピックルボール ／ テックボール', time: '終日通し', venue: '第2体育室', org: 'レクリエーション協会', text: 'いま注目の新しい競技。誰でもたのしめます。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-table-tennis-paddle-ball' },
-  { name: 'バスケットボール', time: '終日通し', venue: '第3体育室', org: 'サンロッカーズ渋谷', text: 'プロチームのコーチが直接指導。シュートチャレンジも。', tag: '中学生限定 ／ 全員参加可', tagClass: 'junior', icon: 'fa-basketball' },
-  { name: 'Legit ダンス体験', time: '3コマ開催', venue: '第4体育室', org: 'CyberAgent Legit', text: 'D.LEAGUE 優勝チームのメンバーが、ダンスを教えます。', tag: '5歳以上', tagClass: '5plus', icon: 'fa-music' },
-  { name: '柔道体験', time: '3コマ開催', venue: '第5体育室', org: '三井住友海上', text: '日本の伝統的なスポーツを、安全に体験できます。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-hand-fist' },
-  { name: 'YCAP チームビルディング', time: '3コマ開催', venue: 'YCAPエリア', org: '国立青少年教育振興機構', text: 'ゲーム感覚で、チーム作りの大切さをまなびます。', tag: '小学生以上', tagClass: 'elem', icon: 'fa-people-group' },
-  { name: 'ボッチャ 自由参加', time: '終日通し', venue: '体育室前スペース', org: '日本ボッチャ協会 ほか', text: '年齢・障がいをこえて、いっしょに楽しめるパラスポーツ。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-bullseye' },
+  { name: 'スポあんぱん食い競走', time: 'AM ／ PM の2回開催（事前申込不要）', venue: '中央広場', org: 'ぱん食い競走協会 ／ スポーツ安全協会', text: '名物プログラム。子どもからおとなまで、笑顔があふれます。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-bread-slice', category: 'tsunagaru', featured: true },
+  { name: 'Baseball5 体験', time: '終日通し', venue: '第1体育室', org: '全日本野球協会 BFJ', text: 'ボールひとつで誰でも楽しめる、新しい野球です。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-baseball-bat-ball', category: 'suru' },
+  { name: 'ピックルボール ／ テックボール', time: '終日通し', venue: '第2体育室', org: 'レクリエーション協会', text: 'いま注目の新しい競技。誰でもたのしめます。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-table-tennis-paddle-ball', category: 'suru' },
+  { name: 'バスケットボール', time: '終日通し', venue: '第3体育室', org: 'サンロッカーズ渋谷', text: 'プロチームのコーチが直接指導。楽しみながら、ボールに触れられます。', tag: '中学生限定 ／ 全員参加可', tagClass: 'junior', icon: 'fa-basketball', category: 'suru' },
+  { name: 'Legit ダンス体験', time: '3コマ開催', venue: '第4体育室', org: 'CyberAgent Legit', text: 'D.LEAGUE 優勝チームのメンバーが、ダンスを教えます。', tag: '5歳以上', tagClass: '5plus', icon: 'fa-music', category: 'suru' },
+  { name: '柔道体験', time: '3コマ開催', venue: '第5体育室', org: '三井住友海上', text: '日本の伝統的なスポーツを、安全に体験できます。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-hand-fist', category: 'suru' },
+  { name: 'YCAP チームビルディング', time: '3コマ開催', venue: 'YCAPエリア', org: '国立青少年教育振興機構', text: 'ゲーム感覚で、チーム作りの大切さをまなびます。', tag: '小学生以上', tagClass: 'elem', icon: 'fa-people-group', category: 'suru' },
+  { name: 'ボッチャ 自由参加', time: '終日通し', venue: '体育室前スペース', org: '日本ボッチャ協会 ほか', text: '年齢・障がいをこえて、いっしょに楽しめるパラスポーツ。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-bullseye', category: 'suru' },
 ];
 
 const day2 = [
-  { name: 'スポあんぱん食い競走', time: 'AM ／ PM の2回開催（事前申込不要）', venue: '中央広場', org: 'ぱん食い競走協会 ／ スポーツ安全協会', text: 'Day2 もぱん食い競走を開催。ぜひ、ご参加ください。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-bread-slice', featured: true },
-  { name: 'かけっこ教室', time: '午前・午後 各1コマ', venue: '第1体育室', org: '三井住友海上', text: '「もっと、はやく走りたい」をかなえる教室です。', tag: '小学生以上', tagClass: 'elem', icon: 'fa-person-running' },
-  { name: '鬼ごっこ', time: '12:00 - 15:00 通し', venue: '第2体育室', org: '鬼ごっこ協会', text: 'みんな大好き鬼ごっこ。身体をおもいっきり動かしましょう。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-children' },
-  { name: 'フェンシング体験', time: '3コマ開催', venue: '第4体育室', org: '日本フェンシング協会', text: 'オリンピック競技を、専用の道具で安全に体験できます。', tag: '6歳以上', tagClass: '6plus', icon: 'fa-khanda' },
-  { name: 'DIP（ミュージックドリブル）', time: '3コマ開催', venue: '第5体育室', org: '渋谷区スポーツ協会', text: '音楽に合わせてボールをドリブル。リズム感と運動能力を。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-record-vinyl' },
-  { name: 'YCAP チームビルディング', time: '3コマ開催', venue: 'YCAPエリア', org: '国立青少年教育振興機構', text: 'Day2 も別テーマで開催。Day1 と違う体験ができます。', tag: '小学生以上', tagClass: 'elem', icon: 'fa-people-group' },
-  { name: '閉会セレモニー＋演劇発表', time: '15:30 - 17:00', venue: '小ホール', org: '東京演劇集団風 ほか', text: '2日間の最後はみんなで小ホールに集まって閉会。', tag: 'どなたでも ／ 全員集合', tagClass: 'all', icon: 'fa-masks-theater', special: true },
+  { name: 'スポあんぱん食い競走', time: 'AM ／ PM の2回開催（事前申込不要）', venue: '中央広場', org: 'ぱん食い競走協会 ／ スポーツ安全協会', text: 'Day2 もぱん食い競走を開催。ぜひ、ご参加ください。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-bread-slice', category: 'tsunagaru', featured: true },
+  { name: 'かけっこ教室', time: '午前・午後 各1コマ', venue: '第1体育室', org: '三井住友海上', text: '「もっと、はやく走りたい」をかなえる教室です。', tag: '小学生以上', tagClass: 'elem', icon: 'fa-person-running', category: 'suru' },
+  { name: '鬼ごっこ', time: '12:00 - 15:00 通し', venue: '第2体育室', org: '鬼ごっこ協会', text: 'みんな大好き鬼ごっこ。身体をおもいっきり動かしましょう。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-children', category: 'suru' },
+  { name: 'フェンシング体験', time: '3コマ開催', venue: '第4体育室', org: '日本フェンシング協会', text: 'オリンピック競技を、専用の道具で安全に体験できます。', tag: '6歳以上', tagClass: '6plus', icon: 'fa-khanda', category: 'suru' },
+  { name: 'DIP（ミュージックドリブル）', time: '3コマ開催', venue: '第5体育室', org: '渋谷区スポーツ協会', text: '音楽に合わせてボールをドリブル。リズム感と運動能力を。', tag: 'どなたでも', tagClass: 'all', icon: 'fa-record-vinyl', category: 'suru' },
+  { name: 'YCAP チームビルディング', time: '3コマ開催', venue: 'YCAPエリア', org: '国立青少年教育振興機構', text: 'Day2 も別テーマで開催。Day1 と違う体験ができます。', tag: '小学生以上', tagClass: 'elem', icon: 'fa-people-group', category: 'suru' },
+  { name: '閉会セレモニー ＋ プロダンス パフォーマンス', time: '15:30 - 17:00', venue: '小ホール', org: 'dip BATTLES ／ CyberAgent Legit', text: '2日間の締めくくり。プロダンサーによる特別パフォーマンスと閉会式。', tag: 'どなたでも ／ 全員集合', tagClass: 'all', icon: 'fa-masks-theater', category: 'tsunagaru', special: true },
+];
+
+// カテゴリー定義
+const categories = [
+  {
+    key: 'suru',
+    label: 'する',
+    subtitle: 'STEP 01',
+    tag: 'SPORTS ／ CULTURE',
+    icon: 'fa-play',
+    color: 'navy',
+    catch: '「おもしろそう！」「やってみたい！」の体験',
+    desc: 'スポーツ・文化を、実際に体を動かして、楽しむプログラム。 未経験でも、大丈夫。 プロや、経験者と、一緒にはじめられます。',
+  },
+  {
+    key: 'shiru',
+    label: '知る',
+    subtitle: 'STEP 02',
+    tag: 'CONFERENCE',
+    icon: 'fa-lightbulb',
+    color: 'orange',
+    catch: '指導者・保護者・地域 向けのセミナー ＆ 交流会',
+    desc: '「遊びから生まれる、子どもの主体性」を、テーマにした、カンファレンス。 スポーツ・アカデミア・文化の 3ジャンルから、専門家が、登壇します。',
+  },
+  {
+    key: 'tsunagaru',
+    label: 'つながる',
+    subtitle: 'STEP 03',
+    tag: 'CONNECT',
+    icon: 'fa-link',
+    color: 'teal',
+    catch: 'みんなでつくる、新しいスポーツの、つながりの場',
+    desc: 'オープニングの ぱん食い競走、フィナーレの プロダンスパフォーマンス、参加者同士の 交流会 など、境界を超えて、つながる時間。',
+  },
 ];
 ---
 <BaseLayout
@@ -36,7 +71,7 @@ const day2 = [
         <i class="fa-solid fa-angle-right"></i>
         <span>プログラム</span>
       </nav>
-      <p class="dec-sub-hero__label">PROGRAMS</p>
+      <p class="dec-sub-hero__label">fun sport nexus 2026  ／  PROGRAMS</p>
       <h1 class="dec-sub-hero__title">プログラム一覧</h1>
       <p class="dec-sub-hero__lead">
         Day1 と Day2 で、合計15以上のプログラムを、ご用意しております。<br>
@@ -45,12 +80,41 @@ const day2 = [
     </div>
   </section>
 
+  <!-- 3カテゴリー -->
+  <section class="dec-section dec-section--concept">
+    <div class="dec-section__inner">
+      <p class="dec-section__label dec-section__label--orange">3 CATEGORIES</p>
+      <h2 class="dec-section__title">
+        3 つの、カテゴリーで、<br>fun sport nexus を、たのしむ。
+      </h2>
+      <p class="dec-section__lead">
+        「する ／ 知る ／ つながる」の、3つの体験を、ご用意しています。<br>
+        気になったところから、ぜひ、お進みください。
+      </p>
+
+      <div class="cat-grid">
+        {categories.map(c => (
+          <a href={c.key === 'suru' ? '#day1' : `#cat-${c.key}`} class={`cat-card cat-card--${c.color}`}>
+            <div class="cat-card__head">
+              <span class="cat-card__subtitle">{c.subtitle}</span>
+              <span class="cat-card__tag">{c.tag}</span>
+            </div>
+            <div class="cat-card__icon"><i class={`fa-solid ${c.icon}`}></i></div>
+            <h3 class="cat-card__label">{c.label}</h3>
+            <p class="cat-card__catch">{c.catch}</p>
+            <p class="cat-card__desc">{c.desc}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
   <!-- Day1 -->
-  <section class="dec-section">
+  <section class="dec-section" id="day1">
     <div class="dec-section__inner">
       <div class="prog-day__head" style="border-bottom: 2px solid var(--fsn-navy); padding-bottom: 24px; margin-bottom: 32px;">
         <p style="display:inline-block;padding:6px 18px;background:var(--fsn-navy);color:#fff;border-radius:6px;font-size:0.82rem;font-weight:700;letter-spacing:0.2em;margin:0 0 8px;">DAY 1</p>
-        <h2 style="font-size:1.8rem;font-weight:800;color:var(--fsn-navy);margin:0 0 6px;">スポーツの源流</h2>
+        <h2 style="font-size:1.8rem;font-weight:800;color:var(--fsn-navy);margin:0 0 6px;">あそびの ひろば</h2>
         <p style="font-size:0.95rem;color:var(--fsn-gray-700);margin:0;">
           <i class="fa-solid fa-calendar-day" style="color:var(--fsn-orange);margin-right:8px;"></i>
           2026年12月19日（土）
@@ -60,6 +124,9 @@ const day2 = [
       <div class="prog-grid">
         {day1.map(p => (
           <article class={`prog-card ${p.featured ? 'prog-card--featured' : ''}`}>
+            <span class={`prog-cat prog-cat--${p.category}`}>
+              {p.category === 'suru' ? 'する' : p.category === 'shiru' ? '知る' : 'つながる'}
+            </span>
             <div class="prog-card__icon"><i class={`fa-solid ${p.icon}`}></i></div>
             <h3 class="prog-card__title">{p.name}</h3>
             <p class="prog-card__time"><i class="fa-regular fa-clock"></i> {p.time}</p>
@@ -78,7 +145,7 @@ const day2 = [
     <div class="dec-section__inner">
       <div class="prog-day__head" style="border-bottom: 2px solid var(--fsn-orange); padding-bottom: 24px; margin-bottom: 32px;">
         <p style="display:inline-block;padding:6px 18px;background:var(--fsn-orange);color:#fff;border-radius:6px;font-size:0.82rem;font-weight:700;letter-spacing:0.2em;margin:0 0 8px;">DAY 2</p>
-        <h2 style="font-size:1.8rem;font-weight:800;color:var(--fsn-orange-dark);margin:0 0 6px;">体験会 ＋ 大会要素</h2>
+        <h2 style="font-size:1.8rem;font-weight:800;color:var(--fsn-orange-dark);margin:0 0 6px;">あそびの ひろば</h2>
         <p style="font-size:0.95rem;color:var(--fsn-gray-700);margin:0;">
           <i class="fa-solid fa-calendar-day" style="color:var(--fsn-orange);margin-right:8px;"></i>
           2026年12月20日（日）
@@ -88,6 +155,9 @@ const day2 = [
       <div class="prog-grid">
         {day2.map(p => (
           <article class={`prog-card ${p.featured ? 'prog-card--featured' : ''} ${p.special ? 'prog-card--special' : ''}`}>
+            <span class={`prog-cat prog-cat--${p.category}`}>
+              {p.category === 'suru' ? 'する' : p.category === 'shiru' ? '知る' : 'つながる'}
+            </span>
             <div class="prog-card__icon"><i class={`fa-solid ${p.icon}`}></i></div>
             <h3 class="prog-card__title">{p.name}</h3>
             <p class="prog-card__time"><i class="fa-regular fa-clock"></i> {p.time}</p>
@@ -97,6 +167,110 @@ const day2 = [
             <p class="prog-card__tag-wrap"><span class={`prog-tag prog-tag--${p.tagClass}`}>{p.tag}</span></p>
           </article>
         ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- 「知る」カンファレンス -->
+  <section class="dec-section dec-section--tint" id="cat-shiru">
+    <div class="dec-section__inner">
+      <div class="prog-day__head" style="border-bottom: 2px solid var(--fsn-orange); padding-bottom: 24px; margin-bottom: 32px;">
+        <p style="display:inline-block;padding:6px 18px;background:var(--fsn-orange);color:#fff;border-radius:6px;font-size:0.82rem;font-weight:700;letter-spacing:0.2em;margin:0 0 8px;">知る</p>
+        <h2 style="font-size:1.8rem;font-weight:800;color:var(--fsn-orange-dark);margin:0 0 6px;">カンファレンス</h2>
+        <p style="font-size:0.95rem;color:var(--fsn-gray-700);margin:0;">
+          <i class="fa-solid fa-calendar-day" style="color:var(--fsn-orange);margin-right:8px;"></i>
+          1日目 夕方 予定 ／ 国際交流棟 レセプションホール
+        </p>
+      </div>
+
+      <div class="conf-box">
+        <p class="conf-box__label">CONFERENCE THEME</p>
+        <h3 class="conf-box__theme">「遊び」から、生まれる、<br>子どもの、主体性。</h3>
+        <p class="conf-box__lead">
+          「勝つため」だけではなく、「楽しむこと」から生まれる、<br>
+          学びや、出会いを、一緒に、考える時間です。<br>
+          スポーツ・アカデミア・文化の 3ジャンルから、専門家が、登壇予定。<br>
+          対象は、指導者・保護者・地域の、みなさま。
+        </p>
+
+        <div class="conf-panels">
+          <div class="conf-panel">
+            <span class="conf-panel__tag">スポーツ</span>
+            <div class="conf-panel__photo"><i class="fa-solid fa-user"></i></div>
+            <p class="conf-panel__name">登壇者、調整中</p>
+            <p class="conf-panel__role">Coming soon</p>
+          </div>
+          <div class="conf-panel__mark">×</div>
+          <div class="conf-panel">
+            <span class="conf-panel__tag">アカデミア</span>
+            <div class="conf-panel__photo"><i class="fa-solid fa-user"></i></div>
+            <p class="conf-panel__name">登壇者、調整中</p>
+            <p class="conf-panel__role">Coming soon</p>
+          </div>
+          <div class="conf-panel__mark">×</div>
+          <div class="conf-panel">
+            <span class="conf-panel__tag">文化</span>
+            <div class="conf-panel__photo"><i class="fa-solid fa-user"></i></div>
+            <p class="conf-panel__name">登壇者、調整中</p>
+            <p class="conf-panel__role">Coming soon</p>
+          </div>
+        </div>
+
+        <p class="conf-box__foot">
+          <i class="fa-solid fa-circle-info"></i>
+          登壇者は、決定次第、こちらのページにて、ご案内いたします。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 「つながる」フィナーレ -->
+  <section class="dec-section" id="cat-tsunagaru">
+    <div class="dec-section__inner">
+      <div class="prog-day__head" style="border-bottom: 2px solid #0EA5A5; padding-bottom: 24px; margin-bottom: 32px;">
+        <p style="display:inline-block;padding:6px 18px;background:#0EA5A5;color:#fff;border-radius:6px;font-size:0.82rem;font-weight:700;letter-spacing:0.2em;margin:0 0 8px;">つながる</p>
+        <h2 style="font-size:1.8rem;font-weight:800;color:#0F766E;margin:0 0 6px;">はじまりと、おわりを、<br>みんなで、シェアする時間。</h2>
+        <p style="font-size:0.95rem;color:var(--fsn-gray-700);margin:0;">
+          <i class="fa-solid fa-link" style="color:#0EA5A5;margin-right:8px;"></i>
+          オープニング ／ フィナーレ ／ 交流会
+        </p>
+      </div>
+
+      <div class="tsun-grid">
+        <article class="tsun-card tsun-card--open">
+          <span class="tsun-card__phase">OPENING</span>
+          <div class="tsun-card__icon"><i class="fa-solid fa-bread-slice"></i></div>
+          <h3 class="tsun-card__title">スポあん<br>ぱん食い競走</h3>
+          <p class="tsun-card__time">Day1 ／ Day2 の朝、開催</p>
+          <p class="tsun-card__text">
+            2日間の、はじまりを、みんなで、飾る、恒例プログラム。<br>
+            事前申込は、不要です。ぜひ、ふらっと、お立ち寄りください。
+          </p>
+        </article>
+
+        <article class="tsun-card tsun-card--main">
+          <span class="tsun-card__phase">FINALE</span>
+          <div class="tsun-card__icon"><i class="fa-solid fa-music"></i></div>
+          <h3 class="tsun-card__title">プロダンス<br>パフォーマンス</h3>
+          <p class="tsun-card__time">Day2 夕方 ／ 小ホール</p>
+          <p class="tsun-card__text">
+            <strong>dip BATTLES</strong> と <strong>CyberAgent Legit</strong> による、<br>
+            2日間の、締めくくりの、スペシャルパフォーマンス。<br>
+            体験ではなく、「観る楽しさ」から、また、新しい憧れが、生まれます。
+          </p>
+        </article>
+
+        <article class="tsun-card tsun-card--talk">
+          <span class="tsun-card__phase">MEET-UP</span>
+          <div class="tsun-card__icon"><i class="fa-solid fa-people-arrows"></i></div>
+          <h3 class="tsun-card__title">交流会</h3>
+          <p class="tsun-card__time">Day1 夕方 予定</p>
+          <p class="tsun-card__text">
+            スポーツ・文化・地域の、垣根を、こえて、参加者どうしが、<br>
+            ゆるやかに、つながる時間。運営団体・大学生・保護者の、<br>
+            みなさまも、ぜひ、ご参加ください。
+          </p>
+        </article>
       </div>
     </div>
   </section>
@@ -139,12 +313,201 @@ const day2 = [
 </BaseLayout>
 
 <style>
+  /* 3カテゴリー紹介 */
+  .dec-section--concept { background: linear-gradient(180deg, #FFFDF8, #FFF7EB); }
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 40px;
+  }
+  @media (max-width: 720px) { .cat-grid { grid-template-columns: 1fr; } }
+  .cat-card {
+    display: block;
+    padding: 32px 28px;
+    background: #fff;
+    border-radius: 20px;
+    text-decoration: none;
+    color: inherit;
+    border: 2px solid transparent;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+    position: relative;
+  }
+  .cat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(10,31,79,0.12); }
+  .cat-card--navy { border-color: var(--fsn-navy); }
+  .cat-card--navy:hover { background: #F5F8FF; }
+  .cat-card--orange { border-color: var(--fsn-orange); }
+  .cat-card--orange:hover { background: #FFF7EB; }
+  .cat-card--teal { border-color: #0EA5A5; }
+  .cat-card--teal:hover { background: #F0FDFA; }
+
+  .cat-card__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .cat-card__subtitle { font-size: 0.72rem; font-weight: 900; letter-spacing: 0.2em; color: var(--fsn-gray-500); }
+  .cat-card__tag { font-size: 0.68rem; padding: 2px 8px; border-radius: 999px; background: var(--fsn-gray-100); color: var(--fsn-gray-700); font-weight: 700; letter-spacing: 0.06em; }
+  .cat-card__icon {
+    width: 60px; height: 60px; border-radius: 16px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; color: #fff;
+    margin-bottom: 16px;
+  }
+  .cat-card--navy .cat-card__icon { background: var(--fsn-navy); }
+  .cat-card--orange .cat-card__icon { background: var(--fsn-orange); }
+  .cat-card--teal .cat-card__icon { background: #0EA5A5; }
+  .cat-card__label {
+    font-size: 2rem; font-weight: 900; margin: 0 0 12px;
+    letter-spacing: 0.04em;
+  }
+  .cat-card--navy .cat-card__label { color: var(--fsn-navy-deep); }
+  .cat-card--orange .cat-card__label { color: var(--fsn-orange-dark); }
+  .cat-card--teal .cat-card__label { color: #0F766E; }
+  .cat-card__catch { font-size: 0.95rem; font-weight: 700; line-height: 1.6; margin: 0 0 12px; color: var(--fsn-gray-900); }
+  .cat-card__desc { font-size: 0.85rem; line-height: 1.85; color: var(--fsn-gray-700); margin: 0; }
+
+  /* プログラムカードのカテゴリバッジ */
+  .prog-cat {
+    position: absolute; top: 14px; right: 14px;
+    padding: 3px 10px; border-radius: 999px;
+    font-size: 0.68rem; font-weight: 900; letter-spacing: 0.08em;
+    color: #fff;
+  }
+  .prog-cat--suru { background: var(--fsn-navy); }
+  .prog-cat--shiru { background: var(--fsn-orange); }
+  .prog-cat--tsunagaru { background: #0EA5A5; }
+
+  /* 「知る」カンファレンス */
+  .conf-box {
+    background: #fff;
+    border-radius: 24px;
+    padding: clamp(32px, 5vw, 56px);
+    border: 2px solid var(--fsn-orange);
+  }
+  .conf-box__label {
+    font-size: 0.72rem; letter-spacing: 0.28em;
+    color: var(--fsn-orange-dark); font-weight: 900;
+    margin: 0 0 12px; text-align: center;
+  }
+  .conf-box__theme {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 900; text-align: center;
+    color: var(--fsn-navy-deep);
+    margin: 0 0 28px; line-height: 1.5;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--fsn-orange);
+  }
+  .conf-box__lead {
+    font-size: 0.98rem; line-height: 2;
+    color: var(--fsn-gray-700);
+    text-align: center;
+    margin: 0 0 40px;
+  }
+  .conf-panels {
+    display: flex; align-items: center; justify-content: center;
+    gap: 20px; flex-wrap: wrap;
+    margin: 32px 0 24px;
+  }
+  .conf-panel {
+    flex: 1; min-width: 220px; max-width: 280px;
+    padding: 24px 20px;
+    background: #FEFBF5;
+    border: 1.5px solid #FCD38C;
+    border-radius: 16px;
+    text-align: center;
+  }
+  .conf-panel__tag {
+    display: inline-block;
+    font-size: 0.72rem; font-weight: 900; letter-spacing: 0.14em;
+    color: var(--fsn-orange-dark);
+    background: #FFF; padding: 3px 12px; border-radius: 999px;
+    border: 1px solid var(--fsn-orange);
+    margin-bottom: 14px;
+  }
+  .conf-panel__photo {
+    width: 92px; height: 92px; border-radius: 50%;
+    background: var(--fsn-gray-100);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--fsn-gray-500); font-size: 2.4rem;
+    margin: 0 auto 14px;
+  }
+  .conf-panel__name {
+    font-size: 0.95rem; font-weight: 800;
+    color: var(--fsn-gray-700); margin: 0 0 4px;
+  }
+  .conf-panel__role {
+    font-size: 0.78rem; color: var(--fsn-gray-500);
+    margin: 0; letter-spacing: 0.05em;
+  }
+  .conf-panel__mark {
+    font-size: 1.6rem; font-weight: 900;
+    color: var(--fsn-orange); flex-shrink: 0;
+  }
+  @media (max-width: 720px) {
+    .conf-panel__mark { display: none; }
+  }
+  .conf-box__foot {
+    margin: 24px 0 0; padding: 12px 16px;
+    background: #FEF3C7; color: #92400E;
+    font-size: 0.85rem; border-radius: 10px;
+    text-align: center;
+  }
+  .conf-box__foot i { margin-right: 6px; }
+
+  /* 「つながる」フィナーレ */
+  .tsun-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 900px) { .tsun-grid { grid-template-columns: 1fr; } }
+  .tsun-card {
+    padding: 32px 28px;
+    background: #fff;
+    border: 2px solid #0EA5A5;
+    border-radius: 20px;
+    position: relative;
+    text-align: center;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .tsun-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(14,165,165,0.15); }
+  .tsun-card--main {
+    background: linear-gradient(135deg, #F0FDFA, #fff);
+  }
+  .tsun-card__phase {
+    display: inline-block;
+    font-size: 0.72rem; font-weight: 900; letter-spacing: 0.24em;
+    color: #0F766E; background: #CCFBF1;
+    padding: 4px 14px; border-radius: 999px;
+    margin-bottom: 18px;
+  }
+  .tsun-card__icon {
+    width: 72px; height: 72px; border-radius: 20px;
+    background: #0EA5A5; color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.9rem;
+    margin: 0 auto 18px;
+  }
+  .tsun-card__title {
+    font-size: 1.25rem; font-weight: 900;
+    color: #0F766E; margin: 0 0 12px;
+    line-height: 1.5;
+  }
+  .tsun-card__time {
+    font-size: 0.82rem; color: var(--fsn-gray-500);
+    margin: 0 0 14px; font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .tsun-card__text {
+    font-size: 0.9rem; line-height: 1.9;
+    color: var(--fsn-gray-700); margin: 0;
+  }
+  .tsun-card__text strong { color: #0F766E; }
+
   .prog-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 24px;
   }
   .prog-card {
+    position: relative;
     background: var(--fsn-white);
     border: 1px solid var(--fsn-gray-200);
     border-radius: var(--fsn-radius-md);
