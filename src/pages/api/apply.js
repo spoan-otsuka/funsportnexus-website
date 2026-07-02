@@ -54,6 +54,18 @@ export async function POST({ request, locals }) {
     return redirect('/202612orisen/apply/?success=1&id=ok');
   }
 
+  // Cloudflare Turnstile 検証
+  const turnstileToken = (form.get('cf-turnstile-response') || '').toString();
+  const ip = request.headers.get('cf-connecting-ip') || '';
+  try {
+    const { verifyTurnstile } = await import('../../lib/turnstile.js');
+    const ts = await verifyTurnstile(env, turnstileToken, ip);
+    if (!ts.success) {
+      console.warn('turnstile failed:', ts);
+      return redirect('/202612orisen/apply/?error=turnstile');
+    }
+  } catch (e) { console.error('turnstile import error:', e); }
+
   const data = {
     name: (form.get('name') || '').toString().trim(),
     furigana: (form.get('furigana') || '').toString().trim(),
@@ -304,7 +316,7 @@ async function sendEmailsAndSlack(env, data, attendees, slotMap, entryId, qrToke
       text: `申込ID: ${entryId}\nQRトークン: ${qrToken}\n\n${summary}`,
     });
 
-    const lookupQuickUrl = `${siteUrl}/202612orisen/lookup/?id=${entryId}&email=${encodeURIComponent(data.email)}`;
+    const lookupQuickUrl = `${siteUrl}/202612orisen/lookup/?id=${entryId}&email=${encodeURIComponent(data.email)}&t=${qrToken}`;
     const adminLookupUrl = `${siteUrl}/202612orisen/lookup/`;
     const userText = [
       `${data.name} 様`,
@@ -351,7 +363,8 @@ async function sendEmailsAndSlack(env, data, attendees, slotMap, entryId, qrToke
 
   if (env.SLACK_WEBHOOK_URL) {
     try {
-      const slackText = `🎟️ *申込受信* (ID: ${entryId})\n*${data.name}* 様（${data.attendees}名）`;
+      const { maskName } = await import('../../lib/mask.js');
+      const slackText = `🎟️ *申込受信* (ID: ${entryId})\n*${maskName(data.name)}* 様（${data.attendees}名）`;
       await fetch(env.SLACK_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
