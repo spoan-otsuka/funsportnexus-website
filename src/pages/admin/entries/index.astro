@@ -1,0 +1,172 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/admin.css';
+
+export const prerender = false;
+
+const env = Astro.locals?.runtime?.env ?? {};
+const q = (Astro.url.searchParams.get('q') || '').trim();
+const statusFilter = Astro.url.searchParams.get('status') || 'all';
+
+let entries = [];
+let errorMsg = null;
+
+if (env.DB) {
+  try {
+    let sql = `
+      SELECT
+        e.id, e.applicant_name, e.applicant_furigana, e.email, e.tel,
+        e.attendees, e.status, e.created_at, e.cancelled_at, e.checked_in_at,
+        (SELECT COUNT(*) FROM entry_checkins WHERE entry_id = e.id) AS ck_count
+      FROM entries e
+      WHERE 1=1
+    `;
+    const params = [];
+    if (statusFilter === 'confirmed') sql += ` AND e.status = 'confirmed'`;
+    else if (statusFilter === 'cancelled') sql += ` AND e.status = 'cancelled'`;
+    if (q) {
+      sql += ` AND (e.applicant_name LIKE ? OR e.applicant_furigana LIKE ? OR e.email LIKE ? OR e.tel LIKE ? OR CAST(e.id AS TEXT) = ?)`;
+      const like = `%${q}%`;
+      params.push(like, like, like, like, q);
+    }
+    sql += ` ORDER BY e.id DESC LIMIT 200`;
+    const r = await env.DB.prepare(sql).bind(...params).all();
+    entries = r?.results ?? [];
+  } catch (e) {
+    errorMsg = e.message;
+  }
+}
+---
+<BaseLayout
+  title="申込一覧 ｜ 管理 ｜ fun sport nexus 2026.12"
+  description="運営用 管理画面 ／ 申込一覧"
+  noindex={true}
+  hideHeader={true}
+  hideFooter={true}
+>
+
+  <div class="admin-wrap">
+    <header class="admin-head">
+      <h1>申込一覧</h1>
+      <div style="display:flex;gap:8px;">
+        <a href="/admin/" class="admin-btn admin-btn--ghost">管理TOP</a>
+      </div>
+    </header>
+
+    {errorMsg && <p style="color:#b00;">エラー：{errorMsg}</p>}
+
+    <!-- 検索・フィルタ -->
+    <form method="GET" class="ent-search">
+      <input type="search" name="q" value={q} placeholder="お名前 / ふりがな / メール / 電話 / 管理ID" class="ent-search__input" />
+      <select name="status" class="ent-search__select">
+        <option value="all" selected={statusFilter === 'all'}>すべて</option>
+        <option value="confirmed" selected={statusFilter === 'confirmed'}>確定のみ</option>
+        <option value="cancelled" selected={statusFilter === 'cancelled'}>キャンセル済のみ</option>
+      </select>
+      <button type="submit" class="ent-search__btn">検索</button>
+      {(q || statusFilter !== 'all') && (
+        <a href="/admin/entries/" class="ent-search__clear">クリア</a>
+      )}
+    </form>
+
+    <!-- CSV ダウンロード -->
+    <div class="ent-tools">
+      <a href={`/api/admin-export-csv?type=entries&q=${encodeURIComponent(q)}&status=${statusFilter}`}
+         class="ent-btn ent-btn--csv">
+        <i class="fa-solid fa-download"></i> 申込一覧CSV
+      </a>
+      <a href="/api/admin-export-csv?type=program" class="ent-btn ent-btn--csv">
+        <i class="fa-solid fa-download"></i> プログラム別 参加者CSV
+      </a>
+      <a href="/api/admin-export-csv?type=attendees" class="ent-btn ent-btn--csv">
+        <i class="fa-solid fa-download"></i> 参加者一覧CSV
+      </a>
+    </div>
+
+    <!-- 表 -->
+    <p class="ent-count">表示中：{entries.length} 件（上限 200 件）</p>
+    <div class="ent-table-wrap">
+      <table class="ent-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>状態</th>
+            <th>お名前（ふりがな）</th>
+            <th>メール</th>
+            <th>電話</th>
+            <th>人数</th>
+            <th>受付</th>
+            <th>申込日時</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.length === 0 && (
+            <tr><td colspan="9" style="text-align:center;color:var(--fsn-gray-500);padding:24px;">該当なし</td></tr>
+          )}
+          {entries.map(e => (
+            <tr class={e.status === 'cancelled' ? 'ent-row--cancelled' : ''}>
+              <td>#{e.id}</td>
+              <td>
+                {e.status === 'cancelled'
+                  ? <span class="badge badge--absent">キャンセル</span>
+                  : <span class="badge badge--ok">確定</span>}
+              </td>
+              <td>
+                <strong>{e.applicant_name}</strong> 様<br>
+                <small>{e.applicant_furigana}</small>
+              </td>
+              <td><small>{e.email}</small></td>
+              <td><small>{e.tel}</small></td>
+              <td style="text-align:center;">{e.attendees}名</td>
+              <td>
+                {e.ck_count > 0
+                  ? <span class="badge badge--ok">{e.ck_count}日 ✓</span>
+                  : <span style="color:var(--fsn-gray-500);">未</span>}
+              </td>
+              <td><small>{(e.created_at || '').slice(0, 16).replace('T',' ')}</small></td>
+              <td>
+                <a href={`/admin/entries/${e.id}/`} class="ent-link">詳細</a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</BaseLayout>
+
+<style is:global>
+  .admin-wrap { max-width: 1280px; margin: 0 auto; padding: 40px 24px; color: var(--fsn-gray-900); }
+  .admin-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 2px solid var(--fsn-orange); }
+  .admin-head h1 { font-size: 1.4rem; margin: 0; color: var(--fsn-navy-deep); }
+  .admin-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--fsn-navy-deep); color: var(--fsn-white); border: 0; border-radius: var(--fsn-radius-sm); text-decoration: none; font-size: 0.88rem; font-weight: 700; }
+  .admin-btn--ghost { background: var(--fsn-white); color: var(--fsn-navy-deep); border: 1px solid var(--fsn-gray-300); }
+
+  .ent-search { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .ent-search__input { flex: 1; min-width: 220px; padding: 9px 14px; border: 1px solid var(--fsn-gray-300); border-radius: var(--fsn-radius-sm); font-size: 0.9rem; }
+  .ent-search__select { padding: 9px 14px; border: 1px solid var(--fsn-gray-300); border-radius: var(--fsn-radius-sm); font-size: 0.9rem; background: var(--fsn-white); }
+  .ent-search__btn { padding: 9px 22px; background: var(--fsn-navy-deep); color: var(--fsn-white); border: 0; border-radius: var(--fsn-radius-sm); cursor: pointer; font-weight: 700; }
+  .ent-search__clear { color: var(--fsn-gray-700); text-decoration: underline; font-size: 0.85rem; }
+
+  .ent-tools { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 18px; }
+  .ent-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--fsn-white); color: var(--fsn-orange-dark); border: 1.5px solid var(--fsn-orange); border-radius: var(--fsn-radius-sm); text-decoration: none; font-size: 0.85rem; font-weight: 700; }
+  .ent-btn--csv:hover { background: var(--fsn-orange); color: var(--fsn-white); }
+
+  .ent-count { font-size: 0.82rem; color: var(--fsn-gray-700); margin: 0 0 6px; }
+  .ent-table-wrap { overflow-x: auto; background: var(--fsn-white); border: 1px solid var(--fsn-gray-200); border-radius: var(--fsn-radius-sm); }
+  .ent-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .ent-table th { background: var(--fsn-gray-100); padding: 10px 12px; text-align: left; font-weight: 700; color: var(--fsn-gray-700); border-bottom: 1px solid var(--fsn-gray-300); white-space: nowrap; }
+  .ent-table td { padding: 10px 12px; border-bottom: 1px solid var(--fsn-gray-100); vertical-align: top; }
+  .ent-table small { color: var(--fsn-gray-700); font-size: 0.8rem; }
+  .ent-row--cancelled { background: #FEF2F2; opacity: 0.7; }
+
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; }
+  .badge--ok { background: #DCFCE7; color: #166534; }
+  .badge--absent { background: #FEE2E2; color: #991B1B; }
+
+  .ent-link { color: var(--fsn-orange-dark); font-weight: 700; text-decoration: none; }
+  .ent-link:hover { text-decoration: underline; }
+</style>
