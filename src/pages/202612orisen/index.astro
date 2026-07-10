@@ -2,20 +2,26 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import '../../styles/202612orisen.css';
 
+// 画像は /public/programs/{code}.jpg （16:9）に配置想定。画像が無い間は グラデ背景でプレースホルダー
 const programs = [
-  { code: 'panshoku',     name: 'スポあんぱん食い競走', time: '10:00 ／ 15:00 開始（事前申込不要）', venue: '中央広場',       day: 'Day1 ／ Day2', icon: 'fa-bread-slice',          featured: true },
-  { code: 'baseball5',    name: 'Baseball5 体験',       time: '10:00 - 15:00 通し',   venue: '第1体育室',     day: 'Day1',          icon: 'fa-baseball-bat-ball' },
-  { code: 'basket',       name: 'バスケットボール',     time: '10:00 - 15:00 通し',   venue: '第3体育室',     day: 'Day1',          icon: 'fa-basketball' },
-  { code: 'legit',        name: 'Legit ダンス',         time: '10:00 ／ 12:00 ／ 14:00', venue: '第4体育室',  day: 'Day1',          icon: 'fa-music' },
-  { code: 'judo',         name: '柔道体験',             time: '10:00 ／ 12:00 ／ 14:00', venue: '第5体育室',  day: 'Day1',          icon: 'fa-hand-fist' },
-  { code: 'pickle',       name: 'ピックルボール',       time: '10:00 - 15:00 通し',   venue: '第2体育室',     day: 'Day1',          icon: 'fa-table-tennis-paddle-ball' },
-  { code: 'boccia',       name: 'ボッチャ',             time: '自由参加 ／ 終日通し', venue: '体育室エントランス', day: 'Day1',     icon: 'fa-bullseye' },
-  { code: 'ycap',         name: 'YCAP チームビルディング', time: '10:00 ／ 12:00 ／ 14:00', venue: 'YCAPエリア', day: 'Day1 ／ Day2', icon: 'fa-people-group' },
-  { code: 'kakekko',      name: 'かけっこ教室',         time: '11:00 ／ 14:00',       venue: '第1体育室',     day: 'Day2',          icon: 'fa-person-running' },
-  { code: 'oni',          name: '鬼ごっこ',             time: '12:00 - 15:00 通し',   venue: '第2体育室',     day: 'Day2',          icon: 'fa-children' },
-  { code: 'fencing',      name: 'フェンシング体験',     time: '10:00 ／ 12:00 ／ 14:00', venue: '第4体育室',  day: 'Day2',          icon: 'fa-khanda' },
-  { code: 'dip',          name: 'DIP（ミュージックドリブル）', time: '11:00 ／ 13:00 ／ 15:00', venue: '第5体育室', day: 'Day2',    icon: 'fa-record-vinyl' },
-  { code: 'closing',      name: '閉会セレモニー＋演劇', time: '13:00 - 15:00',        venue: '小ホール',       day: 'Day2',          icon: 'fa-masks-theater', special: true },
+  { code: 'panshoku',      name: 'スポあんぱん食い競走',    time: '11:00 ／ 13:00',        venue: '中央広場',             day: 'Day1 ／ Day2', theme: 'orange', featured: true },
+  { code: 'kakekko',       name: 'かけっこ教室',             time: '12:00 ／ 14:00',        venue: '中央広場',             day: 'Day1 ／ Day2', theme: 'green' },
+  { code: 'music-dribble', name: 'ミュージックドリブル',    time: '10:00 - 12:00',         venue: '第1体育室',            day: 'Day1',           theme: 'navy' },
+  { code: 'soccer',        name: 'サッカー教室',              time: '13:00 - 14:00',         venue: '第1体育室',            day: 'Day1',           theme: 'navy' },
+  { code: 'baseball5',     name: 'Baseball5 体験',           time: '10:00 - 14:00 通し',    venue: '第1体育室',            day: 'Day2',           theme: 'navy' },
+  { code: 'legit',         name: 'Legit ダンス',              time: '11:00 ／ 13:00 ／ 15:00', venue: '第1・4体育室',      day: 'Day2',           theme: 'pink' },
+  { code: 'sunrockers',    name: 'サンロッカーズ渋谷 バスケ', time: '10:00 - 14:00 通し',   venue: '第3体育室',            day: 'Day1',           theme: 'orange' },
+  { code: '3x3',           name: '3x3 バスケ',                time: '10:00 ／ 13:00',        venue: '第3体育室',            day: 'Day2',           theme: 'orange' },
+  { code: 'dip',           name: 'Dip Battles',                time: '10:00 ／ 12:00',        venue: '第4体育室',            day: 'Day1',           theme: 'purple' },
+  { code: 'judo',          name: '柔道体験',                   time: '10:00 ／ 12:00 ／ 14:00', venue: '第5体育室',         day: 'Day1',           theme: 'green' },
+  { code: 'fencing',       name: 'フェンシング体験',           time: '10:00 ／ 12:00 ／ 14:00', venue: '第5体育室',         day: 'Day2',           theme: 'orange' },
+  { code: 'ycap',          name: 'YCAP チームビルディング',    time: '10:00 ／ 12:00 ／ 14:00', venue: 'YCAPエリア',         day: 'Day1',           theme: 'purple' },
+  { code: 'parkour',       name: 'パルクール',                  time: '10:00 ／ 12:00 ／ 14:00', venue: 'YCAPエリア',         day: 'Day2',           theme: 'purple' },
+  { code: 'rec-bousai',    name: 'レク協会 ／ 防災スポーツ',   time: '11:00 - 14:00 通し',    venue: '第2体育室',            day: 'Day1 ／ Day2',   theme: 'yellow' },
+  { code: 'boccia',        name: 'ボッチャ',                    time: '自由参加 ／ 終日通し',  venue: '体育室エントランス',   day: 'Day1 ／ Day2',   theme: 'blue' },
+  { code: 'shogi',         name: '将棋 ／ カードゲーム',        time: '自由参加 ／ 終日通し',  venue: '体育室エントランス',   day: 'Day1 ／ Day2',   theme: 'blue' },
+  { code: 'esports',       name: 'eスポーツ ／ 雀魂',            time: '自由参加 ／ 終日通し',  venue: '体育室エントランス',   day: 'Day1',            theme: 'blue' },
+  { code: 'radio',         name: '渋谷のラジオ 公開収録',       time: '通し',                  venue: '体育室エントランス',   day: 'Day1 ／ Day2',   theme: 'pink' },
 ];
 ---
 <BaseLayout
@@ -54,13 +60,14 @@ const programs = [
       <p class="dec-section__label dec-section__label--orange">PROGRAMS</p>
       <h2 class="dec-section__title">2日間で楽しめる、<br>多彩なプログラム</h2>
       <p class="dec-section__lead">
-        ぱん食い競走、Baseball5、ダンス、ボッチャ、フェンシングなど、<br>
-        多種多様なスポーツや文化を、無料で体験できます。
+        マルチスポーツ ／ マルチカルチャー。<br>
+        ぱん食い競走、Baseball5、3x3、Legit、フェンシング、パルクール、Dip Battles など、<br>
+        {programs.length}のプログラムを、無料で体験できます。
       </p>
 
       <div class="dec-stats">
         <div class="dec-stat">
-          <span class="dec-stat__num">15<span class="dec-stat__plus">+</span></span>
+          <span class="dec-stat__num">{programs.length}<span class="dec-stat__plus">+</span></span>
           <span class="dec-stat__label">プログラム</span>
         </div>
         <div class="dec-stat">
@@ -75,14 +82,18 @@ const programs = [
 
       <div class="dec-progmini__grid">
         {programs.map(p => (
-          <a href="/202612orisen/programs/" class={`dec-progmini ${p.featured ? 'dec-progmini--featured' : ''} ${p.special ? 'dec-progmini--special' : ''}`}>
-            <span class="dec-progmini__image"></span>
-            <span class="dec-progmini__name">{p.name}</span>
-            <span class="dec-progmini__meta">
-              <span class="dec-progmini__time"><i class="fa-regular fa-clock"></i> {p.time}</span>
-              <span class="dec-progmini__venue"><i class="fa-solid fa-location-dot"></i> {p.venue}</span>
+          <a href="/202612orisen/programs/" class={`dec-progmini dec-progmini--theme-${p.theme || 'navy'} ${p.featured ? 'dec-progmini--featured' : ''} ${p.special ? 'dec-progmini--special' : ''}`}>
+            <span class="dec-progmini__image">
+              <img src={`/programs/${p.code}.jpg`} alt="" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+              <span class="dec-progmini__day-badge">{p.day}</span>
             </span>
-            <span class="dec-progmini__day">{p.day}</span>
+            <span class="dec-progmini__body">
+              <span class="dec-progmini__name">{p.name}</span>
+              <span class="dec-progmini__meta">
+                <span class="dec-progmini__time"><i class="fa-regular fa-clock"></i> {p.time}</span>
+                <span class="dec-progmini__venue"><i class="fa-solid fa-location-dot"></i> {p.venue}</span>
+              </span>
+            </span>
           </a>
         ))}
       </div>
@@ -111,7 +122,7 @@ const programs = [
         <div class="dec-tt-block__head dec-tt-block__head--navy">
           <span class="dec-tt-block__num">DAY 1</span>
           <span class="dec-tt-block__date">12月19日（土）</span>
-          <span style="margin-left: auto; font-size: 0.95rem; font-weight: 600; opacity: 0.92;">スポーツの源流</span>
+          <span style="margin-left: auto; font-size: 0.95rem; font-weight: 600; opacity: 0.92;">体験会 ／ マルチスポ・カル</span>
         </div>
         <div class="dec-tt-wrap">
           <table class="dec-tt dec-tt--v2">
@@ -123,34 +134,43 @@ const programs = [
             </thead>
             <tbody>
               <tr><th><i class="fa-solid fa-location-dot"></i> 中央広場</th>
-                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い競走<small>10:00</small></td>
-                <td colspan="4" class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い競走<small>15:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い<small>11:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--green">かけっこ<small>12:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い<small>13:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--green">かけっこ<small>14:00</small></td>
+                <td class="dec-tt__empty"></td>
               </tr>
               <tr><th><i class="fa-solid fa-location-dot"></i> 第1体育室</th>
-                <td colspan="6" class="dec-tt__bar dec-tt__bar--blue">Baseball5<small>10:00 - 15:00 通し</small></td>
+                <td colspan="2" class="dec-tt__bar dec-tt__bar--navy">ミュージックドリブル<small>10:00 - 12:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td colspan="2" class="dec-tt__bar dec-tt__bar--navy">サッカー教室<small>13:00 - 14:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">Dip<small>15:00</small></td>
               </tr>
               <tr><th><i class="fa-solid fa-location-dot"></i> 第2体育室</th>
-                <td colspan="6" class="dec-tt__bar dec-tt__bar--orange">レク協会(ピックルボール等)<small>10:00 - 15:00 通し</small></td>
+                <td class="dec-tt__empty"></td>
+                <td colspan="4" class="dec-tt__bar dec-tt__bar--yellow">レク協会 ／ 防災スポーツ<small>11:00 - 14:00 通し</small></td>
+                <td class="dec-tt__empty"></td>
               </tr>
               <tr><th><i class="fa-solid fa-location-dot"></i> 第3体育室</th>
-                <td colspan="6" class="dec-tt__bar dec-tt__bar--yellow">バスケ(サンロッカーズ渋谷)<small>10:00 - 15:00 通し</small></td>
+                <td class="dec-tt__empty"></td>
+                <td colspan="4" class="dec-tt__bar dec-tt__bar--orange">サンロッカーズ渋谷 バスケ<small>11:00 - 14:00 通し</small></td>
+                <td class="dec-tt__empty"></td>
               </tr>
               <tr><th><i class="fa-solid fa-location-dot"></i> 第4体育室</th>
-                <td class="dec-tt__bar dec-tt__bar--pink">Legit ①<small>10:00</small></td>
                 <td class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--pink">Legit ②<small>12:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">Dip ①<small>11:00</small></td>
                 <td class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--pink">Legit ③<small>14:00</small></td>
-                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">Dip ②<small>13:00</small></td>
+                <td colspan="2" class="dec-tt__empty"></td>
               </tr>
               <tr><th><i class="fa-solid fa-location-dot"></i> 第5体育室</th>
+                <td class="dec-tt__bar dec-tt__bar--green">柔道 ①<small>10:00</small></td>
                 <td class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--green">柔道 ①<small>11:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--green">柔道 ②<small>12:00</small></td>
                 <td class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--green">柔道 ②<small>13:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--green">柔道 ③<small>14:00</small></td>
                 <td class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--green">柔道 ③<small>15:00</small></td>
               </tr>
               <tr><th><i class="fa-solid fa-location-dot"></i> YCAPエリア</th>
                 <td class="dec-tt__bar dec-tt__bar--purple">YCAP ①<small>10:00</small></td>
@@ -161,14 +181,14 @@ const programs = [
                 <td class="dec-tt__empty"></td>
               </tr>
               <tr><th><i class="fa-solid fa-location-dot"></i> 体育室エントランス</th>
-                <td colspan="6" class="dec-tt__bar dec-tt__bar--blue">ボッチャ・将棋<small>10:00 - 15:00 通し</small></td>
+                <td colspan="6" class="dec-tt__bar dec-tt__bar--blue">ボッチャ・将棋・カードゲーム・雀魂・渋谷のラジオ<small>10:00 - 15:00 通し</small></td>
               </tr>
             </tbody>
           </table>
         </div>
         <div class="dec-tt__special">
           <i class="fa-solid fa-microphone-lines"></i>
-          <span><strong>16:30 - 18:00</strong> 特別セミナー（90分）<small>センター棟 ／ 基調講演 ＋ ワークショップ ＋ 交流会</small></span>
+          <span><strong>16:30 - 18:30</strong> トーク ＋ ワークショップ（120分）<small>センター棟 ／ 「スポーツと遊び」トークセッション ＋ ワークショップ ＋ 助成金採択団体 ポスターセッション</small></span>
         </div>
       </div>
 
@@ -189,26 +209,36 @@ const programs = [
             </thead>
             <tbody>
               <tr><th><i class="fa-solid fa-location-dot"></i> 中央広場</th>
-                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い競走<small>10:00</small></td>
-                <td colspan="2" class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い競走<small>13:00</small></td>
-                <td colspan="2" class="dec-tt__empty"></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い<small>11:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--green">かけっこ<small>12:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--orange">ぱん食い<small>13:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--green">かけっこ<small>14:00</small></td>
+                <td class="dec-tt__empty"></td>
               </tr>
               <tr><th><i class="fa-solid fa-location-dot"></i> 第1体育室</th>
-                <td class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--green">かけっこ ①<small>11:00</small></td>
-                <td colspan="2" class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--green">かけっこ ②<small>14:00</small></td>
-                <td class="dec-tt__empty"></td>
+                <td colspan="5" class="dec-tt__bar dec-tt__bar--navy">Baseball5<small>10:00 - 14:00 通し</small></td>
+                <td class="dec-tt__bar dec-tt__bar--pink">Legit<small>15:00</small></td>
               </tr>
               <tr><th><i class="fa-solid fa-location-dot"></i> 第2体育室</th>
-                <td colspan="2" class="dec-tt__empty"></td>
-                <td colspan="4" class="dec-tt__bar dec-tt__bar--yellow">鬼ごっこ(仮)<small>12:00 - 15:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td colspan="4" class="dec-tt__bar dec-tt__bar--yellow">レク協会 ／ 防災スポーツ<small>11:00 - 14:00 通し</small></td>
+                <td class="dec-tt__empty"></td>
               </tr>
               <tr><th><i class="fa-solid fa-location-dot"></i> 第3体育室</th>
-                <td colspan="6" class="dec-tt__prep">調整中</td>
+                <td colspan="2" class="dec-tt__bar dec-tt__bar--orange">3x3 バスケ ①<small>10:00 - 11:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td colspan="2" class="dec-tt__bar dec-tt__bar--orange">3x3 バスケ ②<small>13:00 - 14:00</small></td>
+                <td class="dec-tt__empty"></td>
               </tr>
               <tr><th><i class="fa-solid fa-location-dot"></i> 第4体育室</th>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--pink">Legit ①<small>11:00</small></td>
+                <td class="dec-tt__empty"></td>
+                <td class="dec-tt__bar dec-tt__bar--pink">Legit ②<small>13:00</small></td>
+                <td colspan="2" class="dec-tt__empty"></td>
+              </tr>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 第5体育室</th>
                 <td class="dec-tt__bar dec-tt__bar--orange">フェンシング ①<small>10:00</small></td>
                 <td class="dec-tt__empty"></td>
                 <td class="dec-tt__bar dec-tt__bar--orange">フェンシング ②<small>12:00</small></td>
@@ -216,26 +246,16 @@ const programs = [
                 <td class="dec-tt__bar dec-tt__bar--orange">フェンシング ③<small>14:00</small></td>
                 <td class="dec-tt__empty"></td>
               </tr>
-              <tr><th><i class="fa-solid fa-location-dot"></i> 第5体育室</th>
-                <td class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--yellow">DIP ①<small>11:00</small></td>
-                <td class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--yellow">DIP ②<small>13:00</small></td>
-                <td class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--yellow">DIP ③<small>15:00</small></td>
-              </tr>
               <tr><th><i class="fa-solid fa-location-dot"></i> YCAPエリア</th>
-                <td class="dec-tt__bar dec-tt__bar--purple">YCAP ①<small>10:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">パルクール ①<small>10:00</small></td>
                 <td class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--purple">YCAP ②<small>12:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">パルクール ②<small>12:00</small></td>
                 <td class="dec-tt__empty"></td>
-                <td class="dec-tt__bar dec-tt__bar--purple">YCAP ③<small>14:00</small></td>
+                <td class="dec-tt__bar dec-tt__bar--purple">パルクール ③<small>14:00</small></td>
                 <td class="dec-tt__empty"></td>
               </tr>
-              <tr><th><i class="fa-solid fa-location-dot"></i> 小ホール</th>
-                <td colspan="3" class="dec-tt__empty"></td>
-                <td colspan="2" class="dec-tt__bar dec-tt__bar--navy">太鼓体験会<small>13:00 - 14:00</small></td>
-                <td class="dec-tt__bar dec-tt__bar--navy">太鼓発表会<small>15:00</small></td>
+              <tr><th><i class="fa-solid fa-location-dot"></i> 体育室エントランス</th>
+                <td colspan="6" class="dec-tt__bar dec-tt__bar--blue">ボッチャ・将棋・カードゲーム・渋谷のラジオ<small>10:00 - 15:00 通し</small></td>
               </tr>
             </tbody>
           </table>
@@ -252,16 +272,16 @@ const programs = [
   <section class="dec-section">
     <div class="dec-section__inner">
       <p class="dec-section__label dec-section__label--orange">SPECIAL SEMINAR</p>
-      <h2 class="dec-section__title">特別セミナー</h2>
+      <h2 class="dec-section__title">トークセッション ＋ ワークショップ</h2>
       <p class="dec-section__lead">
-        Day1の夕方に、スポーツ・教育の第一線で活躍する方々を、お招きします。<br>
-        基調講演と、参加型ワークショップを、おこないます。
+        Day1の夕方、「スポーツと遊び」をテーマに、教育・スポーツの第一線で活躍する方々を、お招きします。<br>
+        トークセッションと、参加型ワークショップを、おこないます。
       </p>
 
       <div class="dec-seminar__info">
         <div class="dec-seminar__info-item">
           <span class="dec-seminar__info-label">日時</span>
-          <span class="dec-seminar__info-value">12月19日（土）16:30 - 18:00（90分）</span>
+          <span class="dec-seminar__info-value">12月19日（土）16:30 - 18:30（120分）</span>
         </div>
         <div class="dec-seminar__info-item">
           <span class="dec-seminar__info-label">会場</span>
@@ -269,26 +289,12 @@ const programs = [
         </div>
         <div class="dec-seminar__info-item">
           <span class="dec-seminar__info-label">構成</span>
-          <span class="dec-seminar__info-value">基調講演 ＋ ワークショップ ＋ 交流会</span>
+          <span class="dec-seminar__info-value">トークセッション ＋ ワークショップ ＋ 交流会</span>
         </div>
       </div>
 
-      <h3 class="dec-seminar__sub">登壇予定（敬称略）</h3>
+      <h3 class="dec-seminar__sub">トークセッション「スポーツと遊び」<small style="font-weight: 500; margin-left: 12px; opacity: 0.8;">16:30 - 17:30 ／ 60分</small></h3>
       <div class="dec-seminar__grid">
-        <article class="dec-seminar-card">
-          <div class="dec-seminar-card__photo" style="background-image: url('/logo-fsn.png');"></div>
-          <div class="dec-seminar-card__body">
-            <p class="dec-seminar-card__name">益子 直美</p>
-            <p class="dec-seminar-card__title">一般社団法人 監督が怒ってはいけない大会  代表理事</p>
-          </div>
-        </article>
-        <article class="dec-seminar-card">
-          <div class="dec-seminar-card__photo" style="background-image: url('/logo-fsn.png');"></div>
-          <div class="dec-seminar-card__body">
-            <p class="dec-seminar-card__name">為末 大</p>
-            <p class="dec-seminar-card__title">いっ"ぱん"社団法人 ぱん食い競走協会  会長 ／ 元 世界陸上 銅メダリスト</p>
-          </div>
-        </article>
         <article class="dec-seminar-card">
           <div class="dec-seminar-card__photo" style="background-image: url('/logo-fsn.png');"></div>
           <div class="dec-seminar-card__body">
@@ -297,16 +303,46 @@ const programs = [
           </div>
         </article>
         <article class="dec-seminar-card">
-          <div class="dec-seminar-card__photo dec-seminar-card__photo--tba">
-            <i class="fa-solid fa-user-plus"></i>
-          </div>
+          <div class="dec-seminar-card__photo" style="background-image: url('/logo-fsn.png');"></div>
           <div class="dec-seminar-card__body">
-            <p class="dec-seminar-card__name">調整中</p>
-            <p class="dec-seminar-card__title">スポーツ界・教育界の第一線の方々を、お招き予定です</p>
+            <p class="dec-seminar-card__name">吉武 裕平</p>
+            <p class="dec-seminar-card__title">「ポジティブコーチング」×「ユーススポーツリーグ」推進実行委員会  委員長</p>
+          </div>
+        </article>
+        <article class="dec-seminar-card">
+          <div class="dec-seminar-card__photo" style="background-image: url('/logo-fsn.png');"></div>
+          <div class="dec-seminar-card__body">
+            <p class="dec-seminar-card__name">寺田 拓真</p>
+            <p class="dec-seminar-card__title">広島県 総務局付課長 ／ 福山市 教育委員会 学校教育部 参与 ／ 大阪教育大学 客員教授</p>
           </div>
         </article>
       </div>
-      <p class="dec-seminar__note">※登壇者・内容は、確定次第ご案内いたします。</p>
+
+      <h3 class="dec-seminar__sub" style="margin-top: 40px;">ワークショップ<small style="font-weight: 500; margin-left: 12px; opacity: 0.8;">17:30 - 18:30 ／ 60分</small></h3>
+      <div class="dec-seminar__info" style="margin-top: 16px;">
+        <div class="dec-seminar__info-item">
+          <span class="dec-seminar__info-label">形式</span>
+          <span class="dec-seminar__info-value">8人ぐらいの少人数ワークショップ</span>
+        </div>
+        <div class="dec-seminar__info-item">
+          <span class="dec-seminar__info-label">テーマ（案）</span>
+          <span class="dec-seminar__info-value">①「遊び」から生まれたスポーツ ／ ②子どもの「自主性」を高める</span>
+        </div>
+      </div>
+
+      <h3 class="dec-seminar__sub" style="margin-top: 40px;">ポスターセッション <small style="font-weight: 500; margin-left: 12px; opacity: 0.8;">助成金採択団体の事例紹介</small></h3>
+      <div class="dec-seminar__info" style="margin-top: 16px;">
+        <div class="dec-seminar__info-item">
+          <span class="dec-seminar__info-label">会場</span>
+          <span class="dec-seminar__info-value">カルチャー棟 小ホール 展示コーナー</span>
+        </div>
+        <div class="dec-seminar__info-item">
+          <span class="dec-seminar__info-label">内容</span>
+          <span class="dec-seminar__info-value">fun sport nexus と同じベクトルで活動する団体の紹介と、意見交換の場</span>
+        </div>
+      </div>
+
+      <p class="dec-seminar__note" style="margin-top: 24px;">※登壇者・内容・テーマは、現時点の予定です。確定次第、ご案内いたします。</p>
     </div>
   </section>
 
