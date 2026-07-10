@@ -247,102 +247,109 @@
   letter-spacing: 0.08em;
 }
 
-/* ---------- プログラムミニカード ---------- */
+/* ---------- プログラムミニカード（16:9 画像ベース） ---------- */
 .dec-progmini__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 20px;
 }
 .dec-progmini {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 18px;
+  overflow: hidden;
   background: var(--fsn-white);
-  border: 1.5px solid var(--fsn-gray-200);
   border-radius: var(--fsn-radius-md);
   text-decoration: none;
   color: var(--fsn-gray-900);
-  min-height: 320px;
-  transition: transform .25s, border-color .25s, box-shadow .25s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), box-shadow .3s;
 }
 .dec-progmini:hover {
-  transform: translateY(-3px);
-  border-color: var(--fsn-orange);
-  box-shadow: 0 8px 18px rgba(249,115,22,.18);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.14);
 }
 .dec-progmini--featured {
-  background: linear-gradient(135deg, var(--fsn-orange-light), #fff);
-  border-color: var(--fsn-orange);
+  outline: 3px solid var(--fsn-orange);
+  outline-offset: -3px;
 }
 .dec-progmini--special {
-  background: linear-gradient(135deg, var(--fsn-cyan), #fff);
-  border-color: var(--fsn-navy);
+  outline: 3px solid var(--fsn-navy);
+  outline-offset: -3px;
 }
 .dec-progmini__image {
   display: block;
   width: 100%;
-  height: 70px;
-  border-radius: var(--fsn-radius-sm);
-  background-image: url('/logo-fsn-gray.png');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: var(--fsn-gray-50);
-  padding: 8px;
-  border: 1px solid var(--fsn-gray-200);
+  aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
 }
-.dec-progmini--featured .dec-progmini__image {
-  background-color: var(--fsn-orange-light);
-  border-color: var(--fsn-orange);
+/* テーマ別プレースホルダー：画像が届くまでの あいだ を彩る */
+.dec-progmini--theme-navy   .dec-progmini__image { background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
+.dec-progmini--theme-orange .dec-progmini__image { background: linear-gradient(135deg, #f97316, #ea580c); }
+.dec-progmini--theme-green  .dec-progmini__image { background: linear-gradient(135deg, #10b981, #059669); }
+.dec-progmini--theme-pink   .dec-progmini__image { background: linear-gradient(135deg, #db2777, #ec4899); }
+.dec-progmini--theme-purple .dec-progmini__image { background: linear-gradient(135deg, #7c3aed, #4338ca); }
+.dec-progmini--theme-yellow .dec-progmini__image { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.dec-progmini--theme-blue   .dec-progmini__image { background: linear-gradient(135deg, #0284c7, #0369a1); }
+
+.dec-progmini__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .5s ease-out;
 }
-.dec-progmini--special .dec-progmini__image {
-  background-color: var(--fsn-cyan);
-  border-color: var(--fsn-navy);
+.dec-progmini:hover .dec-progmini__image img {
+  transform: scale(1.06);
+}
+.dec-progmini__day-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 5px 12px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1;
+}
+.dec-progmini__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px 18px;
+  flex: 1;
 }
 .dec-progmini__name {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 800;
   color: var(--fsn-navy);
-  line-height: 1.4;
+  line-height: 1.45;
+  margin: 0;
 }
 .dec-progmini__meta {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  padding: 10px 12px;
-  background: var(--fsn-gray-50);
-  border-radius: var(--fsn-radius-sm);
-  flex-grow: 1;
+  gap: 4px;
+  margin-top: auto;
 }
 .dec-progmini__time,
 .dec-progmini__venue {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
+  gap: 6px;
+  font-size: 0.8rem;
   color: var(--fsn-gray-700);
   line-height: 1.4;
   font-weight: 500;
 }
-.dec-progmini__time i { color: var(--fsn-orange-dark); width: 13px; font-size: 0.75rem; }
-.dec-progmini__venue i { color: var(--fsn-navy); width: 13px; font-size: 0.75rem; }
-.dec-progmini__day {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--fsn-orange-dark);
-  letter-spacing: 0.06em;
-  padding: 3px 10px;
-  background: var(--fsn-orange-light);
-  border-radius: var(--fsn-radius-pill);
-  margin-top: auto;
-}
-.dec-progmini--special .dec-progmini__day {
-  background: var(--fsn-cyan);
-  color: var(--fsn-navy);
-}
+.dec-progmini__time i { color: var(--fsn-orange-dark); width: 13px; font-size: 0.72rem; }
+.dec-progmini__venue i { color: var(--fsn-navy); width: 13px; font-size: 0.72rem; }
 
 /* ---------- タイムテーブル ---------- */
 .dec-tt-block { margin: 36px 0 24px; }
