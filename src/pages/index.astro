@@ -93,7 +93,7 @@ const formatDate = (iso) => {
       <p class="section-label">CORE VALUES</p>
       <h2 class="section-title">fun sport nexus の3つの柱</h2>
 
-      <div class="pillars__grid">
+      <div class="pillars__grid" data-reveal="stagger">
         <article class="pillar">
           <div class="pillar__icon pillar__icon--connect">
             <i class="fa-solid fa-link"></i>
@@ -145,7 +145,7 @@ const formatDate = (iso) => {
           </a>
         </div>
 
-        <div class="latest-news__grid">
+        <div class="latest-news__grid" data-reveal="stagger">
           {latestNews.map(item => {
             const thumb = item.eyecatch?.url ?? item.thumbnail?.url ?? null;
             return (
@@ -187,7 +187,7 @@ const formatDate = (iso) => {
 
   <!-- 12月開催告知 -->
   <section class="event-banner">
-    <div class="event-banner__inner">
+    <div class="event-banner__inner" data-reveal>
       <div class="event-banner__content">
         <p class="event-banner__date">2026.12.19（土） - 20（日）</p>
         <h2 class="event-banner__title">
@@ -212,7 +212,7 @@ const formatDate = (iso) => {
   <!-- コラム カルーセル -->
   {latestColumns.length > 0 && (
     <section class="cols-carousel">
-      <div class="cols-carousel__inner">
+      <div class="cols-carousel__inner" data-reveal>
         <div class="cols-carousel__head">
           <div>
             <p class="section-label section-label--orange">COLUMNS</p>
@@ -292,7 +292,7 @@ const formatDate = (iso) => {
           </a>
         </div>
 
-        <div class="latest-results__grid">
+        <div class="latest-results__grid" data-reveal="stagger">
           {latestResults.map(item => {
             const thumb = item.eyecatch?.url ?? null;
             const venue = item.venue ?? item.Venue;
@@ -361,7 +361,7 @@ const formatDate = (iso) => {
         新しいスポーツ文化の定着に、取り組んでまいります。
       </p>
 
-      <div class="business__grid">
+      <div class="business__grid" data-reveal="stagger">
         <a href="/events" class="business-card">
           <div class="business-card__icon"><i class="fa-solid fa-calendar-days"></i></div>
           <h3 class="business-card__title">イベント開催</h3>
@@ -397,7 +397,7 @@ const formatDate = (iso) => {
 
   <!-- お問い合わせ -->
   <section class="cta">
-    <div class="cta__inner">
+    <div class="cta__inner" data-reveal>
       <h2 class="cta__title">お問い合わせ・ご連携のご相談</h2>
       <p class="cta__lead">
         共催・後援・取材・取組のご相談など、お気軽にご連絡ください。
@@ -1336,4 +1336,62 @@ const formatDate = (iso) => {
     .hero__cta { flex-direction: column; align-items: stretch; }
     .hero__cta .btn { justify-content: center; }
   }
+
+  /* ============ スクロール登場（fade-up） ============ */
+  /* 単体要素 */
+  [data-reveal]:not([data-reveal="stagger"]) {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    will-change: opacity, transform;
+  }
+  [data-reveal]:not([data-reveal="stagger"]).is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  /* グループ：子要素を順に stagger */
+  [data-reveal="stagger"] > * {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    will-change: opacity, transform;
+  }
+  [data-reveal="stagger"].is-in > * {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  [data-reveal="stagger"].is-in > *:nth-child(1) { transition-delay: 0.00s; }
+  [data-reveal="stagger"].is-in > *:nth-child(2) { transition-delay: 0.10s; }
+  [data-reveal="stagger"].is-in > *:nth-child(3) { transition-delay: 0.20s; }
+  [data-reveal="stagger"].is-in > *:nth-child(4) { transition-delay: 0.30s; }
+  [data-reveal="stagger"].is-in > *:nth-child(5) { transition-delay: 0.40s; }
+  [data-reveal="stagger"].is-in > *:nth-child(6) { transition-delay: 0.50s; }
+  [data-reveal="stagger"].is-in > *:nth-child(7) { transition-delay: 0.60s; }
+  [data-reveal="stagger"].is-in > *:nth-child(8) { transition-delay: 0.70s; }
+
+  /* 動きが苦手なユーザーはOFF */
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal],
+    [data-reveal="stagger"] > * {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
 </style>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.15,
+    rootMargin: '0px 0px -60px 0px'
+  });
+
+  document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+</script>
