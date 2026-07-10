@@ -706,11 +706,31 @@ const formatDate = (iso) => {
     margin: 0 auto 20px;
     font-size: 2rem;
     color: var(--fsn-white);
+    transition: transform 0.4s cubic-bezier(.34, 1.56, .64, 1);
+    animation: pillarIconFloat 4.5s ease-in-out infinite;
+  }
+  /* 3つの柱アイコンは 位相をずらしてゆるやかに漂う */
+  .pillar:nth-child(1) .pillar__icon { animation-delay: 0s;   }
+  .pillar:nth-child(2) .pillar__icon { animation-delay: -1.5s; }
+  .pillar:nth-child(3) .pillar__icon { animation-delay: -3s;   }
+  @keyframes pillarIconFloat {
+    0%, 100% { transform: translateY(0)    rotate(0deg); }
+    50%      { transform: translateY(-6px) rotate(-3deg); }
+  }
+  /* カードをホバーすると アイコンが 元気にジャンプ */
+  .pillar:hover .pillar__icon {
+    animation-play-state: paused;
+    transform: translateY(-10px) scale(1.08) rotate(6deg);
   }
   .pillar__icon--connect { background: linear-gradient(135deg, var(--fsn-navy), var(--fsn-blue-accent)); }
   .pillar__icon--enjoy   { background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark)); }
   .pillar__icon--expand  { background: linear-gradient(135deg, var(--fsn-green-text), var(--fsn-green)); }
   .pillar__icon--expand i { color: var(--fsn-white); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pillar__icon { animation: none !important; }
+    .pillar:hover .pillar__icon { transform: none !important; }
+  }
 
   .pillar__en {
     font-size: 0.8rem;
@@ -1284,6 +1304,15 @@ const formatDate = (iso) => {
     justify-content: center;
     font-size: 1.6rem;
     margin: 0 0 20px;
+    transition: transform 0.4s cubic-bezier(.34, 1.56, .64, 1);
+  }
+  /* カードをホバーすると アイコンが 遊ぶように反応 */
+  .business-card:hover .business-card__icon {
+    transform: translateY(-6px) rotate(-8deg) scale(1.06);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .business-card__icon { transition: none !important; }
+    .business-card:hover .business-card__icon { transform: none !important; }
   }
   .business-card__title {
     font-size: 1.25rem;
