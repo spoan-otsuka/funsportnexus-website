@@ -57,6 +57,14 @@ const formatDate = (iso) => {
   <section class="hero">
     <div class="hero__bg"></div>
     <div class="hero__overlay"></div>
+    <div class="hero__particles" aria-hidden="true">
+      <span class="hero__particle hero__particle--1"></span>
+      <span class="hero__particle hero__particle--2"></span>
+      <span class="hero__particle hero__particle--3"></span>
+      <span class="hero__particle hero__particle--4"></span>
+      <span class="hero__particle hero__particle--5"></span>
+      <span class="hero__particle hero__particle--6"></span>
+    </div>
     <div class="hero__inner">
       <p class="hero__label">FUN SPORT NEXUS</p>
       <h1 class="hero__catch">
@@ -448,6 +456,11 @@ const formatDate = (iso) => {
     background-size: cover;
     background-position: center;
     background-color: #0A1A4D;
+    animation: heroKenBurns 22s ease-in-out infinite alternate;
+  }
+  @keyframes heroKenBurns {
+    0%   { transform: scale(1)    translate(0, 0); }
+    100% { transform: scale(1.12) translate(-2%, -1%); }
   }
   .hero__overlay {
     position: absolute;
@@ -456,6 +469,43 @@ const formatDate = (iso) => {
       linear-gradient(180deg, rgba(10, 26, 77, 0.55) 0%, rgba(10, 26, 77, 0.85) 100%),
       radial-gradient(circle at 30% 40%, rgba(249, 115, 22, 0.12), transparent 50%);
   }
+  /* 浮遊モチーフ（NAVY基調 × ORANGE ／ 幾何学） */
+  .hero__particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .hero__particle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: 0.75;
+    animation: heroFloat 14s ease-in-out infinite;
+  }
+  .hero__particle--1 { width: 140px; height: 140px; top: 14%; left:  8%;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.55), transparent 70%);
+    animation-delay: 0s; }
+  .hero__particle--2 { width: 200px; height: 200px; top: 62%; left: 12%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.45), transparent 70%);
+    animation-delay: -3s; }
+  .hero__particle--3 { width: 100px; height: 100px; top: 22%; right: 14%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.30), transparent 70%);
+    animation-delay: -6s; }
+  .hero__particle--4 { width: 240px; height: 240px; top: 52%; right:  6%;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.35), transparent 70%);
+    animation-delay: -9s; }
+  .hero__particle--5 { width:  90px; height:  90px; bottom: 18%; left: 44%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.35), transparent 70%);
+    animation-delay: -4s; }
+  .hero__particle--6 { width: 160px; height: 160px; top: 30%; left: 48%;
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.35), transparent 70%);
+    animation-delay: -7s; }
+  @keyframes heroFloat {
+    0%, 100% { transform: translate(0, 0)     scale(1);    opacity: 0.65; }
+    50%      { transform: translate(36px, -42px) scale(1.18); opacity: 1;   }
+  }
+
   .hero__inner {
     position: relative;
     max-width: 1100px;
@@ -464,6 +514,23 @@ const formatDate = (iso) => {
     text-align: center;
     width: 100%;
   }
+  /* 順にフェードアップで入場 */
+  .hero__label,
+  .hero__catch,
+  .hero__lead,
+  .hero__cta {
+    opacity: 0;
+    animation: heroFadeUp 0.9s ease-out forwards;
+  }
+  .hero__label { animation-delay: 0.15s; }
+  .hero__catch { animation-delay: 0.40s; }
+  .hero__lead  { animation-delay: 0.80s; }
+  .hero__cta   { animation-delay: 1.10s; }
+  @keyframes heroFadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0);    }
+  }
+
   .hero__label {
     font-size: 0.85rem;
     font-weight: 700;
@@ -491,6 +558,36 @@ const formatDate = (iso) => {
     gap: 16px;
     justify-content: center;
     flex-wrap: wrap;
+  }
+  /* CTAの primary をゆっくり脈打たせる */
+  .hero__cta .btn--primary {
+    animation: heroCtaPulse 2.6s ease-in-out infinite;
+    animation-delay: 2s;
+  }
+  @keyframes heroCtaPulse {
+    0%, 100% { box-shadow: 0 0 0 0    rgba(249, 115, 22, 0.55); }
+    50%      { box-shadow: 0 0 0 16px rgba(249, 115, 22, 0);    }
+  }
+
+  /* モバイルは浮遊モチーフを軽量化 */
+  @media (max-width: 768px) {
+    .hero__particle--3,
+    .hero__particle--5,
+    .hero__particle--6 { display: none; }
+  }
+  /* 動きが苦手なユーザーは全てOFF */
+  @media (prefers-reduced-motion: reduce) {
+    .hero__bg,
+    .hero__particle,
+    .hero__label,
+    .hero__catch,
+    .hero__lead,
+    .hero__cta,
+    .hero__cta .btn--primary {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
   }
 
   /* ============ 共通ボタン ============ */
