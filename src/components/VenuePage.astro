@@ -1,0 +1,242 @@
+---
+/**
+ * 拠点ページ 共通テンプレート
+ * props で拠点データを受け取り、Coming Soon 状態のランディングを描画
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { statusLabel, statusColor } from '../data/venues.js';
+
+const { venue } = Astro.props;
+---
+<BaseLayout
+  title={`${venue.name} ｜ fun sport nexus`}
+  description={`${venue.venueName}（${venue.prefecture} ${venue.city}）で開催予定の ${venue.name}。${venue.subCopy}`}
+>
+
+  <section class={`vp-hero vp-hero--${venue.color}`}>
+    <div class="vp-hero__inner">
+      <nav class="dec-breadcrumb">
+        <a href="/events/">募集イベント</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <span>{venue.name}</span>
+      </nav>
+      <p class="vp-hero__status" style={`background: ${statusColor[venue.status]}; color: #fff;`}>
+        {statusLabel[venue.status]}
+      </p>
+      <p class="vp-hero__label">fun sport nexus  ／  ＠ {venue.venueName}</p>
+      <h1 class="vp-hero__catch">{venue.name}</h1>
+      {venue.theme && <p class="vp-hero__theme">{venue.theme}</p>}
+
+      <div class="vp-hero__meta">
+        <span class="vp-hero__meta-item"><i class="fa-solid fa-calendar-days"></i> {venue.dateLabel}</span>
+        <span class="vp-hero__meta-item"><i class="fa-solid fa-location-dot"></i> {venue.prefecture} {venue.city}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 開催情報 -->
+  <section class="dec-section">
+    <div class="dec-section__inner" style="max-width: 820px;">
+      <p class="dec-section__label dec-section__label--orange">OVERVIEW</p>
+      <h2 class="dec-section__title">開催 概要</h2>
+
+      <div class="vp-info">
+        <div class="vp-info__row">
+          <dt>日程</dt>
+          <dd>{venue.dateLabel}</dd>
+        </div>
+        <div class="vp-info__row">
+          <dt>会場</dt>
+          <dd>
+            {venue.venueName}<br />
+            <small>{venue.prefecture} {venue.city}</small>
+          </dd>
+        </div>
+        <div class="vp-info__row">
+          <dt>主催</dt>
+          <dd>{venue.host}</dd>
+        </div>
+        {venue.university && (
+          <div class="vp-info__row">
+            <dt>連携 大学</dt>
+            <dd>{venue.university}</dd>
+          </div>
+        )}
+      </div>
+
+      <p class="vp-sub">{venue.subCopy}</p>
+    </div>
+  </section>
+
+  <!-- 準備中 -->
+  <section class="dec-section dec-section--tint">
+    <div class="dec-section__inner" style="max-width: 720px; text-align: center;">
+      <div class="vp-soon">
+        <div class="vp-soon__icon">
+          <i class="fa-solid fa-hourglass-half"></i>
+        </div>
+        <h2 class="vp-soon__title">プログラム詳細は、準備中です</h2>
+        <p class="vp-soon__lead">
+          プログラム内容、参加お申込み方法、当日の詳細は、決定次第、こちらのページにて、ご案内いたします。<br>
+          お申込みは、各拠点の 主催団体 サイトから、お受けする 予定です。
+        </p>
+
+        {venue.applyUrl ? (
+          <a href={venue.applyUrl} class="vp-apply-btn" target={venue.isInternal ? '_self' : '_blank'} rel={venue.isInternal ? '' : 'noopener noreferrer'}>
+            <i class="fa-solid fa-external-link-alt"></i>
+            {venue.applyLabel}
+          </a>
+        ) : (
+          <button type="button" class="vp-apply-btn vp-apply-btn--disabled" disabled>
+            <i class="fa-solid fa-clock"></i>
+            {venue.applyLabel}
+          </button>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- fun sport nexus とは -->
+  <section class="dec-section">
+    <div class="dec-section__inner" style="max-width: 820px;">
+      <p class="dec-section__label dec-section__label--orange">ABOUT</p>
+      <h2 class="dec-section__title">fun sport nexus とは？</h2>
+      <p class="dec-section__lead">
+        「すべては『遊び』からはじまる」を、テーマに、<br>
+        スポーツ・文化・地域を、つなぐ プラットフォームです。<br>
+        年齢・立場・障がいを、こえて、誰もが 楽しめる 場を、全国に、ひろげています。
+      </p>
+
+      <p style="text-align: center; margin-top: 32px;">
+        <a href="/events/" class="dec-link">
+          募集イベント 一覧に戻る
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </p>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  .vp-hero {
+    background: linear-gradient(135deg, var(--fsn-navy-deep), var(--fsn-navy));
+    color: #fff;
+    padding: clamp(72px, 10vw, 120px) 20px 56px;
+  }
+  .vp-hero--orange { background: linear-gradient(135deg, var(--fsn-orange-dark), var(--fsn-orange)); }
+  .vp-hero--purple { background: linear-gradient(135deg, #5B21B6, #7C3AED); }
+  .vp-hero--sky { background: linear-gradient(135deg, #0369A1, #0EA5E9); }
+  .vp-hero--green { background: linear-gradient(135deg, #14532D, #16A34A); }
+  .vp-hero--gray { background: linear-gradient(135deg, #374151, #6B7280); }
+
+  .vp-hero__inner { max-width: 960px; margin: 0 auto; }
+  .vp-hero__status {
+    display: inline-block; padding: 4px 14px;
+    border-radius: 999px; font-size: 0.78rem; font-weight: 800;
+    margin-bottom: 18px; letter-spacing: 0.06em;
+  }
+  .vp-hero__label {
+    font-size: 0.85rem; letter-spacing: 0.14em; font-weight: 700;
+    color: rgba(255,255,255,0.85); margin: 0 0 12px;
+  }
+  .vp-hero__catch {
+    font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+    font-weight: 900; margin: 0 0 12px;
+    line-height: 1.4; text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .vp-hero__theme {
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    color: rgba(255,255,255,0.92); margin: 0 0 28px;
+    font-weight: 700;
+  }
+  .vp-hero__meta {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .vp-hero__meta-item {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.24);
+    border-radius: 999px;
+    font-size: 0.85rem; font-weight: 700;
+    color: #fff;
+  }
+
+  /* 開催情報 */
+  .vp-info {
+    background: var(--fsn-gray-50);
+    border-radius: 16px;
+    padding: 8px 24px;
+    margin-top: 32px;
+  }
+  .vp-info__row {
+    display: grid; grid-template-columns: 120px 1fr;
+    gap: 20px; padding: 18px 0;
+    border-bottom: 1px dashed var(--fsn-gray-200);
+    align-items: start;
+  }
+  .vp-info__row:last-child { border-bottom: none; }
+  .vp-info__row dt {
+    font-size: 0.85rem; font-weight: 800;
+    color: var(--fsn-gray-500); letter-spacing: 0.06em;
+  }
+  .vp-info__row dd {
+    font-size: 0.98rem; font-weight: 700;
+    color: var(--fsn-navy-deep); margin: 0;
+    line-height: 1.7;
+  }
+  .vp-info__row small { color: var(--fsn-gray-500); font-weight: 600; font-size: 0.82rem; }
+  @media (max-width: 600px) {
+    .vp-info__row { grid-template-columns: 1fr; gap: 4px; }
+  }
+
+  .vp-sub {
+    margin: 32px 0 0; text-align: center;
+    font-size: 1rem; line-height: 2;
+    color: var(--fsn-gray-700);
+    padding: 20px;
+    background: #FEFBF5;
+    border-radius: 12px;
+    border-left: 4px solid var(--fsn-orange);
+  }
+
+  /* Coming Soon */
+  .vp-soon { padding: 20px 0; }
+  .vp-soon__icon {
+    width: 88px; height: 88px; border-radius: 50%;
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 2.4rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 24px;
+  }
+  .vp-soon__title {
+    font-size: 1.5rem; font-weight: 900;
+    color: var(--fsn-navy-deep); margin: 0 0 16px;
+  }
+  .vp-soon__lead {
+    font-size: 0.98rem; line-height: 2;
+    color: var(--fsn-gray-700); margin: 0 0 32px;
+  }
+
+  .vp-apply-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, var(--fsn-orange), var(--fsn-orange-dark));
+    color: #fff;
+    border-radius: 999px;
+    font-size: 1rem; font-weight: 800;
+    text-decoration: none; border: 0;
+    box-shadow: 0 6px 18px rgba(249,115,22,0.28);
+    cursor: pointer;
+  }
+  .vp-apply-btn:hover { transform: translateY(-2px); }
+  .vp-apply-btn--disabled {
+    background: var(--fsn-gray-100);
+    color: var(--fsn-gray-500);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+  .vp-apply-btn--disabled:hover { transform: none; }
+</style>
