@@ -1,0 +1,6 @@
+---
+import VenuePage from '../../components/VenuePage.astro';
+import { venueBySlug } from '../../data/venues.js';
+const venue = venueBySlug('kobe');
+---
+<VenuePage venue={venue} />
