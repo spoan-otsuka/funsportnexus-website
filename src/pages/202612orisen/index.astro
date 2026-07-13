@@ -3,25 +3,26 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import '../../styles/202612orisen.css';
 
 // 画像は /public/programs/{code}.jpg （16:9）に配置想定。画像が無い間は グラデ背景でプレースホルダー
+// day: '12/19' | '12/20' | '12/19-20' の3値。バッジのカラーも 3パターンで色分け（CSS の data-day 属性で切替）
 const programs = [
-  { code: 'panshoku',      name: 'スポあんぱん食い競走',    time: '11:00 ／ 13:00',        venue: '中央広場',             day: 'Day1 ／ Day2', theme: 'orange', featured: true },
-  { code: 'kakekko',       name: 'かけっこ教室',             time: '12:00 ／ 14:00',        venue: '中央広場',             day: 'Day1 ／ Day2', theme: 'green' },
-  { code: 'music-dribble', name: 'ミュージックドリブル',    time: '10:00 - 12:00',         venue: '第1体育室',            day: 'Day1',           theme: 'navy' },
-  { code: 'soccer',        name: 'サッカー教室',              time: '13:00 - 14:00',         venue: '第1体育室',            day: 'Day1',           theme: 'navy' },
-  { code: 'baseball5',     name: 'Baseball5 体験',           time: '10:00 - 14:00 通し',    venue: '第1体育室',            day: 'Day2',           theme: 'navy' },
-  { code: 'legit',         name: 'Legit ダンス',              time: '11:00 ／ 13:00 ／ 15:00', venue: '第1・4体育室',      day: 'Day2',           theme: 'pink' },
-  { code: 'sunrockers',    name: 'サンロッカーズ渋谷 バスケ', time: '10:00 - 14:00 通し',   venue: '第3体育室',            day: 'Day1',           theme: 'orange' },
-  { code: '3x3',           name: '3x3 バスケ',                time: '10:00 ／ 13:00',        venue: '第3体育室',            day: 'Day2',           theme: 'orange' },
-  { code: 'dip',           name: 'Dip Battles',                time: '10:00 ／ 12:00',        venue: '第4体育室',            day: 'Day1',           theme: 'purple' },
-  { code: 'judo',          name: '柔道体験',                   time: '10:00 ／ 12:00 ／ 14:00', venue: '第5体育室',         day: 'Day1',           theme: 'green' },
-  { code: 'fencing',       name: 'フェンシング体験',           time: '10:00 ／ 12:00 ／ 14:00', venue: '第5体育室',         day: 'Day2',           theme: 'orange' },
-  { code: 'ycap',          name: 'YCAP チームビルディング',    time: '10:00 ／ 12:00 ／ 14:00', venue: 'YCAPエリア',         day: 'Day1',           theme: 'purple' },
-  { code: 'parkour',       name: 'パルクール',                  time: '10:00 ／ 12:00 ／ 14:00', venue: 'YCAPエリア',         day: 'Day2',           theme: 'purple' },
-  { code: 'rec-bousai',    name: 'レク協会 ／ 防災スポーツ',   time: '11:00 - 14:00 通し',    venue: '第2体育室',            day: 'Day1 ／ Day2',   theme: 'yellow' },
-  { code: 'boccia',        name: 'ボッチャ',                    time: '自由参加 ／ 終日通し',  venue: '体育室エントランス',   day: 'Day1 ／ Day2',   theme: 'blue' },
-  { code: 'shogi',         name: '将棋 ／ カードゲーム',        time: '自由参加 ／ 終日通し',  venue: '体育室エントランス',   day: 'Day1 ／ Day2',   theme: 'blue' },
-  { code: 'esports',       name: 'eスポーツ ／ 雀魂',            time: '自由参加 ／ 終日通し',  venue: '体育室エントランス',   day: 'Day1',            theme: 'blue' },
-  { code: 'radio',         name: '渋谷のラジオ 公開収録',       time: '通し',                  venue: '体育室エントランス',   day: 'Day1 ／ Day2',   theme: 'pink' },
+  { code: 'panshoku',      name: 'スポあんぱん食い競走',    time: '11:00 ／ 13:00',        venue: '中央広場',             day: '12/19-20', theme: 'orange', featured: true },
+  { code: 'kakekko',       name: 'かけっこ教室',             time: '12:00 ／ 14:00',        venue: '中央広場',             day: '12/19-20', theme: 'green' },
+  { code: 'music-dribble', name: 'ミュージックドリブル',    time: '10:00 - 12:00',         venue: '第1体育室',            day: '12/19',    theme: 'navy' },
+  { code: 'soccer',        name: 'サッカー教室',              time: '13:00 - 14:00',         venue: '第1体育室',            day: '12/19',    theme: 'navy' },
+  { code: 'baseball5',     name: 'Baseball5 体験',           time: '10:00 - 14:00 通し',    venue: '第1体育室',            day: '12/20',    theme: 'navy' },
+  { code: 'legit',         name: 'Legit ダンス',              time: '11:00 ／ 13:00 ／ 15:00', venue: '第1・4体育室',      day: '12/20',    theme: 'pink' },
+  { code: 'sunrockers',    name: 'サンロッカーズ渋谷 バスケ', time: '10:00 - 14:00 通し',   venue: '第3体育室',            day: '12/19',    theme: 'orange' },
+  { code: '3x3',           name: '3x3 バスケ',                time: '10:00 ／ 13:00',        venue: '第3体育室',            day: '12/20',    theme: 'orange' },
+  { code: 'dip',           name: 'Dip Battles',                time: '10:00 ／ 12:00',        venue: '第4体育室',            day: '12/19',    theme: 'purple' },
+  { code: 'judo',          name: '柔道体験',                   time: '10:00 ／ 12:00 ／ 14:00', venue: '第5体育室',         day: '12/19',    theme: 'green' },
+  { code: 'fencing',       name: 'フェンシング体験',           time: '10:00 ／ 12:00 ／ 14:00', venue: '第5体育室',         day: '12/20',    theme: 'orange' },
+  { code: 'ycap',          name: 'YCAP チームビルディング',    time: '10:00 ／ 12:00 ／ 14:00', venue: 'YCAPエリア',         day: '12/19',    theme: 'purple' },
+  { code: 'parkour',       name: 'パルクール',                  time: '10:00 ／ 12:00 ／ 14:00', venue: 'YCAPエリア',         day: '12/20',    theme: 'purple' },
+  { code: 'rec-bousai',    name: 'レク協会 ／ 防災スポーツ',   time: '11:00 - 14:00 通し',    venue: '第2体育室',            day: '12/19-20', theme: 'yellow' },
+  { code: 'boccia',        name: 'ボッチャ',                    time: '自由参加 ／ 終日通し',  venue: '体育室エントランス',   day: '12/19-20', theme: 'blue' },
+  { code: 'shogi',         name: '将棋 ／ カードゲーム',        time: '自由参加 ／ 終日通し',  venue: '体育室エントランス',   day: '12/19-20', theme: 'blue' },
+  { code: 'esports',       name: 'eスポーツ ／ 雀魂',            time: '自由参加 ／ 終日通し',  venue: '体育室エントランス',   day: '12/19',    theme: 'blue' },
+  { code: 'radio',         name: '渋谷のラジオ 公開収録',       time: '通し',                  venue: '体育室エントランス',   day: '12/19-20', theme: 'pink' },
 ];
 ---
 <BaseLayout
@@ -85,7 +86,7 @@ const programs = [
           <a href="/202612orisen/programs/" class={`dec-progmini dec-progmini--theme-${p.theme || 'navy'} ${p.featured ? 'dec-progmini--featured' : ''} ${p.special ? 'dec-progmini--special' : ''}`}>
             <span class="dec-progmini__image">
               <img src={`/programs/${p.code}.jpg`} alt="" loading="lazy" decoding="async" onerror="this.style.display='none'" />
-              <span class="dec-progmini__day-badge">{p.day}</span>
+              <span class="dec-progmini__day-badge" data-day={p.day}>{p.day}</span>
             </span>
             <span class="dec-progmini__body">
               <span class="dec-progmini__name">{p.name}</span>
