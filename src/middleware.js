@@ -26,9 +26,12 @@ export const onRequest = async (context, next) => {
   const env = context.locals?.runtime?.env ?? {};
   const expected = env.ADMIN_PASSWORD;
 
-  // パスワード未設定なら通す（開発時の救済）
+  // fail-closed：ADMIN_PASSWORD 未設定は、全リクエストを拒否する（環境変数消失や設定ミス時の情報漏洩を防ぐ）
   if (!expected) {
-    return next();
+    return new Response('Service Unavailable: admin auth not configured', {
+      status: 503,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
   }
 
   const cookieHeader = context.request.headers.get('cookie') || '';

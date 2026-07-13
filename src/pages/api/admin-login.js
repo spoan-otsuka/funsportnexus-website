@@ -9,6 +9,14 @@ export async function POST({ request, locals }) {
   const env = locals?.runtime?.env ?? {};
   const expected = env.ADMIN_PASSWORD || '';
 
+  // fail-closed：ADMIN_PASSWORD 未設定は、ログインAPIごと停止する（誤って空パスワードで通す事故を防ぐ）
+  if (!expected) {
+    return new Response('Service Unavailable: admin auth not configured', {
+      status: 503,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+
   let form;
   try { form = await request.formData(); }
   catch {
@@ -18,7 +26,7 @@ export async function POST({ request, locals }) {
   const password = (form.get('password') || '').toString();
   const next = (form.get('next') || '/admin/').toString();
 
-  if (!expected || password !== expected) {
+  if (password !== expected) {
     // 失敗ログインも Slack 通知（不正アクセス検出）
     if (env.SLACK_WEBHOOK_URL) {
       const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
