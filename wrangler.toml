@@ -3,10 +3,13 @@ main = "./dist/_worker.js/index.js"
 compatibility_date = "2026-06-25"
 compatibility_flags = ["nodejs_compat"]
 
-# カスタムドメイン（検証用サブドメイン）
-# Cloudflare DNS で funsportnexus.org が管理されている場合、
-# このデプロイで自動で DNS レコード + SSL証明書 + ルーティング が設定されます
+# カスタムドメイン
+# Cloudflare DNS で funsportnexus.org が管理されているため、
+# このデプロイで自動で DNS レコード + SSL証明書 + ルーティング が設定されます。
+# 本番 apex (funsportnexus.org) と、検証用サブドメイン (next.funsportnexus.org) を並列で保持。
+# 問題があれば apex 行を外して再デプロイで `next.` のみに戻せる（ロールバック 約5分）。
 routes = [
+  { pattern = "funsportnexus.org", custom_domain = true },
   { pattern = "next.funsportnexus.org", custom_domain = true },
 ]
 
