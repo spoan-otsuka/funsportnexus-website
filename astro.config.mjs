@@ -9,6 +9,10 @@ export default defineConfig({
     platformProxy: { enabled: true },
   }),
   site: 'https://funsportnexus.org',
+  // 旧 WordPress URL からのリダイレクト
+  redirects: {
+    '/grant.html': '/business/',
+  },
   integrations: [
     sentry({
       sourceMapsUploadOptions: { enabled: false },
