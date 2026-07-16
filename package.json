@@ -14,6 +14,8 @@
   "dependencies": {
     "@astrojs/cloudflare": "^11.2.0",
     "@astrojs/sitemap": "^3.7.3",
+    "@sentry/astro": "^10.65.0",
+    "@sentry/cloudflare": "^10.65.0",
     "astro": "^4.16.18",
     "microcms-js-sdk": "^3.1.3"
   },
