@@ -14,6 +14,7 @@ const dupInfo = Astro.url.searchParams.get('dup') || '';
 const dupAttendee = Astro.url.searchParams.get('attendee') || '';
 const qrToken = Astro.url.searchParams.get('qr') || '';
 const entryId = Astro.url.searchParams.get('id') || '';
+const turnstileSiteKey = env.TURNSTILE_SITE_KEY || '';
 
 const errorMessages = {
   invalid_form: 'フォームの読み取りに失敗しました。',
@@ -31,6 +32,7 @@ const errorMessages = {
   time_conflict: `時間帯が重複するプログラムが、選択されています。${conflictInfo ? `（${conflictInfo}）` : ''}`,
   db_unavailable: 'システム一時障害です。しばらく後にお試しください。',
   server_error: 'サーバーエラーが発生しました。お手数ですが、再度お試しください。',
+  captcha_failed: 'スパム対策のチェックに失敗しました。ページを再読み込みして、もう一度お試しください。',
 };
 
 let slots = [];
@@ -121,6 +123,7 @@ if (!success && env.DB) {
           </a>
         </div>
       ) : (
+        <>
         <form class="ap-form" action="/api/apply" method="POST">
           {errorParam && (
             <div class="ap-error-banner" data-error-banner>
@@ -266,6 +269,12 @@ if (!success && env.DB) {
 
           <input type="text" name="website" class="ap-honeypot" tabindex="-1" autocomplete="off" />
 
+          {turnstileSiteKey && (
+            <div class="ap-turnstile">
+              <div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
+            </div>
+          )}
+
           <div class="ap-submit">
             <button type="submit" class="ap-submit__btn">
               <i class="fa-solid fa-paper-plane"></i>
@@ -273,6 +282,10 @@ if (!success && env.DB) {
             </button>
           </div>
         </form>
+        {turnstileSiteKey && (
+          <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline></script>
+        )}
+        </>
       )}
     </div>
   </section>
@@ -1694,6 +1707,12 @@ if (!success && env.DB) {
     width: 1px;
     height: 1px;
     opacity: 0;
+  }
+
+  .ap-turnstile {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0;
   }
 
   .ap-submit { text-align: center; margin-top: 8px; }

@@ -54,6 +54,31 @@ export async function POST({ request, locals }) {
     return redirect('/202612orisen/apply/?success=1&id=ok');
   }
 
+  // Cloudflare Turnstile（両方セット時のみ検証。片方欠けはスキップしHoneypotのみで運用）
+  if (env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY) {
+    const token = (form.get('cf-turnstile-response') || '').toString().trim();
+    if (!token) return redirect('/202612orisen/apply/?error=captcha_failed');
+    try {
+      const verify = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          secret: env.TURNSTILE_SECRET_KEY,
+          response: token,
+          remoteip: request.headers.get('CF-Connecting-IP') || '',
+        }),
+      });
+      const result = await verify.json();
+      if (!result.success) {
+        console.warn('Turnstile verify failed:', result['error-codes']);
+        return redirect('/202612orisen/apply/?error=captcha_failed');
+      }
+    } catch (e) {
+      console.error('Turnstile verify error:', e);
+      return redirect('/202612orisen/apply/?error=captcha_failed');
+    }
+  }
+
   const data = {
     name: (form.get('name') || '').toString().trim(),
     furigana: (form.get('furigana') || '').toString().trim(),

@@ -12,6 +12,9 @@
  *   FROM_NAME           (例: fun sport nexus 運営事務局)
  *   ADMIN_EMAIL_FALLBACK (事務局宛, 例: funsportnexus@spoan.or.jp)
  *   SLACK_WEBHOOK_URL
+ *   TURNSTILE_SITE_KEY   (公開)
+ *   TURNSTILE_SECRET_KEY (シークレット)
+ *     ※ 両方セット時のみ検証が有効化される。片方でも欠けていればスキップ（既存のHoneypot動作を維持）
  */
 
 export const prerender = false;
@@ -40,6 +43,31 @@ export async function POST({ request, locals }) {
   if (honey) {
     // Bot 扱い: 成功画面に進める（無視）
     return redirect('/contact/?success=1');
+  }
+
+  // Cloudflare Turnstile（両方セット時のみ検証）
+  if (env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY) {
+    const token = (form.get('cf-turnstile-response') || '').toString().trim();
+    if (!token) return redirect('/contact/?error=captcha_failed');
+    try {
+      const verify = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          secret: env.TURNSTILE_SECRET_KEY,
+          response: token,
+          remoteip: request.headers.get('CF-Connecting-IP') || '',
+        }),
+      });
+      const result = await verify.json();
+      if (!result.success) {
+        console.warn('Turnstile verify failed:', result['error-codes']);
+        return redirect('/contact/?error=captcha_failed');
+      }
+    } catch (e) {
+      console.error('Turnstile verify error:', e);
+      return redirect('/contact/?error=captcha_failed');
+    }
   }
 
   const data = {

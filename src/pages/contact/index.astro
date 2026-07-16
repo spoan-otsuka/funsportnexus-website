@@ -3,8 +3,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export const prerender = false;
 
+const env = Astro.locals?.runtime?.env ?? {};
 const success = Astro.url.searchParams.get('success') === '1';
 const errorParam = Astro.url.searchParams.get('error');
+const turnstileSiteKey = env.TURNSTILE_SITE_KEY || '';
 ---
 <BaseLayout
   title="お問い合わせ"
@@ -40,6 +42,7 @@ const errorParam = Astro.url.searchParams.get('error');
           </a>
         </div>
       ) : (
+        <>
         <form class="ct-form" action="/api/contact" method="POST">
           {errorParam && (
             <div class="ct-error-banner">
@@ -118,6 +121,12 @@ const errorParam = Astro.url.searchParams.get('error');
 
           <input type="text" name="website" class="ct-form__honeypot" tabindex="-1" autocomplete="off" />
 
+          {turnstileSiteKey && (
+            <div class="ct-form__turnstile">
+              <div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
+            </div>
+          )}
+
           <div class="ct-form__submit">
             <button type="submit" class="ct-form__btn">
               <i class="fa-solid fa-paper-plane"></i>
@@ -125,6 +134,10 @@ const errorParam = Astro.url.searchParams.get('error');
             </button>
           </div>
         </form>
+        {turnstileSiteKey && (
+          <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline></script>
+        )}
+        </>
       )}
     </div>
   </section>
@@ -265,6 +278,12 @@ const errorParam = Astro.url.searchParams.get('error');
     width: 1px;
     height: 1px;
     opacity: 0;
+  }
+
+  .ct-form__turnstile {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0;
   }
 
   .ct-form__submit {
