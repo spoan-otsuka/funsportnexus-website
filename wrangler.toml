@@ -10,6 +10,7 @@ compatibility_flags = ["nodejs_compat"]
 # 問題があれば apex 行を外して再デプロイで `next.` のみに戻せる（ロールバック 約5分）。
 routes = [
   { pattern = "funsportnexus.org", custom_domain = true },
+  { pattern = "www.funsportnexus.org", custom_domain = true },
   { pattern = "next.funsportnexus.org", custom_domain = true },
 ]
 

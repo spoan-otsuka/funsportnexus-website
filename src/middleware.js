@@ -1,12 +1,20 @@
 /**
- * /admin/* を Cookie認証で保護
- * - 未認証なら /admin/login/ にリダイレクト
- * - Cookie admin_token が ADMIN_PASSWORD と一致すれば認可
+ * ミドルウェア:
+ *   1. www.funsportnexus.org → funsportnexus.org に 301 リダイレクト
+ *   2. /admin/* を Cookie認証で保護
+ *      - 未認証なら /admin/login/ にリダイレクト
+ *      - Cookie admin_token が ADMIN_PASSWORD と一致すれば認可
  */
 
 export const onRequest = async (context, next) => {
   const url = new URL(context.request.url);
   const path = url.pathname;
+
+  // www → apex 恒久リダイレクト
+  if (url.hostname === 'www.funsportnexus.org') {
+    url.hostname = 'funsportnexus.org';
+    return Response.redirect(url.toString(), 301);
+  }
 
   // 認証不要パス
   if (
