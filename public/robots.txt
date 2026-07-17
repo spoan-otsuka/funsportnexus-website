@@ -1,6 +1,8 @@
+# noindex 期間中（正式ローンチまで）
+# 全パス・全クローラー拒否
+# 解除時: このファイルの中身を "User-agent: * / Allow: / / Disallow: /api/" に戻す
+
 User-agent: *
-Allow: /
-Disallow: /api/
-Disallow: /404
+Disallow: /
 
 Sitemap: https://funsportnexus.org/sitemap.xml

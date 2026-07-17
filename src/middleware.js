@@ -4,7 +4,11 @@
  *   2. /admin/* を Cookie認証で保護
  *      - 未認証なら /admin/login/ にリダイレクト
  *      - Cookie admin_token が ADMIN_PASSWORD と一致すれば認可
+ *   3. 全レスポンスに X-Robots-Tag: noindex, nofollow を付与（正式ローンチまで）
+ *      解除時: 下部 `NOINDEX_HEADER` を false にする or ブロック削除
  */
+
+const NOINDEX_HEADER = true;
 
 export const onRequest = async (context, next) => {
   const url = new URL(context.request.url);
@@ -16,6 +20,20 @@ export const onRequest = async (context, next) => {
     return Response.redirect(url.toString(), 301);
   }
 
+  // /admin/* 認証
+  const authBlock = getAdminAuthBlockingResponse(context, path, url);
+  if (authBlock) return authBlock;
+
+  const response = await next();
+
+  if (NOINDEX_HEADER) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  }
+
+  return response;
+};
+
+function getAdminAuthBlockingResponse(context, path, url) {
   // 認証不要パス
   if (
     path === '/admin/login' ||
@@ -23,13 +41,11 @@ export const onRequest = async (context, next) => {
     path.startsWith('/api/admin-login') ||
     path.startsWith('/api/admin-logout')
   ) {
-    return next();
+    return null;
   }
 
   // /admin/* のみ保護対象
-  if (!path.startsWith('/admin')) {
-    return next();
-  }
+  if (!path.startsWith('/admin')) return null;
 
   const env = context.locals?.runtime?.env ?? {};
   const expected = env.ADMIN_PASSWORD;
@@ -50,5 +66,5 @@ export const onRequest = async (context, next) => {
     return Response.redirect(`${url.origin}/admin/login/?next=${encodeURIComponent(path)}`, 302);
   }
 
-  return next();
-};
+  return null;
+}
