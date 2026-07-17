@@ -49,6 +49,7 @@ FROM_NAME = "fun sport nexus 運営事務局"
 ADMIN_EMAIL_FALLBACK = "funsportnexus@spoan.or.jp"
 SITE_URL = "https://funsportnexus.org"
 PUBLIC_GA4_ID = "G-160BF6GL3W"
+TURNSTILE_SITE_KEY = "0x4AAAAAAD3lx6FRYjbJBaso"
 
 # ============================================
 # 観察可能性（Workers Logs）
